@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Tools &amp; Middleware Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Tools &amp; Middleware</h1>
+  <div class="sub">Your integration toolbox: Postman, Workbench, the Salesforce CLI, Data Loader, testing helpers, and MuleSoft.</div>
+  <div>
+    <span class="pill">Postman</span><span class="pill">Workbench</span>
+    <span class="pill">Salesforce CLI</span><span class="pill">Data Loader</span>
+    <span class="pill">Testing helpers</span><span class="pill">Middleware / iPaaS</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Postman</a></li>
+<li class=""><a href="#f02">02 - Workbench</a></li>
+<li class=""><a href="#f03">03 - Salesforce CLI (`sf`)</a></li>
+<li class=""><a href="#f04">04 - Data Loader</a></li>
+<li class=""><a href="#f05">05 - Testing Helpers</a></li>
+<li class=""><a href="#f06">06 - Middleware and iPaaS</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 10 - Tools &amp; Middleware</h1>
+<blockquote>
+<p><strong>Goal</strong>: Know your toolbox. Pick the right tool to test, explore, move data, and orchestrate.
+<strong>API version</strong>: v66.0 (Spring '26).</p>
+</blockquote>
+<p>Two families: <strong>testing/dev tools</strong> (Postman, Workbench, the CLI, Data Loader, and smaller helpers) for building and debugging integrations, and <strong>middleware/iPaaS</strong> (MuleSoft and friends) for connecting many systems at scale.</p>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">postman</a></td>
+<td>The universal API client + Salesforce collection</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">workbench</a></td>
+<td>Browser-based REST/SOQL/data/metadata tool</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">salesforce-cli</a></td>
+<td>The <code>sf</code> CLI for auth, data, deploy, scripting</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">data-loader</a></td>
+<td>Desktop bulk import/export (GUI + headless)</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">testing-helpers</a></td>
+<td>cURL, SOAP UI, Swagger, Pipedream, VS Code</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">middleware-and-ipaas</a></td>
+<td>MuleSoft API-led + the iPaaS landscape</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which tool? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([What do you need to do?]) --&gt; Q{Task?}
+    Q --&gt;|Test or explore any API by hand| PM[Postman]
+    Q --&gt;|Quick SF data or metadata in a browser| WB[Workbench]
+    Q --&gt;|Automate, deploy, or script| CLI[Salesforce CLI sf]
+    Q --&gt;|Load a big CSV via GUI| DL[Data Loader]
+    Q --&gt;|Catch a webhook or fake an API| TH[Testing helpers]
+    Q --&gt;|Connect 3+ systems, transform, orchestrate| MW[Middleware / iPaaS]
+
+    style PM fill:#00A1E0,color:#fff
+    style WB fill:#ff9900,color:#fff
+    style CLI fill:#9C27B0,color:#fff
+    style DL fill:#4CAF50,color:#fff
+    style TH fill:#607D8B,color:#fff
+    style MW fill:#F44336,color:#fff
+
+</div>
+<hr />
+<h2>Tool comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>Best for</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Postman</strong></td>
+<td>API client</td>
+<td>Testing/exploring any endpoint, OAuth flows</td>
+<td>OAuth</td>
+</tr>
+<tr>
+<td><strong>Workbench</strong></td>
+<td>Web tool</td>
+<td>Quick SF REST/SOQL/data/metadata ops</td>
+<td>OAuth login</td>
+</tr>
+<tr>
+<td><strong>Salesforce CLI (<code>sf</code>)</strong></td>
+<td>CLI</td>
+<td>Dev, CI/CD, deploys, scripted data</td>
+<td>Web or JWT</td>
+</tr>
+<tr>
+<td><strong>Data Loader</strong></td>
+<td>Desktop app</td>
+<td>Large CSV import/export (uses Bulk API)</td>
+<td>OAuth / Bulk</td>
+</tr>
+<tr>
+<td><strong>Testing helpers</strong></td>
+<td>Misc</td>
+<td>Webhooks, SOAP, OpenAPI, fake APIs</td>
+<td>varies</td>
+</tr>
+<tr>
+<td><strong>MuleSoft / iPaaS</strong></td>
+<td>Middleware</td>
+<td>Many systems, transformation, orchestration</td>
+<td>platform</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When do you actually need middleware?</h2>
+<div class="mermaid">
+flowchart TD
+    Q1{How many systems?} --&gt;|Just 2| DIRECT[Point-to-point is fine]
+    Q1 --&gt;|3 or more| Q2{Transformation or&lt;br/&gt;orchestration needed?}
+    Q2 --&gt;|No, simple and same format| DIRECT2[Point-to-point still OK]
+    Q2 --&gt;|Yes| MW[Use middleware&lt;br/&gt;MuleSoft, Boomi, Workato]
+    Q1 --&gt;|Many, complex flows| MW
+
+    style DIRECT fill:#4CAF50,color:#fff
+    style DIRECT2 fill:#4CAF50,color:#fff
+    style MW fill:#F44336,color:#fff
+
+</div>
+<p>Full reasoning in <a href="#f06">06-middleware-and-ipaas.md</a> and <a href="../01-Fundamentals/08-middleware-and-esb.md">Module 01</a>.</p>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: Postman vs Workbench?</strong>
+→ Postman is the general API client (great for OAuth and collections). Workbench is a Salesforce-specific web tool for quick REST/SOQL/data/metadata. Salesforce now steers people to Postman.</p>
+<p><strong>Q: How do you load 1M records as an admin, no code?</strong>
+→ <strong>Data Loader</strong> (it uses the Bulk API), or <code>sf data import bulk</code> from the CLI.</p>
+<p><strong>Q: What authenticates the CLI in a CI/CD pipeline?</strong>
+→ The <strong>JWT Bearer</strong> flow (<code>sf org login jwt</code>), no interactive login. See <a href="../03-Authentication/04-jwt-bearer-flow.md">Module 03</a>.</p>
+<p><strong>Q: When do you reach for MuleSoft?</strong>
+→ When you connect many systems, need data transformation/orchestration, or want reusable API-led layers, not for a single point-to-point call.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/tools/salesforcecli">Salesforce CLI — Developer Tools</a></li>
+<li><a href="https://developer.salesforce.com/tools/data-loader">Data Loader — Developer Tools</a></li>
+<li><a href="https://www.postman.com/salesforce-developers/salesforce-developers/collection/b32utmu/salesforce-platform-apis">Salesforce Platform APIs — Postman Collection</a></li>
+<li><a href="https://www.mulesoft.com/platform/enterprise-integration">MuleSoft Anypoint Platform</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Postman</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The universal API client for <strong>exploring, testing, and demonstrating</strong> Salesforce APIs without writing code.
+<strong>Use when</strong>: You want to hit any Salesforce REST/Bulk/Composite endpoint by hand, prototype a call, or debug an integration.
+<strong>Bonus</strong>: Salesforce publishes an official <strong>Salesforce Platform APIs</strong> Postman collection (one of Postman's top-rated).</p>
+</blockquote>
+<p>This is Module 10, the toolbox. For the APIs themselves, see <a href="../04-Inbound-APIs/README.md">Module 04</a>. For the auth Postman performs, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Postman is a <strong>workbench for API calls</strong>. Instead of writing Apex or a script just to see what an endpoint returns, you fill in a URL, method, headers, and body in a UI, click <strong>Send</strong>, and read the response. It remembers your requests in <strong>collections</strong>, stores secrets and URLs in <strong>environments</strong>, and can run the <strong>OAuth dance</strong> for you so each call carries a fresh token.</p>
+<p>For Salesforce specifically, you don't even start from scratch: you <strong>fork the official Salesforce Platform APIs collection</strong>, set a few environment variables, authenticate once, and every common request (query, create, composite, bulk) is ready to fire.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exploring or testing any Salesforce API by hand.</td>
+<td>You need quick SF-specific data/metadata ops → <a href="#f02">Workbench</a>.</td>
+</tr>
+<tr>
+<td>Prototyping a request before coding it in Apex.</td>
+<td>Scripting/automation in CI → <a href="#f03">Salesforce CLI</a>.</td>
+</tr>
+<tr>
+<td>Demonstrating an API to a teammate.</td>
+<td>Loading large CSVs → <a href="#f04">Data Loader</a>.</td>
+</tr>
+<tr>
+<td>Debugging OAuth flows and tokens.</td>
+<td>Building real integration logic → Apex / middleware.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. How it works</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant PM as Postman
+    participant SF as Salesforce&lt;br/&gt;/services/oauth2 + /services/data
+    PM-&gt;&gt;SF: OAuth request (e.g. web server / client credentials)
+    SF--&gt;&gt;PM: access_token + instance_url
+    PM-&gt;&gt;PM: Store token + instance_url in environment
+    PM-&gt;&gt;SF: GET /services/data/v66.0/query?q=... (Bearer token)
+    SF--&gt;&gt;PM: JSON response shown in the UI
+
+</div>
+<p>Postman runs the OAuth flow, captures the <strong>access token</strong> and <strong>instance URL</strong> into environment variables, then sends API requests with <code>Authorization: Bearer {{access_token}}</code> against <code>{{instance_url}}</code>.</p>
+<hr />
+<h2>4. Setup steps</h2>
+<ol>
+<li>Install Postman (desktop or web) and sign in.</li>
+<li><strong>Fork the official "Salesforce Platform APIs" collection</strong> from the Salesforce Developers workspace on Postman.</li>
+<li>Create/select an <strong>environment</strong> and set variables: your <strong>My Domain login URL</strong>, the Connected App / External Client App <strong>consumer key</strong> and <strong>secret</strong>, and (per flow) a username.</li>
+<li>Choose an OAuth flow under the collection's <strong>Authorization</strong> tab. For a logged-in user use <strong>OAuth 2.0 (Authorization Code)</strong>; for server-to-server use <strong>Client Credentials</strong>. Click <strong>Get New Access Token</strong>.</li>
+<li>Postman stores the token (and often the <code>instance_url</code>) as variables.</li>
+<li>Run a request, e.g.:</li>
+</ol>
+<pre><code>GET {{instance_url}}/services/data/v66.0/query?q=SELECT+Id,Name+FROM+Account+LIMIT+5
+Authorization: Bearer {{access_token}}
+</code></pre>
+<blockquote>
+<p><strong>Tip</strong>: Create a Connected App / External Client App with the right scopes (<code>api refresh_token</code>) and add Postman's callback (<code>https://oauth.pstmn.io/v1/callback</code>) as the callback URL for the Authorization Code flow.</p>
+</blockquote>
+<hr />
+<h2>5. Gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token expired (<code>401 INVALID_SESSION_ID</code>)</td>
+<td>Click <strong>Get New Access Token</strong> again, or use a refresh token.</td>
+</tr>
+<tr>
+<td>Wrong host</td>
+<td>Always use your <strong>My Domain</strong> / <code>instance_url</code>, not <code>login.salesforce.com</code> for data calls.</td>
+</tr>
+<tr>
+<td>Callback mismatch</td>
+<td>Set the Connected App callback to <code>https://oauth.pstmn.io/v1/callback</code>.</td>
+</tr>
+<tr>
+<td>Username-Password flow fails</td>
+<td>It's blocked/retiring. Use Authorization Code or Client Credentials. See <a href="../03-Authentication/07-username-password-flow.md">Module 03</a>.</td>
+</tr>
+<tr>
+<td>Forgot the API version</td>
+<td>Pin <code>v66.0</code> in the path.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you test a Salesforce REST call without writing code?</strong>
+A: Postman. Fork the official Salesforce Platform APIs collection, set environment variables, run an OAuth flow to get a token, and send requests against the instance URL.</p>
+<p><strong>Q: Postman vs Workbench?</strong>
+A: Postman is the general-purpose API client great for OAuth, collections, and any endpoint. Workbench is a Salesforce-specific web tool with quick REST Explorer, SOQL, data, and metadata operations. Salesforce nudges people toward Postman now.</p>
+<p><strong>Q: How does Postman authenticate to Salesforce?</strong>
+A: Via OAuth. It runs a configured flow (Authorization Code, Client Credentials, etc.), stores the access token, and attaches it as a Bearer header. The Username-Password flow is avoided since it's retiring.</p>
+<p><strong>Q: Why use the official collection?</strong>
+A: It ships ready-made requests for query, CRUD, composite, and bulk with variables wired up, so you test in minutes instead of building requests by hand.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Postman is a workbench where you type an API call into a form, click send, and read the answer, no code required."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Collection, environment, Bearer token, OAuth flow, instance URL - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://www.postman.com/salesforce-developers/salesforce-developers/collection/b32utmu/salesforce-platform-apis">Salesforce Platform APIs — Postman Collection</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart.htm">Quick Start: Connected App for the REST API — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide (v66.0)</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-workbench.md</a> - the browser-based Salesforce power tool.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Workbench</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A free, browser-based Swiss Army knife for <strong>Salesforce-specific</strong> data and metadata operations, no install required.
+<strong>Use when</strong>: You want a quick, point-and-click way to run SOQL, fire a REST call, load a small CSV, or retrieve/deploy metadata in the browser.
+<strong>Note</strong>: Workbench is <strong>community-maintained</strong> (open source, BSD license, by Ryan Brainard) and is <strong>NOT a supported Salesforce product</strong>. Salesforce now nudges people toward <a href="#f01">Postman</a> for API exploration.</p>
+</blockquote>
+<p>This is Module 10, the toolbox. Coming from <a href="#f01">Postman</a>? Workbench is the more <strong>Salesforce-aware</strong> cousin. For the APIs it wraps, see <a href="../04-Inbound-APIs/README.md">Module 04</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Workbench is a <strong>web dashboard that speaks fluent Salesforce</strong>. Postman is a generic API client where you build every request by hand. Workbench already knows your org: it logs in with OAuth, reads your schema, and gives you <strong>purpose-built screens</strong> for the common jobs. Pick "Insert," choose an object, upload a CSV, and go. Type SOQL and see results in a grid. Click "Retrieve" and pull down metadata as a zip.</p>
+<p>Think of it as the <strong>mechanic's pit-stop tool</strong>. Not the prettiest, not officially backed, but it gets a Salesforce-specific job done in seconds without writing code or installing anything. The current build is <strong>Workbench 66.0.0</strong>, matching API <strong>v66.0 (Spring '26)</strong>.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>Use it when</th>
+<th>Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick browser-based SF data or metadata op, nothing to install.</td>
+<td>You need OAuth collections, scripting, or non-SF APIs to <a href="#f01">Postman</a>.</td>
+</tr>
+<tr>
+<td>Ad hoc SOQL/SOSL and eyeballing results in a grid.</td>
+<td>Automation, CI/CD, or repeatable scripts to <a href="#f03">Salesforce CLI</a>.</td>
+</tr>
+<tr>
+<td>One-off CSV insert/update/upsert/delete of a few thousand rows.</td>
+<td>Large or scheduled CSV loads (millions of rows) to <a href="#f04">Data Loader</a>.</td>
+</tr>
+<tr>
+<td>Exploring <code>describe</code>/schema or testing the REST Explorer fast.</td>
+<td>Building real integration logic to Apex / middleware.</td>
+</tr>
+<tr>
+<td>Retrieving or deploying a small metadata package by hand.</td>
+<td>Production-grade releases to CLI + source control.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Warning</strong>: Workbench's own About page says "DO NOT USE WITH PRODUCTION DATA" without care. Treat it as a power tool, not a production pipeline.</p>
+</blockquote>
+<hr />
+<h2>3. How it works</h2>
+<div class="mermaid">
+flowchart LR
+    U[You in a browser] --&gt;|OAuth login| WB[Workbench&lt;br/&gt;workbench.developerforce.com]
+    WB --&gt;|Partner / REST / Bulk APIs| SF[(Salesforce Org)]
+    WB --&gt;|Metadata API| SF
+    WB --&gt;|Apex / Streaming APIs| SF
+    SF --&gt;|Results, CSV, zip| WB
+    WB --&gt;|Grid, JSON, download| U
+
+    style U fill:#607D8B,color:#fff
+    style WB fill:#00A1E0,color:#fff
+    style SF fill:#9C27B0,color:#fff
+
+</div>
+<p>Workbench authenticates with <strong>OAuth</strong> against your My Domain, then proxies your clicks into the right Salesforce API: <strong>Partner</strong> for data CRUD, <strong>REST</strong> for the REST Explorer, <strong>Bulk</strong> for big loads, <strong>Metadata</strong> for retrieve/deploy, plus <strong>Apex</strong> and <strong>Streaming</strong>. You pick the <strong>environment</strong> (Production or Sandbox) and <strong>API version</strong> on the login screen.</p>
+<hr />
+<h2>4. Key capabilities and how to use them</h2>
+<p>Log in at <code>https://workbench.developerforce.com/login.php</code>. Choose environment, accept the agreement, and authorize via OAuth. Then use the top menu:</p>
+<table>
+<thead>
+<tr>
+<th>Menu</th>
+<th>What it does</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>queries &gt; SOQL Query</strong></td>
+<td>Build or type SOQL, run, view in a grid, export to CSV.</td>
+<td>Pull <code>SELECT Id, Name FROM Account</code> and inspect.</td>
+</tr>
+<tr>
+<td><strong>queries &gt; SOSL Search</strong></td>
+<td>Run a text search across objects.</td>
+<td>Find a record by free text.</td>
+</tr>
+<tr>
+<td><strong>data &gt; Insert / Update / Upsert / Delete</strong></td>
+<td>Map a CSV to fields and run DML; choose Bulk if large.</td>
+<td>Fix or load a few thousand rows.</td>
+</tr>
+<tr>
+<td><strong>data &gt; Export</strong></td>
+<td>Export query results to CSV.</td>
+<td>Quick data pull.</td>
+</tr>
+<tr>
+<td><strong>migration &gt; Retrieve / Deploy</strong></td>
+<td>Pull a metadata package as zip, or deploy a zip.</td>
+<td>Grab a profile or deploy a small change set.</td>
+</tr>
+<tr>
+<td><strong>info &gt; Standard &amp; Custom Objects</strong></td>
+<td><code>describe</code> an object: fields, types, relationships.</td>
+<td>Check API names and field metadata.</td>
+</tr>
+<tr>
+<td><strong>utilities &gt; REST Explorer</strong></td>
+<td>Send <code>GET/POST/PATCH/DELETE</code> to any <code>/services/data</code> resource.</td>
+<td>Hit <code>GET /services/data/v66.0/limits</code>.</td>
+</tr>
+<tr>
+<td><strong>utilities &gt; Apex Execute</strong></td>
+<td>Run anonymous Apex.</td>
+<td>Quick scripted fix.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example data load (Insert):</strong> pick <strong>data &gt; Insert</strong>, choose the object (e.g. <code>Contact</code>), select your CSV, click <strong>Next</strong>, <strong>map columns to fields</strong>, then <strong>Confirm Insert</strong>. Workbench returns a <strong>results table</strong> with successes and errors you can download.</p>
+<p><strong>Example REST Explorer call:</strong></p>
+<pre><code>GET /services/data/v66.0/query?q=SELECT+Id,Name+FROM+Account+LIMIT+5
+</code></pre>
+<p>No headers to set. Workbench attaches the session for you and renders the JSON response inline.</p>
+<hr />
+<h2>5. Gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not Salesforce-supported.</td>
+<td>Community/open-source tool. For backed workflows use Postman or CLI. Do not rely on it in production runbooks.</td>
+</tr>
+<tr>
+<td>API version drift.</td>
+<td>Pick the version on login. The build is tied to v66.0. Set it explicitly in REST paths.</td>
+</tr>
+<tr>
+<td>Large CSVs time out in the UI.</td>
+<td>Tick <strong>Process records asynchronously via Bulk API</strong> for big jobs, or use <a href="#f04">Data Loader</a>.</td>
+</tr>
+<tr>
+<td>Session inherits your user's permissions.</td>
+<td>You only see/do what your profile allows. No magic admin powers.</td>
+</tr>
+<tr>
+<td>Login redirect to wrong env.</td>
+<td>Choose <strong>Production</strong> vs <strong>Sandbox</strong> correctly on the login screen. Sandbox uses <code>test.salesforce.com</code>.</td>
+</tr>
+<tr>
+<td>Deploy of large metadata is clunky.</td>
+<td>Workbench is fine for tiny packages. Use CLI <code>sf project deploy start</code> for real releases.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Workbench and who maintains it?</strong>
+A: A free, browser-based suite for interacting with a Salesforce org via the Partner, REST, Bulk, Metadata, Apex, and Streaming APIs. It is community-maintained open source under a BSD license, not an officially supported Salesforce product.</p>
+<p><strong>Q: Workbench vs Postman?</strong>
+A: Workbench is Salesforce-aware and click-driven. It knows your schema and gives ready-made screens for SOQL, data DML, describe, and metadata retrieve/deploy. Postman is a general API client where you build requests and manage OAuth yourself. Salesforce now nudges users toward Postman for API exploration.</p>
+<p><strong>Q: Workbench vs Data Loader for a CSV load?</strong>
+A: Workbench is great for a quick, one-off load of a few thousand rows in the browser. For large volumes (up to 150M records) or scheduled/automated loads, use Data Loader, which runs on Bulk API and supports a headless command-line mode.</p>
+<p><strong>Q: How does Workbench authenticate?</strong>
+A: OAuth against your My Domain. You pick Production or Sandbox and an API version on the login screen, then authorize. It acts with your user's permissions.</p>
+<p><strong>Q: Can you run anonymous Apex or test the REST API in Workbench?</strong>
+A: Yes. utilities &gt; Apex Execute runs anonymous Apex, and utilities &gt; REST Explorer sends raw REST calls to <code>/services/data</code> resources with the session attached for you.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Workbench is a website that already knows your Salesforce org, so you can run a query, fix some records, or grab metadata in a few clicks instead of writing code."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Metadata API, Bulk API, REST Explorer, describe, SOQL/SOSL, upsert, My Domain - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://workbench.developerforce.com/about.php">Workbench: About (v66.0.0)</a></li>
+<li><a href="https://workbench.developerforce.com/login.php">Workbench Login</a></li>
+<li><a href="https://github.com/forceworkbench/forceworkbench/wiki">Workbench Documentation Wiki (GitHub)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_intro.htm">Bulk API 2.0 and Bulk API Developer Guide (v66.0)</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-salesforce-cli.md</a> - the <code>sf</code> command-line tool for automation and CI/CD.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Salesforce CLI (<code>sf</code>)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The official command-line tool for <strong>automating</strong> Salesforce: auth, queries, data loads, Apex, and deployments, all scriptable.
+<strong>Use when</strong>: Dev workflows, deployments, CI/CD pipelines, and any task you want to repeat or script instead of clicking.
+<strong>Note</strong>: The modern command is <strong><code>sf</code></strong> (the <code>sfdx</code> executable is <strong>legacy</strong> and being retired). Examples here pin API <strong>v66.0 (Spring '26)</strong> where versions appear.</p>
+</blockquote>
+<p>This is Module 10, the toolbox. <a href="#f01">Postman</a> and <a href="#f02">Workbench</a> are click-driven. The CLI is where you <strong>automate</strong>. For the auth flows it uses, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Salesforce CLI is a <strong>remote control for your org from the terminal</strong>. Anything you would do by clicking, like log in, run a query, load a CSV, execute Apex, or deploy code, you can type as a command. Because it is text, you can <strong>save it in a script</strong> and run it the same way every time, in your laptop or in a CI pipeline at 3am with no human watching.</p>
+<p>Think of it as the <strong>keyboard shortcut for the whole platform</strong>. Slower to learn than clicking, but once you know it, you move faster and, crucially, <strong>repeatably</strong>. That repeatability is why every serious Salesforce DevOps setup runs on the CLI.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>Use it when</th>
+<th>Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deploying metadata, especially from source control.</td>
+<td>One-off manual REST call to <a href="#f01">Postman</a>.</td>
+</tr>
+<tr>
+<td>CI/CD pipelines (build, test, deploy) with JWT auth.</td>
+<td>Quick browser data fix or describe to <a href="#f02">Workbench</a>.</td>
+</tr>
+<tr>
+<td>Scripted or bulk data import/export.</td>
+<td>Admin loading a giant CSV with a GUI to <a href="#f04">Data Loader</a>.</td>
+</tr>
+<tr>
+<td>Running Apex tests or anonymous Apex in automation.</td>
+<td>Real-time app logic to Apex / middleware.</td>
+</tr>
+<tr>
+<td>Spinning up scratch orgs for dev.</td>
+<td>Pure point-and-click admin work to Setup UI.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. How it works</h2>
+<div class="mermaid">
+flowchart TD
+    DEV[Developer or CI runner] --&gt;|"sf commands"| CLI[Salesforce CLI&lt;br/&gt;sf executable]
+    CLI --&gt;|"sf org login web (browser)"| AUTH1[OAuth Web Server flow]
+    CLI --&gt;|"sf org login jwt (headless)"| AUTH2[OAuth JWT Bearer flow]
+    AUTH1 --&gt; TOK[Stored auth + alias]
+    AUTH2 --&gt; TOK
+    CLI --&gt;|"data / apex / project commands"| API[Salesforce APIs&lt;br/&gt;REST, Bulk, Metadata, Tooling]
+    TOK --&gt; API
+    API --&gt; ORG[(Salesforce Org)]
+
+    style DEV fill:#607D8B,color:#fff
+    style CLI fill:#00A1E0,color:#fff
+    style AUTH1 fill:#4CAF50,color:#fff
+    style AUTH2 fill:#ff9900,color:#fff
+    style API fill:#9C27B0,color:#fff
+    style ORG fill:#F44336,color:#fff
+
+</div>
+<p>You authenticate once (interactively with <strong>web login</strong>, or headlessly with <strong>JWT</strong>), the CLI stores the auth under an <strong>alias</strong>, and every later command targets that org with <code>--target-org</code> (or <code>-o</code>). Under the hood the CLI calls the REST, Bulk, Metadata, and Tooling APIs for you.</p>
+<hr />
+<h2>4. Key commands</h2>
+<p>The command shape is <code>sf &lt;topic&gt; &lt;command&gt; --flags</code>. Topics include <code>org</code>, <code>data</code>, <code>apex</code>, and <code>project</code>.</p>
+<p><strong>Authentication</strong></p>
+<pre><code class="language-bash"># Interactive: opens a browser, great for your laptop
+sf org login web --alias DevHub --set-default-dev-hub
+
+# Headless: JWT bearer flow for CI/CD (no browser)
+sf org login jwt \
+  --username ci-user@example.com \
+  --jwt-key-file server.key \
+  --client-id &lt;CONNECTED_APP_CONSUMER_KEY&gt; \
+  --instance-url https://login.salesforce.com \
+  --alias prod
+</code></pre>
+<p><strong>Query and search data</strong></p>
+<pre><code class="language-bash"># Run SOQL
+sf data query --query &quot;SELECT Id, Name FROM Account LIMIT 5&quot; --target-org prod
+
+# Run SOSL
+sf data search --query &quot;FIND {Acme} IN ALL FIELDS RETURNING Account(Id, Name)&quot; -o prod
+</code></pre>
+<p><strong>Bulk data import/export (Bulk API 2.0)</strong></p>
+<pre><code class="language-bash"># Import a CSV into an object
+sf data import bulk --sobject Contact --file contacts.csv --target-org prod --wait 10
+
+# Export query results to a CSV
+sf data export bulk --query &quot;SELECT Id, Email FROM Lead&quot; --output-file leads.csv -o prod --wait 10
+
+# Update existing records from a CSV
+sf data update bulk --sobject Account --file updates.csv -o prod --wait 10
+
+# Resume / check a long-running bulk job
+sf data resume --job-id &lt;JOB_ID&gt; -o prod
+</code></pre>
+<blockquote>
+<p>Use <code>--wait &lt;minutes&gt;</code> to block until the job finishes. Without it, the command returns a job ID you poll with <code>sf data resume</code>.</p>
+</blockquote>
+<p><strong>Run Apex</strong></p>
+<pre><code class="language-bash"># Execute anonymous Apex from a file
+sf apex run --file ./scripts/fix.apex --target-org prod
+
+# Run Apex tests
+sf apex run test --code-coverage --result-format human -o prod
+</code></pre>
+<p><strong>Deploy and retrieve metadata</strong></p>
+<pre><code class="language-bash"># Validate first (dry run, no changes applied)
+sf project deploy start --manifest manifest/package.xml --dry-run -o prod
+
+# Deploy for real, running specified tests
+sf project deploy start --manifest manifest/package.xml \
+  --test-level RunSpecifiedTests --tests MyTestClass -o prod
+
+# Pull metadata down into the project
+sf project retrieve start --manifest manifest/package.xml -o prod
+</code></pre>
+<blockquote>
+<p><strong>CI/CD pattern</strong>: store the JWT private key and consumer key as <strong>secret variables</strong>, run <code>sf org login jwt</code> at the start of the pipeline, then <code>sf project deploy start --dry-run</code> on PRs and a real deploy on merge.</p>
+</blockquote>
+<hr />
+<h2>5. Gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using <code>sfdx</code> muscle memory.</td>
+<td><code>sfdx</code> is legacy. Use <code>sf</code>. Old <code>force:</code> commands map to new topics like <code>project deploy start</code>.</td>
+</tr>
+<tr>
+<td>Browser login fails in CI.</td>
+<td><code>sf org login web</code> needs a browser. Use <code>sf org login jwt</code> in pipelines.</td>
+</tr>
+<tr>
+<td>Forgot which org a command hits.</td>
+<td>Set a default with <code>--set-default</code>, or always pass <code>-o &lt;alias&gt;</code>. Check with <code>sf org list</code>.</td>
+</tr>
+<tr>
+<td>Bulk command returns before the job is done.</td>
+<td>Add <code>--wait &lt;minutes&gt;</code>, or poll with <code>sf data resume --job-id</code>.</td>
+</tr>
+<tr>
+<td>Deploy blows up in production.</td>
+<td>Always <code>--dry-run</code> first and set an explicit <code>--test-level</code>.</td>
+</tr>
+<tr>
+<td>API version mismatch.</td>
+<td>Set <code>sourceApiVersion</code> in <code>sfdx-project.json</code> or pass <code>--api-version 66.0</code>.</td>
+</tr>
+<tr>
+<td>JWT login "user hasn't approved this app".</td>
+<td>Pre-authorize the connected app for the user, or set the app's policy to admin-approved.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Salesforce CLI and why <code>sf</code> not <code>sfdx</code>?</strong>
+A: It is the official command-line tool for automating org work: auth, data, Apex, and deployments. <code>sf</code> is the modern unified executable; <code>sfdx</code> is legacy and being retired. New commands use topics like <code>org</code>, <code>data</code>, <code>apex</code>, and <code>project</code>.</p>
+<p><strong>Q: How do you authenticate the CLI in a CI/CD pipeline?</strong>
+A: The JWT bearer flow with <code>sf org login jwt</code>. It needs a connected app with a digital certificate and uses a private key, so it is fully headless, no browser. Store the key and consumer key as secret CI variables. Interactive <code>sf org login web</code> is for local dev.</p>
+<p><strong>Q: How do you deploy metadata safely?</strong>
+A: <code>sf project deploy start</code> with <code>--dry-run</code> to validate first, then the real deploy with an explicit <code>--test-level</code>. In a pipeline you validate on the PR and deploy on merge.</p>
+<p><strong>Q: How do you load a large CSV with the CLI?</strong>
+A: <code>sf data import bulk --sobject &lt;Object&gt; --file &lt;csv&gt;</code>, which uses Bulk API 2.0. Add <code>--wait</code> to block, or poll with <code>sf data resume</code>. For export use <code>sf data export bulk</code> with a SOQL query.</p>
+<p><strong>Q: CLI vs Data Loader for data?</strong>
+A: The CLI is scriptable and ideal for CI and dev automation. Data Loader is a desktop GUI (with an optional headless batch mode) aimed at admins and very large or scheduled CSV loads. Both ultimately use Bulk API for big volumes.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "The CLI lets you control Salesforce by typing commands, so you can save the steps in a script and have a robot run the exact same deployment every time."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>CLI, alias, JWT bearer flow, scratch org, Bulk API 2.0, manifest (package.xml), dry run/validation - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_top.htm">Salesforce CLI Command Reference (Summer '26)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_data_commands_unified.htm">data Commands - CLI Command Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_project_commands_unified.htm">project Commands - CLI Command Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm">Authorize an Org Using the JWT Flow - Salesforce DX Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_develop_apex_run_anon.htm">Execute Anonymous Apex - Salesforce DX Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-data-loader.md</a> - the desktop app for bulk CSV import and export.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - Data Loader</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The official <strong>desktop app</strong> for bulk import and export of Salesforce data via CSV, with a wizard GUI and an optional headless mode.
+<strong>Use when</strong>: Admins or engineers need to load, update, or export <strong>large CSV volumes</strong> (up to 150M records), or schedule recurring loads.
+<strong>Note</strong>: Runs on <strong>Bulk API</strong> under the hood for big jobs. Current guide is <strong>v67.0 (Summer '26)</strong>; examples pin API paths to <strong>v66.0</strong> to match this vault. Requires <strong>Java 17+</strong>.</p>
+</blockquote>
+<p>This is Module 10, the toolbox. <a href="#f02">Workbench</a> handles small browser loads and the <a href="#f03">Salesforce CLI</a> handles scripted ones. Data Loader is the heavyweight for <strong>big CSVs and admins</strong>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Data Loader is a <strong>forklift for spreadsheets</strong>. You have a big CSV of records and need to push them into Salesforce, or pull a big set out. The app gives you a <strong>step-by-step wizard</strong>: pick the operation, log in, choose the object, <strong>map your columns to fields</strong>, and run. When it finishes, it hands you <strong>two files</strong>: a <code>success.csv</code> and an <code>error.csv</code>, so you know exactly what loaded and what failed.</p>
+<p>It is a <strong>desktop app</strong> (Windows and macOS), not a website, because it is built to chew through volume reliably. For one-off small fixes you would reach for <a href="#f02">Workbench</a>; for millions of rows or a nightly scheduled load, Data Loader is the tool.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>Use it when</th>
+<th>Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Loading or exporting large CSVs (tens of thousands to 150M rows).</td>
+<td>A quick browser query or tiny load to <a href="#f02">Workbench</a>.</td>
+</tr>
+<tr>
+<td>An admin wants a GUI wizard, no code.</td>
+<td>A developer scripting data in CI to <a href="#f03">Salesforce CLI</a>.</td>
+</tr>
+<tr>
+<td>Upsert against an external ID key.</td>
+<td>A single manual API call to <a href="#f01">Postman</a>.</td>
+</tr>
+<tr>
+<td>Scheduled/recurring loads via headless command-line mode.</td>
+<td>Real-time, record-by-record sync to Apex / middleware.</td>
+</tr>
+<tr>
+<td>You need a clean success/error CSV audit trail.</td>
+<td>Live two-way integration to a platform event or API.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. How it works</h2>
+<div class="mermaid">
+flowchart LR
+    CSV[Your CSV file] --&gt; DL[Data Loader&lt;br/&gt;desktop app + Java]
+    MAP[Field mapping .sdl] --&gt; DL
+    DL --&gt;|OAuth login| SF[(Salesforce Org)]
+    DL --&gt;|Bulk API for large jobs| SF
+    SF --&gt; OUT1[success.csv]
+    SF --&gt; OUT2[error.csv]
+    OUT1 --&gt; YOU[You review results]
+    OUT2 --&gt; YOU
+
+    style CSV fill:#607D8B,color:#fff
+    style DL fill:#00A1E0,color:#fff
+    style MAP fill:#ff9900,color:#fff
+    style SF fill:#9C27B0,color:#fff
+    style OUT1 fill:#4CAF50,color:#fff
+    style OUT2 fill:#F44336,color:#fff
+
+</div>
+<p>You log in via OAuth, choose an operation (insert, update, upsert, delete, hard delete, or export), map CSV columns to fields, and run. For large volumes Data Loader switches to <strong>Bulk API</strong>, which processes records asynchronously in batches. Results come back as <strong>success</strong> and <strong>error</strong> CSVs.</p>
+<hr />
+<h2>4. Setup and usage</h2>
+<p><strong>Install</strong>: Download from <strong>Setup &gt; Data Loader</strong> in your org, or from the Salesforce Data Loader GitHub releases. It needs <strong>Java Runtime 17 or later</strong>. Supported on Windows 10/11 and recent macOS (Ventura, Sonoma, Sequoia).</p>
+<p><strong>GUI wizard steps (Insert example)</strong></p>
+<ol>
+<li>Open Data Loader and click <strong>Insert</strong>.</li>
+<li><strong>Log in</strong> via OAuth and confirm the environment.</li>
+<li>Choose the <strong>object</strong> (e.g. <code>Account</code>) and select your <strong>CSV</strong>.</li>
+<li><strong>Map</strong> CSV columns to Salesforce fields (save the mapping as an <code>.sdl</code> file to reuse).</li>
+<li>Choose where to write the <strong>success</strong> and <strong>error</strong> CSVs.</li>
+<li>Click <strong>Finish</strong>. Watch the progress, then review the result files.</li>
+</ol>
+<p><strong>Operations available</strong>: Insert, Update, <strong>Upsert</strong> (match on an external ID), Delete, Hard Delete, and <strong>Export</strong> / Export All (includes archived/soft-deleted).</p>
+<p><strong>Settings worth knowing</strong> (Settings menu):</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>What it controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Use Bulk API</strong></td>
+<td>Switches large jobs to async Bulk API. Default batch size becomes 2000 (vs 200 on the SOAP-based default).</td>
+</tr>
+<tr>
+<td><strong>Enable serial mode for Bulk API</strong></td>
+<td>Processes batches one at a time to avoid lock contention.</td>
+</tr>
+<tr>
+<td><strong>Batch size</strong></td>
+<td>Rows per batch. Smaller batches reduce row-lock errors.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Headless / command-line (batch) mode</strong> for scheduled loads:</p>
+<ol>
+<li><strong>Create an encryption key</strong>, then <strong>encrypt your password</strong> with the bundled <code>encrypt</code> utility so no plaintext password sits in a file.</li>
+<li>Write a <strong><code>process-conf.xml</code></strong> describing the job: a <code>&lt;bean&gt;</code> per process with <code>sfdc.endpoint</code>, <code>sfdc.username</code>, the <strong>encrypted</strong> <code>sfdc.password</code>, the operation, the CSV path, and the field-mapping file.</li>
+<li>Run the process and schedule it (Windows Task Scheduler or cron):</li>
+</ol>
+<pre><code class="language-bash"># Windows (officially supported for batch mode)
+process.bat &quot;C:\dl\conf&quot; myUpsertProcess
+
+# encrypt a password for the config (run once)
+encrypt.bat -e &quot;MyPasswordAndToken&quot; &quot;C:\dl\key.txt&quot;
+</code></pre>
+<blockquote>
+<p><strong>Heads up</strong>: Salesforce officially supports <strong>command-line batch mode on Windows</strong>. The same Java entry point exists on macOS/Linux, but it is not officially supported there. For cross-platform automation, prefer the <a href="#f03">Salesforce CLI</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wrong Java version.</td>
+<td>Install <strong>JRE 17+</strong>. Older Java will not launch the current Data Loader.</td>
+</tr>
+<tr>
+<td>Row-lock errors on big loads (<code>UNABLE_TO_LOCK_ROW</code>).</td>
+<td>Turn on <strong>serial mode</strong>, reduce batch size, or sort the CSV by parent ID.</td>
+</tr>
+<tr>
+<td>Plaintext password in <code>process-conf.xml</code>.</td>
+<td>Always use the <strong>encrypt</strong> utility and reference the encrypted value plus key file.</td>
+</tr>
+<tr>
+<td>Upsert duplicates or fails.</td>
+<td>Map the correct <strong>external ID</strong> field and ensure values are unique.</td>
+</tr>
+<tr>
+<td>Date/number format mismatches.</td>
+<td>Match your locale settings, or set them in Data Loader's config. Use ISO dates.</td>
+</tr>
+<tr>
+<td>Expecting real-time sync.</td>
+<td>Data Loader is batch, not live. For event-driven sync use platform events or middleware.</td>
+</tr>
+<tr>
+<td>Batch-mode automation on Mac/Linux.</td>
+<td>Not officially supported. Use the <strong>Salesforce CLI</strong> for cross-platform scripted loads.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Data Loader and what API does it use?</strong>
+A: A Salesforce desktop app for bulk CSV import and export. It supports insert, update, upsert, delete, hard delete, and export, and for large volumes it uses <strong>Bulk API</strong> to process records asynchronously in batches. It handles up to 150M records.</p>
+<p><strong>Q: GUI mode vs command-line mode?</strong>
+A: The GUI is a wizard for interactive loads. Command-line (batch) mode runs headless from a <code>process-conf.xml</code> config with an encrypted password, so you can schedule recurring loads. Batch mode is officially supported on Windows.</p>
+<p><strong>Q: How do you secure credentials in automated Data Loader runs?</strong>
+A: Use the bundled <strong>encrypt</strong> utility to create a key and encrypt the password, then reference the encrypted value and key file in <code>process-conf.xml</code>. Never store a plaintext password.</p>
+<p><strong>Q: Data Loader vs the Salesforce CLI for data loads?</strong>
+A: Data Loader is a GUI tool aimed at admins and very large or scheduled CSV jobs, with cross-platform batch support best on Windows. The CLI (<code>sf data import bulk</code>) is scriptable and cross-platform, ideal for developers and CI/CD. Both use Bulk API for volume.</p>
+<p><strong>Q: A 5-million-row insert keeps hitting row-lock errors. What do you do?</strong>
+A: Enable <strong>serial mode</strong> so batches run one at a time, reduce the batch size, and sort the file by parent record ID to avoid concurrent locks on the same parent. Confirm Bulk API is enabled.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Data Loader is a forklift for spreadsheets. Point it at a big CSV, tell it which fields go where, and it loads everything into Salesforce, then hands you a receipt of what worked and what didn't."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Bulk API, batch size, serial mode, upsert, external ID, process-conf.xml, headless/batch mode - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/data_loader.htm">Data Loader Guide (v67.0, Summer '26)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/command_line_intro.htm">Data Loader Command Line Introduction</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_encryption.htm">Encrypt from the Command Line - Data Loader Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_params.htm">Data Loader Process Configuration Parameters</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/installing_the_data_loader.htm">Considerations for Installing Data Loader (Java 17+)</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-testing-helpers.md</a> - utilities and fake services for practicing callouts.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Testing Helpers</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The smaller command-line and web helpers that round out the toolbox for <strong>quick API tests, SOAP calls, OpenAPI specs, webhook capture, and day-to-day Salesforce development</strong>.
+<strong>Use when</strong>: You need a fast one-off check, a free public endpoint to call, a place to catch an Outbound Message, or a proper IDE to write Apex and LWC.</p>
+</blockquote>
+<p>This is Module 10, the toolbox. The heavyweights are <a href="#f01">Postman</a>, <a href="#f02">Workbench</a>, the <a href="#f03">Salesforce CLI</a>, and <a href="#f04">Data Loader</a>. This file covers the <strong>supporting cast</strong> you reach for around them.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Postman is the main workbench, but a tradesperson carries more than one tool. Sometimes you want the <strong>fastest possible</strong> check, so you type one line in a terminal. Sometimes the thing you are testing speaks <strong>SOAP</strong>, so you need a SOAP-aware client. Sometimes you are <strong>publishing</strong> an API contract, so you need a spec editor. Sometimes you need a <strong>free, throwaway endpoint</strong> to receive a webhook or to practice a callout against. And every day you need a real <strong>code editor</strong> to build on the platform.</p>
+<p>Think of these as the <strong>drawer of small tools</strong> next to the big bench. Each does one job well. Knowing which to grab is the skill.</p>
+<hr />
+<h2>2. What each one is for</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Reach for it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>cURL</strong></td>
+<td>Command-line HTTP client, on every Mac and Linux box.</td>
+<td>You want the fastest one-line REST test or a snippet to paste into a script or ticket.</td>
+</tr>
+<tr>
+<td><strong>SOAP UI</strong></td>
+<td>Desktop client built for <strong>SOAP and WSDL</strong> (also does REST).</td>
+<td>You are testing the SOAP API, the Metadata API, or any WSDL-based service.</td>
+</tr>
+<tr>
+<td><strong>Swagger UI / SwaggerHub</strong></td>
+<td>Editor and host for <strong>OpenAPI</strong> specs with a try-it-out UI.</td>
+<td>You author or browse an OpenAPI contract that will feed Salesforce <strong>External Services</strong>.</td>
+</tr>
+<tr>
+<td><strong>Pipedream / webhook.site / RequestBin</strong></td>
+<td>Free, instant <strong>inbound endpoints</strong> that log whatever hits them.</td>
+<td>You need to <strong>catch an Outbound Message</strong> or webhook and inspect its payload.</td>
+</tr>
+<tr>
+<td><strong>Public test APIs</strong></td>
+<td>Ready-made fake REST APIs on the internet.</td>
+<td>You want to practice an Apex callout without standing up your own service.</td>
+</tr>
+<tr>
+<td><strong>VS Code + Salesforce Extension Pack</strong></td>
+<td>The IDE plus the official Salesforce dev tooling.</td>
+<td>You are writing Apex, LWC, or Aura and running deploys and debugs.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. How they fit around a Salesforce integration</h2>
+<div class="mermaid">
+flowchart LR
+    DEV[VS Code +&lt;br/&gt;Extension Pack] --&gt;|write and deploy| SF[Salesforce]
+    CURL[cURL] --&gt;|quick REST test| SF
+    SOAP[SOAP UI] --&gt;|SOAP / WSDL test| SF
+    SF --&gt;|Outbound Message&lt;br/&gt;or webhook| CATCH[Pipedream /&lt;br/&gt;webhook.site]
+    SWAG[Swagger UI /&lt;br/&gt;SwaggerHub] --&gt;|OpenAPI spec| EXT[External Services]
+    EXT --&gt; SF
+    APEX[Apex callout] --&gt;|practice against| TESTAPI[Public test API]
+    style DEV fill:#9C27B0,color:#fff
+    style SF fill:#00A1E0,color:#fff
+    style CATCH fill:#ff9900,color:#fff
+    style SWAG fill:#4CAF50,color:#fff
+    style EXT fill:#4CAF50,color:#fff
+    style TESTAPI fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>4. Usage and setup notes</h2>
+<p><strong>cURL</strong> ships with macOS and Linux, so there is nothing to install. A token call looks like this:</p>
+<pre><code>curl https://MyDomain.my.salesforce.com/services/data/v66.0/query \
+  --get --data-urlencode &quot;q=SELECT Id, Name FROM Account LIMIT 5&quot; \
+  -H &quot;Authorization: Bearer ACCESS_TOKEN&quot;
+</code></pre>
+<p>It is perfect for a quick check or for pasting a reproducible command into a bug report. For anything interactive or repeated, <a href="#f01">Postman</a> is friendlier.</p>
+<p><strong>SOAP UI</strong> is the go-to when the contract is a <strong>WSDL</strong>. Point it at the Salesforce Enterprise or Partner WSDL, or the Metadata WSDL, and it generates request stubs for every operation. Salesforce REST work has largely moved to Postman, but SOAP and Metadata API testing still benefit from a SOAP-native client.</p>
+<p><strong>Swagger UI / SwaggerHub</strong> let you write an <strong>OpenAPI</strong> document (formerly called Swagger) and try the operations in a browser. This pairs directly with <strong>External Services</strong>: Salesforce imports an OpenAPI <strong>2.0 or 3.0</strong> spec, generates an invocable action per operation, and you can then call that service from <strong>Flow, Apex, and bots</strong> with no callout code. Authoring the spec in Swagger first gives you a clean contract to register.</p>
+<p><strong>Pipedream / webhook.site / RequestBin</strong> give you a <strong>public URL in seconds</strong>. Paste that URL into an <strong>Outbound Message</strong> endpoint or a webhook config, fire the event, and the tool shows you the exact headers and body Salesforce sent. This is the fastest way to see what an Outbound Message actually looks like on the wire before you build the real receiver.</p>
+<p><strong>Public test APIs</strong> are free fake REST services for practising callouts:</p>
+<ul>
+<li><strong>httpbin.org</strong> echoes your request back, so it is ideal for checking headers, methods, and auth.</li>
+<li><strong>jsonplaceholder.typicode.com</strong> serves fake posts, users, and comments for read and write practice.</li>
+<li><strong>reqres.in</strong> returns realistic user data and now uses a free <strong><code>x-api-key</code></strong> header on many endpoints, so register for a key if calls start returning 401.</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: these are shared public services. Several now <strong>rate-limit</strong> or require a key, so do not lean on them for load tests or anything production-adjacent. For repeatable testing, stand up your own mock or use a captured-endpoint tool above.</p>
+</blockquote>
+<p><strong>VS Code + Salesforce Extension Pack</strong> is the standard dev environment. The pack bundles the tools that matter:</p>
+<ul>
+<li><strong>Apex</strong> language support: highlighting, IntelliSense, running tests.</li>
+<li><strong>Lightning Web Components</strong> and <strong>Aura</strong> tooling.</li>
+<li><strong>Org Browser</strong>: view and retrieve metadata from the org without editing <code>package.xml</code> by hand.</li>
+<li><strong>Apex Replay Debugger</strong>: replays execution from an Apex <strong>debug log</strong>, so you step through code after the fact instead of live. It works on unmanaged code in any org.</li>
+</ul>
+<p>It runs on top of the <a href="#f03">Salesforce CLI</a>, which does the actual authentication and deploys under the hood.</p>
+<hr />
+<h2>5. Gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cURL request needs URL-encoding for SOQL</td>
+<td>Use <code>--data-urlencode</code> so spaces and commas are escaped.</td>
+</tr>
+<tr>
+<td>SOAP UI feels heavy for a simple REST call</td>
+<td>Use cURL or Postman. Keep SOAP UI for genuine SOAP and WSDL work.</td>
+</tr>
+<tr>
+<td>Public test API returns 401 or 429</td>
+<td>reqres.in now wants a free <code>x-api-key</code>. Others rate-limit. Get a key or self-host a mock.</td>
+</tr>
+<tr>
+<td>Webhook receiver URL went stale</td>
+<td>webhook.site and RequestBin URLs expire. Generate a fresh one per test.</td>
+</tr>
+<tr>
+<td>Outbound Message endpoint must be HTTPS</td>
+<td>The capture URL has to be HTTPS, and Salesforce expects a specific ACK response, so a plain receiver may keep retrying.</td>
+</tr>
+<tr>
+<td>Apex Replay Debugger shows nothing</td>
+<td>You need a <strong>debug log</strong> at the right level first. It replays a log, it does not attach live.</td>
+</tr>
+<tr>
+<td>Swagger spec rejected by External Services</td>
+<td>Salesforce supports OpenAPI 2.0 and 3.0 only, with size and operation limits. Trim the spec to the operations you need.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you test a Salesforce REST call from the command line?</strong>
+A: cURL. Hit <code>/services/data/v66.0/...</code> with an <code>Authorization: Bearer</code> header and <code>--data-urlencode</code> for the SOQL. It is the fastest one-liner and pastes cleanly into scripts or tickets.</p>
+<p><strong>Q: You need to test a SOAP or Metadata API operation. What do you use?</strong>
+A: SOAP UI. Point it at the WSDL and it generates request stubs for every operation. REST work has mostly moved to Postman, but a SOAP-native client is still the cleanest way to drive WSDL services.</p>
+<p><strong>Q: How can you see exactly what an Outbound Message sends without building a receiver?</strong>
+A: Use a free capture endpoint like Pipedream, webhook.site, or RequestBin. Drop its HTTPS URL into the Outbound Message config, fire the event, and read the captured headers and body. Note Salesforce expects an ACK or it will retry.</p>
+<p><strong>Q: How do Swagger and External Services relate?</strong>
+A: You author an OpenAPI spec in Swagger or SwaggerHub, then register it in External Services. Salesforce turns each operation into an invocable action you can call from Flow, Apex, or bots, no callout code required. It supports OpenAPI 2.0 and 3.0.</p>
+<p><strong>Q: What does the Salesforce Extension Pack give you in VS Code?</strong>
+A: Apex language support and test running, LWC and Aura tooling, an Org Browser to retrieve metadata, and the Apex Replay Debugger that steps through a captured debug log. It sits on top of the Salesforce CLI.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "These are the small tools in the drawer next to the big workbench. cURL for a quick poke, SOAP UI for the SOAP stuff, Swagger for the contract, a throwaway URL to catch what Salesforce sends, and VS Code to actually write the code."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>cURL, SOAP, WSDL, OpenAPI, Swagger, External Services, webhook, Outbound Message, Apex Replay Debugger, Org Browser - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/vscode-overview.html">Salesforce Extensions for VS Code - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/replay-debugger.html">Apex Replay Debugger - Salesforce Developers</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.external_services_intro_openapi_2_3_support.htm&amp;type=5">External Services OpenAPI 2.0 and 3.0 Support - Salesforce Help</a></li>
+<li><a href="https://reqres.in/docs">ReqRes API docs (x-api-key)</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-middleware-and-ipaas.md</a> - MuleSoft, API-led connectivity, and the iPaaS lineup.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - Middleware and iPaaS</h1>
+<blockquote>
+<p><strong>One-liner</strong>: When systems multiply, you stop wiring them directly and put a <strong>hub</strong> in the middle. <strong>MuleSoft Anypoint Platform</strong> is Salesforce's own iPaaS, and <strong>API-led connectivity</strong> is the method it is famous for.
+<strong>Use when</strong>: You need to connect three or more systems, transform data between formats, orchestrate multi-step flows, or manage and reuse APIs centrally.</p>
+</blockquote>
+<p>This is Module 10, the toolbox. For the <strong>concept</strong> of middleware, the switchboard analogy, and the ESB vs iPaaS history, read <a href="../01-Fundamentals/08-middleware-and-esb.md">01-Fundamentals/08-middleware-and-esb.md</a> first. This file is the <strong>practitioner's view</strong>: the platforms, the layers, and when to pull the trigger.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A delivery company does not send every driver to negotiate with every supplier. It runs a <strong>central warehouse</strong>. Goods come in, get sorted and repackaged, and go out shaped for each customer. Nobody talks directly to everybody.</p>
+<p><strong>Middleware is that warehouse for data.</strong> An <strong>iPaaS</strong> (Integration Platform as a Service) is the modern, cloud-hosted version of it: you rent the warehouse instead of building one, and it comes stocked with ready-made <strong>connectors</strong> for common systems plus tools to <strong>manage</strong> the APIs you build.</p>
+<p><strong>MuleSoft</strong> is the leading iPaaS and is <strong>owned by Salesforce</strong> (acquired 2018), so it is the headline answer when an interviewer asks how Salesforce handles enterprise integration at scale.</p>
+<hr />
+<h2>2. The lineup</h2>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Type</th>
+<th>Best fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MuleSoft Anypoint Platform</strong></td>
+<td>Full iPaaS plus API management</td>
+<td>Enterprise scale, API-led connectivity, the Salesforce-native choice.</td>
+</tr>
+<tr>
+<td><strong>Boomi</strong></td>
+<td>Cloud iPaaS</td>
+<td>Broad connector library, popular mid-market integration.</td>
+</tr>
+<tr>
+<td><strong>Workato</strong></td>
+<td>iPaaS with automation focus</td>
+<td>Business-led automation and app integration, strong recipe model.</td>
+</tr>
+<tr>
+<td><strong>Informatica</strong></td>
+<td>Data integration and iPaaS</td>
+<td>Heavy-duty ETL, data quality, and large data movement.</td>
+</tr>
+<tr>
+<td><strong>Zapier / Make</strong></td>
+<td>No-code automation</td>
+<td>Low-volume, simple app-to-app triggers. Not for enterprise throughput.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Plain version</strong>: MuleSoft, Boomi, Workato, and Informatica are the <strong>enterprise hubs</strong>. Zapier and Make are the <strong>light, no-code</strong> option for hooking up a couple of SaaS apps when volume is low.</p>
+<hr />
+<h2>3. MuleSoft Anypoint Platform - what to know</h2>
+<p><strong>Anypoint Platform</strong> is a single place to <strong>design, build, deploy, secure, monitor, and reuse</strong> APIs and integrations. The pieces you should be able to name:</p>
+<ul>
+<li><strong>Anypoint Studio</strong>: the IDE where you build Mule applications and flows with hundreds of pre-built connectors.</li>
+<li><strong>Anypoint Exchange</strong>: the marketplace of reusable assets, connectors, templates, and your own published APIs.</li>
+<li><strong>CloudHub</strong>: the fully managed, cloud-hosted runtime where Mule apps run without you provisioning servers.</li>
+<li><strong>Runtime Manager and API Manager</strong>: deploy and operate apps, then apply security policies, throttling, and monitoring.</li>
+</ul>
+<p>The lifecycle is a loop, not a line. You <strong>design</strong> a contract, <strong>build</strong> the implementation, <strong>deploy</strong> it to a runtime, <strong>secure</strong> it with policies, <strong>monitor</strong> it in production, and <strong>reuse</strong> the asset on the next project instead of rebuilding it.</p>
+<div class="mermaid">
+flowchart LR
+    D[Design&lt;br/&gt;API contract] --&gt; B[Build&lt;br/&gt;in Studio]
+    B --&gt; DE[Deploy&lt;br/&gt;to CloudHub]
+    DE --&gt; SE[Secure&lt;br/&gt;policies in API Manager]
+    SE --&gt; M[Monitor&lt;br/&gt;Runtime Manager]
+    M --&gt; R[Reuse&lt;br/&gt;publish to Exchange]
+    R --&gt; D
+    style D fill:#4CAF50,color:#fff
+    style B fill:#9C27B0,color:#fff
+    style DE fill:#ff9900,color:#fff
+    style SE fill:#F44336,color:#fff
+    style M fill:#607D8B,color:#fff
+    style R fill:#00A1E0,color:#fff
+
+</div>
+<hr />
+<h2>4. API-led connectivity - the three-layer model</h2>
+<p>This is MuleSoft's signature methodology and a near-certain interview question. Instead of one-off point-to-point integrations, you build <strong>reusable, purposeful APIs</strong> in <strong>three layers</strong> and compose them. Data flows up from systems of record to the channel, and assets are reused rather than rebuilt.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Job</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System APIs</strong></td>
+<td>Unlock a backend system of record. Shield it from change.</td>
+<td>Connect to Salesforce, SAP, or a database and expose its data cleanly.</td>
+</tr>
+<tr>
+<td><strong>Process APIs</strong></td>
+<td>Combine and orchestrate data across System APIs into a business capability.</td>
+<td>A "Customer 360" API that stitches CRM, billing, and orders together.</td>
+</tr>
+<tr>
+<td><strong>Experience APIs</strong></td>
+<td>Reshape that capability for a specific channel or device.</td>
+<td>A trimmed, mobile-friendly payload for the iOS app versus the web.</td>
+</tr>
+</tbody>
+</table>
+<div class="mermaid">
+flowchart TD
+    subgraph EXP[Experience layer]
+        E1[Mobile API]
+        E2[Web API]
+        E3[Partner API]
+    end
+    subgraph PROC[Process layer]
+        P1[Customer 360&lt;br/&gt;orchestrate + combine]
+    end
+    subgraph SYS[System layer]
+        S1[Salesforce&lt;br/&gt;System API]
+        S2[SAP / ERP&lt;br/&gt;System API]
+        S3[Database&lt;br/&gt;System API]
+    end
+    E1 --&gt; P1
+    E2 --&gt; P1
+    E3 --&gt; P1
+    P1 --&gt; S1
+    P1 --&gt; S2
+    P1 --&gt; S3
+    S1 --&gt; SF[Salesforce]
+    S2 --&gt; SAP[SAP / ERP]
+    S3 --&gt; DB[(Database)]
+    style E1 fill:#4CAF50,color:#fff
+    style E2 fill:#4CAF50,color:#fff
+    style E3 fill:#4CAF50,color:#fff
+    style P1 fill:#ff9900,color:#fff
+    style S1 fill:#00A1E0,color:#fff
+    style S2 fill:#00A1E0,color:#fff
+    style S3 fill:#00A1E0,color:#fff
+    style SF fill:#00A1E0,color:#fff
+    style SAP fill:#9C27B0,color:#fff
+    style DB fill:#607D8B,color:#fff
+
+</div>
+<p><strong>The win is reuse.</strong> Build the Salesforce <strong>System API</strong> once, and every Process and Experience API on top of it reuses that single connection. The next project does not re-integrate Salesforce from scratch. This modularity is exactly what point-to-point cannot give you.</p>
+<hr />
+<h2>5. When you need middleware</h2>
+<p>Middleware buys <strong>decoupling and reuse</strong> at the cost of another platform to run and pay for. Justify it with the <strong>shape of the problem</strong>, not because it sounds enterprise-grade. (Full point-to-point comparison lives in <a href="../01-Fundamentals/08-middleware-and-esb.md">01-Fundamentals/08-middleware-and-esb.md</a>.)</p>
+<table>
+<thead>
+<tr>
+<th>Reach for middleware when...</th>
+<th>Point-to-point is fine when...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You connect <strong>three or more systems</strong>, not two.</td>
+<td>You have one or two simple links.</td>
+</tr>
+<tr>
+<td>Data needs <strong>transformation</strong> between formats or shapes.</td>
+<td>Both sides already speak the same format.</td>
+</tr>
+<tr>
+<td>You need <strong>orchestration</strong> across several steps or systems.</td>
+<td>It is a single request to a single endpoint.</td>
+</tr>
+<tr>
+<td>You must <strong>throttle or buffer</strong> to protect a slow downstream.</td>
+<td>Volume is low and steady.</td>
+</tr>
+<tr>
+<td>You are <strong>bridging protocols</strong>, e.g. SOAP to REST or HTTP to a queue.</td>
+<td>Both sides speak the same protocol.</td>
+</tr>
+<tr>
+<td>You want <strong>central logging, security, and reuse</strong> of APIs.</td>
+<td>The link is one-off and unlikely to grow.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: count the connections and ask whether you must transform or orchestrate. A single Apex callout to one REST API needs no middleware at all. Zapier or Make can handle a low-volume two-app hookup. MuleSoft earns its keep when the estate is many systems with real transformation, governance, and reuse needs.</p>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is MuleSoft and how does it relate to Salesforce?</strong>
+A: MuleSoft makes the Anypoint Platform, the leading iPaaS, and is famous for API-led connectivity. Salesforce acquired it in 2018, so it is Salesforce's enterprise integration and API management offering. You can invoke MuleSoft APIs and flows directly from Salesforce.</p>
+<p><strong>Q: Explain API-led connectivity and its three layers.</strong>
+A: It is MuleSoft's method of building reusable, layered APIs instead of one-off integrations. System APIs unlock backends like Salesforce or SAP. Process APIs combine and orchestrate them into business capabilities. Experience APIs reshape that data for a specific channel. The payoff is reuse: build each System API once and compose on top of it.</p>
+<p><strong>Q: Name the main Anypoint Platform components.</strong>
+A: Anypoint Studio is the IDE for building Mule apps, Exchange is the marketplace of reusable assets and connectors, CloudHub is the managed cloud runtime, and Runtime Manager plus API Manager handle deployment, security policies, throttling, and monitoring.</p>
+<p><strong>Q: When would you NOT use middleware?</strong>
+A: When you have only one or two simple connections, both sides speak the same protocol and format, and there is no orchestration or throttling needed. A single Apex callout to one API does not need a hub. For a small low-volume app-to-app link, Zapier or Make is enough.</p>
+<p><strong>Q: iPaaS versus a no-code tool like Zapier?</strong>
+A: An iPaaS like MuleSoft, Boomi, or Workato is built for enterprise volume, transformation, orchestration, and API governance. Zapier and Make are no-code automation for low-volume, simple SaaS-to-SaaS triggers. They solve very different scales of problem.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Instead of every system talking directly to every other, you run one central warehouse. Goods come in, get repackaged, and go out shaped for each customer. MuleSoft is that warehouse, and API-led connectivity is how you organise the shelves into three tidy layers so you build each connection once."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Middleware, iPaaS, ESB, MuleSoft, Anypoint Platform, API-led connectivity, System API, Process API, Experience API, CloudHub, Anypoint Studio, Anypoint Exchange, orchestration, throttling - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">02-core-vocabulary.md</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://www.salesforce.com/blog/api-led-connectivity/">What Is API-led Connectivity? - Salesforce</a></li>
+<li><a href="https://www.mulesoft.com/platform/enterprise-integration">Enterprise Integration - Anypoint Platform - MuleSoft</a></li>
+<li><a href="https://docs.mulesoft.com/cloudhub/">CloudHub Overview - MuleSoft Documentation</a></li>
+<li><a href="https://trailhead.salesforce.com/content/learn/modules/application-networks-and-api-led-connectivity-in-mulesoft/explore-api-led-connectivity">Understanding API-Led Connectivity Essentials - Trailhead</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#overview">README.md</a> - back to the Module 10 toolbox index.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 10 Tools &amp; Middleware · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

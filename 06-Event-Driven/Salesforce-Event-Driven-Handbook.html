@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Event-Driven Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Event-Driven</h1>
+  <div class="sub">From polling to real-time: the event bus, Platform Events, Change Data Capture, the Pub/Sub API, and replay.</div>
+  <div>
+    <span class="pill">Event basics</span><span class="pill">Platform Events</span>
+    <span class="pill">Change Data Capture</span><span class="pill">Pub/Sub API</span>
+    <span class="pill">Streaming (legacy)</span><span class="pill">Publish &amp; subscribe</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Event-Driven Basics</a></li>
+<li class=""><a href="#f02">02 - Platform Events</a></li>
+<li class=""><a href="#f03">03 - Change Data Capture</a></li>
+<li class=""><a href="#f04">04 - Pub/Sub API</a></li>
+<li class=""><a href="#f05">05 - Streaming API and Outbound Messages</a></li>
+<li class=""><a href="#f06">06 - Publishing, Subscribing, and Replay</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 06 - Event-Driven Integration</h1>
+<blockquote>
+<p><strong>Goal</strong>: Stop polling. Use events. This is the modern way to integrate in real time.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>Retention</strong>: high-volume Platform Events and CDC are kept on the event bus for <strong>72 hours</strong> (not 96). Standard-volume events (24h) are retired.</p>
+</blockquote>
+<p>Event-driven means a publisher <strong>broadcasts a change</strong> and subscribers react, with no direct coupling and no polling. Start with <strong><a href="#f01">01-event-driven-basics.md</a></strong> for the event bus and pub/sub model. New to push vs pull? See <a href="../01-Fundamentals/07-push-pull-and-webhooks.md">Module 01</a>.</p>
+<hr />
+<h2>How to use this module</h2>
+<ol>
+<li>Read <strong><a href="#f01">01-event-driven-basics.md</a></strong> (event bus, replay, retention).</li>
+<li>Learn the two event sources: <strong><a href="#f02">Platform Events</a></strong> (you define) and <strong><a href="#f03">CDC</a></strong> (automatic).</li>
+<li>Learn the modern subscriber API: <strong><a href="#f04">Pub/Sub API</a></strong>.</li>
+<li>Know the <strong><a href="#f05">legacy</a></strong> mechanisms and the <strong><a href="#f06">how-to of publishing/subscribing/replay</a></strong>.</li>
+</ol>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">event-driven-basics</a></td>
+<td>Event bus, pub/sub, replay, 72h retention</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">platform-events</a></td>
+<td>Custom events you define and publish (<code>__e</code>)</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">change-data-capture</a></td>
+<td>Automatic events on record changes</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">pub-sub-api</a></td>
+<td>Modern gRPC + Avro publish/subscribe</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">streaming-api-and-outbound-messages</a></td>
+<td>Legacy push (PushTopic, generic, SOAP)</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">publishing-subscribing-and-replay</a></td>
+<td>The how-to across all event types</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which event mechanism? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([Need event-driven integration]) --&gt; Q1{What is the source?}
+    Q1 --&gt;|Any record create/update/delete| Q2{Custom payload needed?}
+    Q2 --&gt;|No - mirror the change| CDC[Change Data Capture]
+    Q2 --&gt;|Yes - business signal| PE1[Platform Event]
+    Q1 --&gt;|An app, Flow, or Apex action| PE2[Platform Event]
+    Q1 --&gt;|Legacy, already built| LEG[Streaming API / Outbound Messages]
+    CDC --&gt; SUB{Who subscribes?}
+    PE1 --&gt; SUB
+    PE2 --&gt; SUB
+    SUB --&gt;|External app / microservice| PUB[Pub/Sub API]
+    SUB --&gt;|Inside Salesforce| INT[Apex trigger / Flow / empApi]
+
+    style CDC fill:#00A1E0,color:#fff
+    style PE1 fill:#ff9900,color:#fff
+    style PE2 fill:#ff9900,color:#fff
+    style PUB fill:#9C27B0,color:#fff
+    style INT fill:#4CAF50,color:#fff
+    style LEG fill:#F44336,color:#fff
+
+</div>
+<hr />
+<h2>Comparison table</h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Who creates the event</th>
+<th>Schema</th>
+<th>Subscribers</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Platform Events</strong> (02)</td>
+<td>You (intentional business event)</td>
+<td>Custom fields you define</td>
+<td>Apex, Flow, empApi, Pub/Sub</td>
+<td>"OrderShipped", "PaymentReceived"</td>
+</tr>
+<tr>
+<td><strong>Change Data Capture</strong> (03)</td>
+<td>Salesforce (auto on record change)</td>
+<td>Fixed: header + changed fields</td>
+<td>Apex, Flow, empApi, Pub/Sub</td>
+<td>Mirror data to an external store</td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong> (04)</td>
+<td>n/a (transport for PE + CDC)</td>
+<td>Avro per topic</td>
+<td>External apps, microservices</td>
+<td>Efficient external publish/subscribe</td>
+</tr>
+<tr>
+<td><strong>Streaming API</strong> (05)</td>
+<td>PushTopic (SOQL) / generic</td>
+<td>JSON</td>
+<td>CometD clients</td>
+<td>⚠️ Legacy. Avoid for new builds</td>
+</tr>
+<tr>
+<td><strong>Outbound Messages</strong> (05)</td>
+<td>Workflow / Flow (declarative)</td>
+<td>Configured field set</td>
+<td>A SOAP endpoint</td>
+<td>⚠️ Legacy declarative push</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Platform Events vs Change Data Capture (the classic question)</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Platform Events</th>
+<th>CDC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who creates the event?</td>
+<td><strong>You</strong> (a deliberate signal)</td>
+<td>Salesforce (automatic)</td>
+</tr>
+<tr>
+<td>Schema</td>
+<td>You define the fields</td>
+<td>Fixed: <code>ChangeEventHeader</code> + changed fields</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Business events</td>
+<td>Replicating record changes</td>
+</tr>
+<tr>
+<td>Customizable payload?</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>What changed worth knowing (2025-2026)</h2>
+<ul>
+<li><strong>Retention is 72 hours</strong> for high-volume Platform Events and CDC. The "96 hours" figure is a myth. (Legacy standard-volume events were 24h and are retired.)</li>
+<li><strong>Pub/Sub API</strong> (gRPC + Avro) is the modern subscriber API. The <strong>Streaming API</strong> (CometD) is legacy for new builds.</li>
+<li><strong>Managed Event Subscriptions (Beta)</strong> let the Pub/Sub API track Replay IDs server-side.</li>
+<li><strong>Outbound Messages</strong> remain, but Workflow Rules / Process Builder are no longer enhanced; build new declarative push in <strong>Flow</strong>.</li>
+</ul>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: Platform Events vs CDC?</strong>
+→ Platform Events are custom business signals you publish on purpose. CDC is automatic, fixed-schema events on record changes, ideal for data replication.</p>
+<p><strong>Q: How do subscribers recover missed events?</strong>
+→ Store the <strong>Replay ID</strong> and resubscribe from it within the <strong>72-hour</strong> window (<code>-1</code> new-only, <code>-2</code> all retained).</p>
+<p><strong>Q: How should an external microservice subscribe today?</strong>
+→ The <strong>Pub/Sub API</strong> (gRPC + Avro), not the legacy CometD Streaming API.</p>
+<p><strong>Q: Is delivery exactly-once?</strong>
+→ No, at-least-once. Subscribers must be <strong>idempotent</strong>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_intro.htm">Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_intro.htm">Change Data Capture Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Pub/Sub API — Event Message Durability</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_event_limits.htm">Platform Event Allocations</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Event-Driven Basics</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Instead of one system constantly asking "anything new yet?", the producer <strong>broadcasts an event</strong> the moment something happens, and any interested system just listens.
+<strong>Why it matters</strong>: This is the modern, efficient alternative to polling. It decouples systems and enables real-time integration.
+<strong>Goal of this file</strong>: Understand the <strong>event bus</strong>, the <strong>publish/subscribe</strong> model, and <strong>replay</strong>, so every other file in this module clicks.</p>
+</blockquote>
+<p>This is Module 06. New to push vs pull? See <a href="../01-Fundamentals/07-push-pull-and-webhooks.md">Module 01 - push, pull, and webhooks</a>. For where this sits among patterns, see <a href="../02-Integration-Patterns/README.md">Module 02 - UI Update / Fire and Forget</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Event-driven integration is a <strong>radio station</strong>. The station (publisher) broadcasts a show (event) without knowing or caring who is listening. Anyone with a radio (subscriber) can tune to that frequency (channel) and hear it. The station does not call each listener; it broadcasts once, and the infrastructure delivers to everyone tuned in.</p>
+<p>Contrast that with <strong>polling</strong>, which is calling the radio station every 30 seconds to ask "are you broadcasting anything?" Polling wastes calls, adds lag, and tightly couples the two sides. Events flip it around: <strong>publish once, many subscribers react, nobody waits on anybody.</strong> That decoupling is the whole point.</p>
+<hr />
+<h2>2. Polling (pull) vs event-driven (push)</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Polling (pull)</th>
+<th>Event-driven (push)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who initiates</td>
+<td>Consumer asks repeatedly</td>
+<td>Producer broadcasts on change</td>
+</tr>
+<tr>
+<td>Freshness</td>
+<td>Laggy (next poll cycle)</td>
+<td>Near real-time</td>
+</tr>
+<tr>
+<td>Efficiency</td>
+<td>Wasteful (most polls find nothing)</td>
+<td>Efficient (only fires on real change)</td>
+</tr>
+<tr>
+<td>Coupling</td>
+<td>Tight (consumer knows the source)</td>
+<td>Loose (publisher and subscriber independent)</td>
+</tr>
+<tr>
+<td>Salesforce example</td>
+<td>A job querying every 5 min for new Cases</td>
+<td>A <strong>Platform Event</strong> fired when a Case is escalated</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: if you find yourself scheduling a job to "check for changes," an event is almost always the better design.</p>
+<hr />
+<h2>3. The event bus and the pub/sub model</h2>
+<p>At the center sits the <strong>event bus</strong>: a multitenant, time-ordered event log. Publishers write to it, subscribers read from it, and the two never talk directly.</p>
+<div class="mermaid">
+flowchart LR
+    A[Apex&lt;br/&gt;EventBus.publish] --&gt; BUS
+    F[Flow] --&gt; BUS
+    R[REST / API] --&gt; BUS
+    REC[Record change] --&gt; CDC[Change Data Capture] --&gt; BUS
+    BUS{{Event Bus&lt;br/&gt;time-ordered log&lt;br/&gt;72-hour retention}}
+    BUS --&gt; S1[Apex trigger]
+    BUS --&gt; S2[Flow]
+    BUS --&gt; S3[LWC via empApi]
+    BUS --&gt; S4[External app&lt;br/&gt;via Pub/Sub API]
+
+    style BUS fill:#ff9900,color:#fff
+    style CDC fill:#00A1E0,color:#fff
+    style S4 fill:#9C27B0,color:#fff
+
+</div>
+<p><strong>Key properties of the bus</strong></p>
+<ul>
+<li><strong>Time-ordered</strong>: events are stored and delivered in the order Salesforce received them.</li>
+<li><strong>Durable with replay</strong>: each event gets a <strong>Replay ID</strong> marking its position. Subscribers store the last Replay ID they processed and can resubscribe from there to catch up.</li>
+<li><strong>Retention window</strong>: high-volume platform events and Change Data Capture events are retained for <strong>72 hours (3 days)</strong>. After that they age out of the bus.</li>
+<li><strong>At-least-once delivery</strong>: a subscriber may occasionally receive an event more than once, so handlers should be <strong>idempotent</strong>.</li>
+</ul>
+<hr />
+<h2>4. The Salesforce event family (what's in this module)</h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Who creates it</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Platform Events</strong></td>
+<td>You define and publish a custom event</td>
+<td><a href="#f02">02-platform-events.md</a></td>
+</tr>
+<tr>
+<td><strong>Change Data Capture (CDC)</strong></td>
+<td>Salesforce auto-fires on record create/update/delete/undelete</td>
+<td><a href="#f03">03-change-data-capture.md</a></td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>The modern gRPC API to publish and subscribe (incl. external apps)</td>
+<td><a href="#f04">04-pub-sub-api.md</a></td>
+</tr>
+<tr>
+<td><strong>Streaming API + Outbound Messages</strong></td>
+<td>Legacy push (PushTopic, generic, declarative SOAP)</td>
+<td><a href="#f05">05-streaming-api-and-outbound-messages.md</a></td>
+</tr>
+<tr>
+<td><strong>Publishing &amp; subscribing &amp; replay</strong></td>
+<td>The how-to across all of the above</td>
+<td><a href="#f06">06-publishing-subscribing-and-replay.md</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Key concepts to carry forward</h2>
+<ul>
+<li><strong>Channel / topic</strong>: the named stream a subscriber listens to (e.g. <code>/event/Order_Shipped__e</code>, <code>/data/AccountChangeEvent</code>).</li>
+<li><strong>Replay ID</strong>: the cursor into the event stream. <code>-1</code> = only new events, <code>-2</code> = all retained events from the start of the window, or a specific ID to resume.</li>
+<li><strong>Retention = 72 hours</strong> for high-volume events and CDC. (Legacy <strong>standard-volume</strong> platform events retained only 24 hours and can no longer be created. They are being retired.)</li>
+<li><strong>Decoupling</strong>: publishers and subscribers deploy, scale, and fail independently.</li>
+<li><strong>Idempotency</strong>: design subscribers to tolerate duplicate or replayed events.</li>
+</ul>
+<hr />
+<h2>6. Common confusions and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Events are guaranteed exactly once."</td>
+<td>Delivery is <strong>at-least-once</strong>. Handle possible duplicates.</td>
+</tr>
+<tr>
+<td>"Platform Events and CDC are the same."</td>
+<td><strong>You</strong> design Platform Events for business signals. <strong>Salesforce</strong> auto-generates CDC from record changes. See <a href="#f02">02</a> vs <a href="#f03">03</a>.</td>
+</tr>
+<tr>
+<td>"Retention is 96 hours."</td>
+<td>It is <strong>72 hours</strong> for high-volume events and CDC. (A common myth.)</td>
+</tr>
+<tr>
+<td>"Streaming API is the way to subscribe."</td>
+<td>For new builds use the <strong>Pub/Sub API</strong>. Streaming API (PushTopic/generic) is legacy.</td>
+</tr>
+<tr>
+<td>"Events replace all integration."</td>
+<td>Events suit notifications and real-time sync, not request/reply or bulk loads.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What is event-driven integration and why use it over polling?</strong>
+A: A publisher broadcasts an event to an event bus and subscribers react, with no direct coupling. It beats polling because it is real-time, avoids wasted "anything new?" calls, and lets both sides evolve independently.</p>
+<p><strong>Q: What is the event bus?</strong>
+A: A multitenant, time-ordered log where Salesforce stores published events and delivers them to subscribers in order, with a 72-hour retention window and Replay IDs for catch-up.</p>
+<p><strong>Q: What is a Replay ID?</strong>
+A: An opaque marker of an event's position in the stream. Subscribers persist the last one they processed and resubscribe from it to recover missed events within the 72-hour window. <code>-1</code> means new-only, <code>-2</code> means everything retained.</p>
+<p><strong>Q: Is delivery guaranteed exactly once?</strong>
+A: No. It is at-least-once, so subscribers must be idempotent to handle occasional duplicates or replays.</p>
+<p><strong>Q: Platform Events vs Change Data Capture?</strong>
+A: Platform Events are custom business events you define and publish intentionally. CDC is automatic, fixed-schema events Salesforce fires whenever records change, ideal for replicating data to an external store.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a radio broadcast. Salesforce announces 'this happened' once, and any system tuned in reacts, instead of everyone phoning in to ask every few seconds."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Event bus, publish/subscribe, channel, Replay ID, retention, at-least-once, idempotency, CDC - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Event Message Durability — Pub/Sub API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_intro.htm">Platform Events Developer Guide — Event Bus</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_event_limits.htm">Platform Event Allocations</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-platform-events.md</a> - the custom events you define and publish.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Platform Events</h1>
+<blockquote>
+<p><strong>One-liner</strong>: You <strong>define a custom event</strong> (like <code>Order_Shipped__e</code>), publish it when something meaningful happens, and any number of subscribers react.
+<strong>Why it matters</strong>: This is the purpose-built way to broadcast <strong>intentional business signals</strong> inside and outside Salesforce, decoupled and near real-time.
+<strong>Use when</strong>: You want to announce "this business thing just happened" and let other systems decide what to do about it.</p>
+</blockquote>
+<p>This is Module 06. New to the event bus, channels, and replay? Start with <a href="#f01">01-event-driven-basics.md</a>. For the auto-generated cousin, see <a href="#f03">03-change-data-capture.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A Platform Event is a <strong>press release</strong>. You decide exactly what it says (the fields), you decide when to issue it (publish), and you send it to the wire (the event bus). You do not phone each reporter. Anyone subscribed to that wire picks it up and acts: one team writes a story, another files it, a third ignores it. You, the publisher, never know or care who is listening.</p>
+<p>Contrast this with <a href="#f03">Change Data Capture</a>, where Salesforce auto-issues a "this record changed" bulletin for you. With Platform Events <strong>you</strong> design the message and <strong>you</strong> choose the moment. That is the whole distinction: Platform Events are <strong>you-defined business signals</strong>, CDC is <strong>Salesforce-defined data changes</strong>.</p>
+<p>In Salesforce terms: you create a Platform Event object with the <strong><code>__e</code></strong> suffix, add custom fields, then publish instances via Apex <code>EventBus.publish()</code>, Flow, or the REST/SOAP API. Subscribers react via Apex triggers, Flow, LWC, or external apps.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You want to broadcast a <strong>business signal</strong> you control, like <code>Order_Shipped__e</code>.</td>
+<td>You just need to mirror <strong>record changes</strong> to an external store → <a href="#f03">03-change-data-capture.md</a>.</td>
+</tr>
+<tr>
+<td>Multiple <strong>decoupled</strong> subscribers should react independently.</td>
+<td>You need a synchronous <strong>answer back</strong> → <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>fire-and-forget</strong> notifications that survive load spikes.</td>
+<td>You are doing a <strong>bulk data load</strong> → <a href="../02-Integration-Patterns/03-batch-data-synchronization.md">Batch sync</a>.</td>
+</tr>
+<tr>
+<td>You need internal <strong>process-to-process</strong> decoupling (publish in one transaction, handle in another).</td>
+<td>You need <strong>guaranteed exactly-once</strong>. Delivery is at-least-once, so subscribers must be idempotent.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: <code>Order_Shipped__e</code> notifying a fulfillment portal, <code>Payment_Received__e</code> triggering downstream provisioning, <code>Print_Job__e</code> fanning a request to an on-prem printer service, a microservice publishing <code>Inventory_Low__e</code> back into Salesforce.</p>
+<hr />
+<h2>3. How it works (Mermaid + walkthrough)</h2>
+<div class="mermaid">
+flowchart LR
+    P1[Apex&lt;br/&gt;EventBus.publish] --&gt; BUS
+    P2[Flow&lt;br/&gt;Create Records] --&gt; BUS
+    P3[REST / SOAP API] --&gt; BUS
+    P4[External app&lt;br/&gt;via Pub/Sub API] --&gt; BUS
+    BUS{{Event Bus&lt;br/&gt;channel /event/Order_Shipped__e&lt;br/&gt;72-hour retention}}
+    BUS --&gt; S1[Apex trigger&lt;br/&gt;after insert]
+    BUS --&gt; S2[Platform Event&lt;br/&gt;triggered Flow]
+    BUS --&gt; S3[LWC via empApi]
+    BUS --&gt; S4[External app&lt;br/&gt;via Pub/Sub API]
+
+    style BUS fill:#ff9900,color:#fff
+    style P4 fill:#9C27B0,color:#fff
+    style S4 fill:#9C27B0,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>You publish an event instance to its channel, <code>/event/Order_Shipped__e</code>.</li>
+<li>Salesforce persists it to the <strong>event bus</strong> (time-ordered, <strong>72-hour</strong> retention for high-volume events).</li>
+<li>Each event gets a <strong>Replay ID</strong> marking its position in the stream.</li>
+<li>All subscribers receive the event independently and asynchronously.</li>
+<li>Apex triggers and Flows run server-side; LWC and external apps stream it down.</li>
+<li>A slow or failed subscriber does not block the publisher or other subscribers.</li>
+</ol>
+<hr />
+<h2>4. The actual code and config</h2>
+<h3>Define the event object</h3>
+<p>In <strong>Setup → Platform Events → New Platform Event</strong>. The object gets the <strong><code>__e</code></strong> suffix automatically (for example <code>Order_Shipped__e</code>). Add custom fields like <code>Order_Number__c</code> (Text) and <code>Tracking__c</code> (Text). You also pick a <strong>Publish Behavior</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Publish Behavior</th>
+<th>When the event is published</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Publish After Commit</strong></td>
+<td>Only <strong>after</strong> the current transaction commits successfully. If the transaction rolls back, the event is <strong>not</strong> published.</td>
+<td>You need the event to reflect data that actually committed (the common, safe default).</td>
+</tr>
+<tr>
+<td><strong>Publish Immediately</strong></td>
+<td>At the moment of the <code>publish</code> call, <strong>outside</strong> the database transaction, even if the transaction later fails.</td>
+<td>You want a signal regardless of outcome, for example logging or audit, fully decoupled from the DML result.</td>
+</tr>
+</tbody>
+</table>
+<h3>Publish via Apex</h3>
+<pre><code class="language-apex">List&lt;Order_Shipped__e&gt; events = new List&lt;Order_Shipped__e&gt;();
+events.add(new Order_Shipped__e(
+    Order_Number__c = 'SO-1001',
+    Tracking__c     = '1Z999AA10123456784'
+));
+
+List&lt;Database.SaveResult&gt; results = EventBus.publish(events);
+
+for (Database.SaveResult sr : results) {
+    if (!sr.isSuccess()) {
+        for (Database.Error err : sr.getErrors()) {
+            System.debug('Publish failed: ' + err.getMessage());
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>A successful <code>SaveResult</code> means the event was <strong>accepted</strong> for publishing, not yet delivered. For confirmed final results, use a <strong>publish callback</strong> (<code>EventBus.publish(events, callback)</code>).</p>
+</blockquote>
+<h3>Publish via Flow</h3>
+<p>Use a <strong>Create Records</strong> element and pick the Platform Event as the record type, or a dedicated platform-event action. No Apex needed.</p>
+<h3>Publish via REST API</h3>
+<p><code>POST</code> to the sObject endpoint, same shape as any record:</p>
+<pre><code class="language-http">POST /services/data/v66.0/sobjects/Order_Shipped__e/
+{ &quot;Order_Number__c&quot;: &quot;SO-1001&quot;, &quot;Tracking__c&quot;: &quot;1Z999AA10123456784&quot; }
+</code></pre>
+<h3>Subscribe four ways</h3>
+<table>
+<thead>
+<tr>
+<th>Subscriber</th>
+<th>How</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Apex trigger</strong></td>
+<td><code>trigger OnOrderShipped on Order_Shipped__e (after insert)</code></td>
+<td>Only <strong><code>after insert</code></strong> is valid. Runs async; up to <strong>2,000</strong> events per execution. Use <code>EventBus.TriggerContext</code> + <code>setResumeCheckpoint(replayId)</code> to resume after an error.</td>
+</tr>
+<tr>
+<td><strong>Flow</strong></td>
+<td>Platform Event-Triggered Flow</td>
+<td>Low-code subscriber, one event per run.</td>
+</tr>
+<tr>
+<td><strong>LWC</strong></td>
+<td><code>empApi</code> (<code>subscribe</code>) on <code>/event/Order_Shipped__e</code></td>
+<td>In-browser, uses CometD under the hood.</td>
+</tr>
+<tr>
+<td><strong>External app</strong></td>
+<td><strong>Pub/Sub API</strong> (gRPC)</td>
+<td>The modern path for microservices. See <a href="#f04">04-pub-sub-api.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-apex">trigger OnOrderShipped on Order_Shipped__e (after insert) {
+    for (Order_Shipped__e evt : Trigger.New) {
+        // idempotent handler: safe if this event arrives twice
+        System.debug('Shipped order ' + evt.Order_Number__c);
+    }
+}
+</code></pre>
+<h3>High-volume vs standard-volume</h3>
+<p><strong>High-volume</strong> platform events are the <strong>modern default</strong> and are retained <strong>72 hours</strong>. <strong>Standard-volume</strong> platform events (24-hour retention) <strong>can no longer be created and are being retired</strong>. Always design on high-volume.</p>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Publish Behavior choice</strong></td>
+<td>After Commit ties the event to a successful transaction; Immediately decouples it entirely.</td>
+<td>Default to <strong>After Commit</strong> unless you truly want the signal even on rollback.</td>
+</tr>
+<tr>
+<td><strong>At-least-once delivery</strong></td>
+<td>A subscriber may receive the same event twice.</td>
+<td>Make handlers <strong>idempotent</strong> (dedupe on a key).</td>
+</tr>
+<tr>
+<td><strong>Trigger is <code>after insert</code> only</strong></td>
+<td>Events are immutable; there is no update/delete trigger.</td>
+<td>Put all logic in <code>after insert</code>.</td>
+</tr>
+<tr>
+<td><strong>2,000 events per trigger run</strong></td>
+<td>A burst is chunked. An uncaught error can re-fire the whole chunk.</td>
+<td>Use <code>setResumeCheckpoint(replayId)</code> to resume past processed events.</td>
+</tr>
+<tr>
+<td><strong>Publish and delivery allocations</strong></td>
+<td>Orgs have limits on <strong>events published per hour</strong> and <strong>event deliveries per 24 hours</strong> (delivery to CometD/empApi).</td>
+<td>Monitor <code>PlatformEventUsageMetric</code>; see the <a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_event_limits.htm">allocations page</a>.</td>
+</tr>
+<tr>
+<td><strong>No SOQL on event objects</strong></td>
+<td>You cannot query past events with SOQL.</td>
+<td>Replay from the bus via Replay ID within 72h, or persist to a record if you need history.</td>
+</tr>
+<tr>
+<td><strong>Field types are limited</strong></td>
+<td>Not every field type is allowed on a <code>__e</code> object.</td>
+<td>Use supported types (Text, Number, Checkbox, Date/Time, etc.).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is a Platform Event and how is it different from CDC?</strong>
+A: A Platform Event is a custom event you define (<code>__e</code> object) and publish intentionally to signal a business occurrence. CDC is auto-fired by Salesforce on record create/update/delete/undelete with a fixed schema. Platform Events are you-defined signals; CDC is data replication.</p>
+<p><strong>Q: Publish After Commit vs Publish Immediately?</strong>
+A: After Commit publishes the event only if the transaction commits, so subscribers can trust the committed data. Immediately publishes outside the transaction, even if it later rolls back, fully decoupling publish from the DML result. After Commit is the safe default.</p>
+<p><strong>Q: How do you publish and subscribe in Apex?</strong>
+A: Publish with <code>EventBus.publish(listOfEvents)</code>. Subscribe with an <code>after insert</code> trigger on the event object. The trigger is asynchronous and processes up to 2,000 events per run.</p>
+<p><strong>Q: Delivery is occasionally duplicated. How do you handle it?</strong>
+A: Delivery is at-least-once, so handlers must be idempotent, for example by checking a dedupe key or external ID before acting, so a replayed event causes no double effect.</p>
+<p><strong>Q: A burst of events causes a trigger error midway. How do you avoid reprocessing everything?</strong>
+A: Use <code>EventBus.TriggerContext</code> and <code>setResumeCheckpoint(replayId)</code> to checkpoint the last good Replay ID, so the retry resumes after the processed events instead of from the start of the chunk.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a press release. I write the message, I choose when to send it to the wire, and anyone subscribed reacts on their own. I never call them directly."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Platform Event, <code>__e</code> object, Publish After Commit, Publish Immediately, <code>EventBus.publish</code>, <code>empApi</code>, high-volume vs standard-volume, Replay ID, idempotency - defined here and in <a href="#f01">01-event-driven-basics.md</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_intro.htm">Platform Events Developer Guide - Intro (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_publish_apex.htm">Publish Event Messages with Apex</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_subscribe_apex.htm">Subscribe to Platform Event Notifications with Apex Triggers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_event_limits.htm">Platform Event Allocations</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=002280033&amp;language=en_US&amp;type=1">Standard-Volume Platform Events Retirement</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Event Message Durability - Pub/Sub API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-change-data-capture.md</a> - the events Salesforce fires automatically when records change.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Change Data Capture</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Turn it on for an object and Salesforce <strong>automatically fires an event every time a record changes</strong>, so you never write publish code.
+<strong>Why it matters</strong>: This is the purpose-built way to <strong>mirror Salesforce data</strong> into an external store or warehouse in near real-time.
+<strong>Use when</strong>: You need an external system to stay in sync with Salesforce record changes without polling.</p>
+</blockquote>
+<p>This is Module 06. New to the event bus and replay? See <a href="#f01">01-event-driven-basics.md</a>. For events <strong>you</strong> design and publish, see <a href="#f02">02-platform-events.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Change Data Capture (CDC) is a <strong>security camera</strong> on your data. Once you point it at an object, it records every change automatically: a record is created, updated, deleted, or undeleted, and CDC quietly fires an event describing what happened. You did not press record each time; the camera just runs.</p>
+<p>Contrast this with <a href="#f02">Platform Events</a>, where you write the message and choose the moment, like issuing a press release. CDC is the opposite: <strong>Salesforce decides the schema and the timing for you.</strong> The payload is fixed, you cannot add custom fields to it, and it fires on the database change itself.</p>
+<p>The killer use case is <strong>replication</strong>. You stand up an external database or data warehouse, subscribe to CDC, and apply each change as it arrives. The external copy stays current without a single scheduled query.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You want to <strong>replicate / mirror</strong> Salesforce records to an external store or warehouse.</td>
+<td>You want a <strong>custom business signal</strong> with your own fields → <a href="#f02">02-platform-events.md</a>.</td>
+</tr>
+<tr>
+<td>You need to react to <strong>any</strong> create/update/delete/undelete on an object.</td>
+<td>You only care about one specific business moment, not raw record churn.</td>
+</tr>
+<tr>
+<td>You want <strong>no publish code</strong>: enable per object and you are done.</td>
+<td>You need to <strong>customize the payload</strong>. CDC schema is fixed.</td>
+</tr>
+<tr>
+<td>You need the <strong>before/after-style</strong> change detail (which fields changed).</td>
+<td>You need a synchronous <strong>answer back</strong> → <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: keeping a reporting <strong>data warehouse</strong> in sync, feeding an <strong>external search index</strong>, mirroring Accounts and Contacts into a <strong>customer data platform</strong>, driving an audit/replication pipeline in a microservice.</p>
+<hr />
+<h2>3. How it works (Mermaid + walkthrough)</h2>
+<div class="mermaid">
+flowchart LR
+    REC[Record create / update&lt;br/&gt;delete / undelete] --&gt; CDC[Change Data Capture&lt;br/&gt;auto-fires]
+    CDC --&gt; BUS{{Event Bus&lt;br/&gt;channel /data/AccountChangeEvent&lt;br/&gt;72-hour retention}}
+    BUS --&gt; S1[Apex trigger&lt;br/&gt;on AccountChangeEvent]
+    BUS --&gt; S2[Flow]
+    BUS --&gt; S3[External warehouse&lt;br/&gt;via Pub/Sub API]
+
+    style CDC fill:#00A1E0,color:#fff
+    style BUS fill:#ff9900,color:#fff
+    style S3 fill:#9C27B0,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A record changes (create, update, delete, or undelete).</li>
+<li>CDC <strong>automatically</strong> generates a change event, no publish code from you.</li>
+<li>The event lands on the object channel, for example <code>/data/AccountChangeEvent</code>.</li>
+<li>It carries a <strong>ChangeEventHeader</strong> plus the changed record fields.</li>
+<li>Subscribers (Apex, Flow, or external apps via Pub/Sub API) apply the change.</li>
+<li>Events are retained <strong>72 hours</strong>; a subscriber can replay within that window.</li>
+</ol>
+<hr />
+<h2>4. The actual config and channels</h2>
+<h3>Enable CDC</h3>
+<p>In <strong>Setup → Change Data Capture</strong>, move objects from <strong>Available Entities</strong> into <strong>Selected Entities</strong>. (You can also enable it via Metadata API with a <code>PlatformEventChannelMember</code>.) When you select an object, Salesforce creates its change event behind the scenes, for example <code>Account</code> → <code>AccountChangeEvent</code>, custom <code>Shipment__c</code> → <code>Shipment__ChangeEvent</code>.</p>
+<h3>Channels</h3>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Listens to</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single standard object</strong></td>
+<td>One standard object</td>
+<td><code>/data/AccountChangeEvent</code></td>
+</tr>
+<tr>
+<td><strong>Single custom object</strong></td>
+<td>One custom object</td>
+<td><code>/data/Shipment__ChangeEvent</code></td>
+</tr>
+<tr>
+<td><strong>All changes</strong></td>
+<td>Every CDC-enabled object</td>
+<td><code>/data/ChangeEvents</code></td>
+</tr>
+<tr>
+<td><strong>Custom channel</strong></td>
+<td>A curated set of objects you group</td>
+<td><code>/data/MyChannel__chn</code></td>
+</tr>
+</tbody>
+</table>
+<p>Use a <strong>custom channel</strong> when different subscribers need different subsets of objects, or to scope event enrichment.</p>
+<h3>The ChangeEventHeader</h3>
+<p>Every change event includes a <code>ChangeEventHeader</code>. Key fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>changeType</code></strong></td>
+<td><code>CREATE</code>, <code>UPDATE</code>, <code>DELETE</code>, or <code>UNDELETE</code>.</td>
+</tr>
+<tr>
+<td><strong><code>entityName</code></strong></td>
+<td>The object, for example <code>Account</code>.</td>
+</tr>
+<tr>
+<td><strong><code>recordIds</code></strong></td>
+<td>The record IDs affected (a list; one event can cover several records in a transaction).</td>
+</tr>
+<tr>
+<td><strong><code>changedFields</code></strong></td>
+<td>The fields that changed (for updates), so you apply only deltas.</td>
+</tr>
+<tr>
+<td><strong><code>commitNumber</code></strong></td>
+<td>The system change number of the commit, for ordering.</td>
+</tr>
+<tr>
+<td><strong><code>commitTimestamp</code></strong></td>
+<td>When the change was committed.</td>
+</tr>
+<tr>
+<td><strong><code>commitUser</code></strong></td>
+<td>The user ID that made the change.</td>
+</tr>
+<tr>
+<td><strong><code>transactionKey</code></strong> / <strong><code>sequenceNumber</code></strong></td>
+<td>Group and order changes within the same transaction.</td>
+</tr>
+</tbody>
+</table>
+<p>Sample change event payload (conceptual):</p>
+<pre><code class="language-json">{
+  &quot;ChangeEventHeader&quot;: {
+    &quot;entityName&quot;: &quot;Account&quot;,
+    &quot;changeType&quot;: &quot;UPDATE&quot;,
+    &quot;recordIds&quot;: [&quot;001xx000003DGb2AAG&quot;],
+    &quot;changedFields&quot;: [&quot;Phone&quot;, &quot;Website&quot;],
+    &quot;commitNumber&quot;: 10282948327,
+    &quot;commitTimestamp&quot;: 1718700000000,
+    &quot;commitUser&quot;: &quot;005xx000001Sv6BAAS&quot;
+  },
+  &quot;Phone&quot;: &quot;+1-415-555-0100&quot;,
+  &quot;Website&quot;: &quot;https://example.com&quot;
+}
+</code></pre>
+<h3>Subscribe</h3>
+<p>Same four ways as Platform Events: <strong>Apex trigger</strong> on the change event object (<code>after insert</code>), <strong>Flow</strong>, <strong>LWC empApi</strong>, and <strong>external apps via Pub/Sub API</strong> (the usual choice for replication). See <a href="#f04">04-pub-sub-api.md</a>.</p>
+<h3>Gap events and overflow</h3>
+<ul>
+<li><strong>Gap event</strong>: when Salesforce <strong>cannot</strong> generate a normal change event (for example certain errors or field conversions), it sends a <strong>gap event</strong> with a header but no field values. Its <code>changeType</code> is suffixed, like <code>GAP_UPDATE</code>. Subscribers should query the record to resync.</li>
+<li><strong>Overflow event</strong>: when a <strong>single transaction</strong> changes more records than a threshold, CDC sends an <strong>overflow event</strong> instead of one event per record. Treat it as a signal to reload the affected scope.</li>
+</ul>
+<p>Both exist so your replica can self-heal instead of silently drifting.</p>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fixed schema</strong></td>
+<td>You cannot add custom fields to the change event payload.</td>
+<td>If you need extra context, use event <strong>enrichment</strong> on a custom channel, or switch to a <a href="#f02">Platform Event</a>.</td>
+</tr>
+<tr>
+<td><strong>72-hour retention</strong></td>
+<td>Events older than 72h are purged from the bus.</td>
+<td>Keep subscribers healthy; replay within the window or do a full reload.</td>
+</tr>
+<tr>
+<td><strong>Gap events</strong></td>
+<td>A gap means data could be out of sync.</td>
+<td>On a gap, <strong>re-query</strong> the affected records to resync the replica.</td>
+</tr>
+<tr>
+<td><strong>Overflow events</strong></td>
+<td>A bulk transaction collapses into one overflow event.</td>
+<td>Reload the affected object set rather than expecting per-record events.</td>
+</tr>
+<tr>
+<td><strong>At-least-once + ordering</strong></td>
+<td>Duplicates are possible; ordering is per <code>commitNumber</code>/<code>commitTimestamp</code>.</td>
+<td>Make the apply step <strong>idempotent</strong> and order by commit metadata.</td>
+</tr>
+<tr>
+<td><strong>Allocations</strong></td>
+<td>CDC shares event delivery allocations and has its own limits.</td>
+<td>See <a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_allocations.htm">CDC Allocations</a>.</td>
+</tr>
+<tr>
+<td><strong>Deletes carry few fields</strong></td>
+<td>A DELETE event mostly has the header and ID.</td>
+<td>Use <code>recordIds</code> + <code>changeType</code> to remove the row in the replica.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Change Data Capture?</strong>
+A: An event feature where Salesforce automatically fires a change event whenever a record is created, updated, deleted, or undeleted on an enabled object. The payload has a fixed schema with a ChangeEventHeader plus changed fields. It is built for replicating Salesforce data to external stores.</p>
+<p><strong>Q: How is CDC different from Platform Events?</strong>
+A: CDC is auto-generated by Salesforce on record changes with a fixed schema, you write no publish code. Platform Events are custom events you define and publish intentionally. CDC = data replication; Platform Events = you-defined business signals.</p>
+<p><strong>Q: What is in the ChangeEventHeader?</strong>
+A: It identifies the change: <code>changeType</code> (create/update/delete/undelete), <code>entityName</code>, <code>recordIds</code>, <code>changedFields</code>, and commit metadata like <code>commitNumber</code>, <code>commitTimestamp</code>, and <code>commitUser</code>. The <code>changedFields</code> list lets you apply only the delta.</p>
+<p><strong>Q: What are gap and overflow events?</strong>
+A: A gap event fires when Salesforce cannot produce a normal change event, signaling the subscriber to re-query and resync. An overflow event fires when one transaction changes more records than a threshold, replacing per-record events; the subscriber reloads the affected scope.</p>
+<p><strong>Q: How long are CDC events retained, and how do you catch up after downtime?</strong>
+A: 72 hours. A subscriber stores the last Replay ID it processed and resubscribes from it within that window. If it falls outside 72 hours, do a full reload of the data.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a security camera on your records. Flip it on for an object and Salesforce automatically broadcasts every change, so an outside system can mirror your data without ever asking 'what's new?'"</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Change Data Capture, change event, <code>ChangeEventHeader</code>, <code>changeType</code>, <code>changedFields</code>, gap event, overflow event, <code>/data/AccountChangeEvent</code>, <code>/data/ChangeEvents</code>, custom channel - defined here and in <a href="#f01">01-event-driven-basics.md</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_intro.htm">Change Data Capture Developer Guide - Intro (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_event_fields_header.htm">ChangeEventHeader Fields</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_subscribe_channels.htm">Subscription Channels</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_other_events_gap.htm">Gap Events</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_other_events_overflow.htm">Overflow Events</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_allocations.htm">Change Data Capture Allocations</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-pub-sub-api.md</a> - the modern gRPC API for publishing and subscribing at scale.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - Pub/Sub API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: One modern <strong>gRPC</strong> API to publish, subscribe, and fetch schemas for <strong>every</strong> Salesforce event type, built for external systems at scale.
+<strong>Why it matters</strong>: It is the <strong>modern replacement for the CometD Streaming API</strong> for new builds, with flow control and efficient binary streaming.
+<strong>Use when</strong>: An external system (a microservice, a data pipeline) needs to publish or subscribe to Salesforce events efficiently and at volume.</p>
+</blockquote>
+<p>This is Module 06. New to channels, Replay IDs, and retention? See <a href="#f01">01-event-driven-basics.md</a>. For the event types it carries, see <a href="#f02">02-platform-events.md</a> and <a href="#f03">03-change-data-capture.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Pub/Sub API is a <strong>universal remote</strong> for Salesforce events. Before it, you reached for different tools for different jobs: one API to publish, another (CometD Streaming API) to subscribe, a third to fetch schemas. The Pub/Sub API is <strong>one device</strong> that does all of it, for Platform Events, Change Data Capture, and real-time event monitoring events alike.</p>
+<p>It speaks <strong>gRPC over HTTP/2</strong> and ships event payloads as <strong>Apache Avro</strong> binary, so it is compact and fast. And it is <strong>pull-based</strong>: the subscriber tells Salesforce "send me N events" and only gets what it asked for. That is <strong>flow control</strong>, and it stops a downstream service from being flooded during a publish spike.</p>
+<p>If you are building anything <strong>external</strong> today, this is the API. The older CometD Streaming API still works but is legacy for new integrations.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An <strong>external</strong> system publishes or subscribes to Salesforce events.</td>
+<td>The subscriber lives <strong>inside</strong> Salesforce → use an Apex trigger or <a href="#f02">Flow</a>.</td>
+</tr>
+<tr>
+<td>You need <strong>high throughput</strong> with backpressure (flow control).</td>
+<td>You need a quick <strong>in-browser</strong> stream in a component → LWC <code>empApi</code>.</td>
+</tr>
+<tr>
+<td>You want <strong>one API</strong> across Platform Events, CDC, and event monitoring.</td>
+<td>You are committed to <strong>legacy CometD</strong> clients already → <a href="#f05">05-streaming-api-and-outbound-messages.md</a>.</td>
+</tr>
+<tr>
+<td>You want to <strong>replay</strong> missed events within the 72-hour window.</td>
+<td>You need a synchronous request/reply → <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a Node microservice subscribing to <code>Order_Shipped__e</code>, a Python data pipeline consuming <code>/data/AccountChangeEvent</code> into a warehouse, an inventory service publishing <code>Inventory_Low__e</code> back into Salesforce, a cross-cloud integration reacting to real-time event monitoring.</p>
+<hr />
+<h2>3. How it works (sequence diagram + walkthrough)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant C as External Client&lt;br/&gt;(gRPC)
+    participant PS as Pub/Sub API
+    participant BUS as Event Bus
+    C-&gt;&gt;PS: GetSchema / GetTopic (Avro schema + topic info)
+    C-&gt;&gt;PS: Subscribe (FetchRequest, numRequested = N, replayPreset)
+    PS-&gt;&gt;BUS: Read up to N events from topic
+    BUS--&gt;&gt;PS: Events (Avro binary)
+    PS--&gt;&gt;C: FetchResponse: events + Replay ID each
+    C-&gt;&gt;C: Decode Avro, process, store last Replay ID
+    C-&gt;&gt;PS: FetchRequest (request next N) flow control
+    Note over C,PS: Pull-based: client never gets more than it asked for
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The client fetches the <strong>Avro schema</strong> (<code>GetSchema</code>) and topic info (<code>GetTopic</code>) so it can decode payloads.</li>
+<li>It calls <strong><code>Subscribe</code></strong>, passing a <code>FetchRequest</code> with <strong><code>numRequested</code></strong> (how many events it can handle, max <strong>100</strong>) and a <strong><code>replayPreset</code></strong> (new-only, earliest retained, or a specific Replay ID).</li>
+<li>Salesforce returns up to that many events in one or more <code>FetchResponse</code> messages.</li>
+<li>Each event carries a <strong>Replay ID</strong>. The client <strong>persists the last one</strong> it processed.</li>
+<li>To keep receiving, the client sends another <code>FetchRequest</code>. It is never sent more than it asked for. That is <strong>flow control</strong>.</li>
+<li>After downtime, it resubscribes from its stored Replay ID to catch up within <strong>72 hours</strong>.</li>
+</ol>
+<hr />
+<h2>4. The actual API and config</h2>
+<h3>gRPC and Avro</h3>
+<p>The service is defined in a <strong><code>.proto</code></strong> file using Protocol Buffers as the IDL. The event payload inside each message is <strong>Apache Avro</strong> binary, so before you publish you Avro-encode, and when you receive you Avro-decode. Clients exist in 11 gRPC languages (Python, Java, Node, C++, Go, etc.).</p>
+<h3>The RPC methods</h3>
+<table>
+<thead>
+<tr>
+<th>RPC method</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>Publish</code></strong></td>
+<td>Publish a batch of events in one request.</td>
+</tr>
+<tr>
+<td><strong><code>PublishStream</code></strong></td>
+<td>Publish via a bidirectional stream for sustained high-volume publishing.</td>
+</tr>
+<tr>
+<td><strong><code>Subscribe</code></strong></td>
+<td>Subscribe with client-driven <strong>flow control</strong> (you request N events at a time).</td>
+</tr>
+<tr>
+<td><strong><code>ManagedSubscribe</code> (Beta)</strong></td>
+<td>Like Subscribe, but Salesforce <strong>tracks your Replay ID server-side</strong> so you do not manage it yourself. Backed by a <code>ManagedEventSubscription</code> (Tooling/Metadata API).</td>
+</tr>
+<tr>
+<td><strong><code>GetSchema</code></strong></td>
+<td>Fetch the Avro schema for a topic by schema ID.</td>
+</tr>
+<tr>
+<td><strong><code>GetTopic</code></strong></td>
+<td>Fetch topic info (the channel and its schema ID).</td>
+</tr>
+</tbody>
+</table>
+<h3>Replay and the replay window</h3>
+<p>Set the starting point in the subscribe call via <strong><code>replayPreset</code></strong>:</p>
+<table>
+<thead>
+<tr>
+<th><code>replayPreset</code></th>
+<th>Starts from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LATEST</code></td>
+<td>Only <strong>new</strong> events from now (like Replay ID <code>-1</code>).</td>
+</tr>
+<tr>
+<td><code>EARLIEST</code></td>
+<td>The <strong>earliest retained</strong> event in the window (like <code>-2</code>).</td>
+</tr>
+<tr>
+<td><code>CUSTOM</code></td>
+<td>A specific stored <strong>Replay ID</strong> you provide.</td>
+</tr>
+</tbody>
+</table>
+<p>Stored events are available for the <strong>72-hour</strong> retention window, so a client can resume up to three days back.</p>
+<h3>Flow control in practice</h3>
+<p><code>numRequested</code> caps how many events Salesforce delivers per request (max <strong>100</strong>). The <code>FetchResponse</code> reports <code>pendingNumRequested</code>, how many of your requested events are still pending. The client requests the next batch only when ready, so a publish spike cannot overwhelm it.</p>
+<h3>Managed Subscribe (Beta) vs manual replay</h3>
+<p>With plain <code>Subscribe</code>, <strong>you</strong> store the last Replay ID and pass it back on reconnect. With <strong><code>ManagedSubscribe</code></strong>, you commit the Replay ID to the server and Salesforce remembers it for you, simplifying recovery. It is in <strong>Beta</strong>.</p>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Avro is mandatory</strong></td>
+<td>Payloads are binary Avro, not JSON.</td>
+<td>Always decode with the schema from <code>GetSchema</code>; cache schemas by ID.</td>
+</tr>
+<tr>
+<td><strong><code>numRequested</code> max 100</strong></td>
+<td>You cannot pull unlimited events in one request.</td>
+<td>Loop: request, process, request again. Tune batch size to your throughput.</td>
+</tr>
+<tr>
+<td><strong>Replay within 72h only</strong></td>
+<td>A stored Replay ID outside the window is invalid.</td>
+<td>If you fall behind 72h, do a full reload, then resume with <code>LATEST</code>.</td>
+</tr>
+<tr>
+<td><strong>At-least-once delivery</strong></td>
+<td>The same event can arrive twice.</td>
+<td>Make processing <strong>idempotent</strong> (dedupe on a key).</td>
+</tr>
+<tr>
+<td><strong>Schema can evolve</strong></td>
+<td>A new field changes the schema ID.</td>
+<td>Look up schema by the ID on each event, do not hardcode.</td>
+</tr>
+<tr>
+<td><strong>ManagedSubscribe is Beta</strong></td>
+<td>Beta features can change.</td>
+<td>For production replay control, manual Replay ID handling is the stable path.</td>
+</tr>
+<tr>
+<td><strong>HTTP/2 + long-lived streams</strong></td>
+<td>gRPC streams are persistent connections.</td>
+<td>Handle reconnects and resume from the last Replay ID.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Pub/Sub API and why use it over the Streaming API?</strong>
+A: It is a single gRPC-over-HTTP/2 API to publish, subscribe, and fetch schemas across Platform Events, CDC, and event monitoring, using compact Avro binary. It is the modern replacement for the CometD Streaming API for new builds, adding flow control and efficient streaming.</p>
+<p><strong>Q: What does flow control mean here?</strong>
+A: The API is pull-based. The subscriber requests a number of events (<code>numRequested</code>, max 100) and only receives that many. It asks for more when ready, so a publish spike cannot overwhelm a slow consumer.</p>
+<p><strong>Q: How does replay work?</strong>
+A: Every event carries a Replay ID. On subscribe you set <code>replayPreset</code> to <code>LATEST</code> (new only), <code>EARLIEST</code> (earliest retained), or <code>CUSTOM</code> with a stored Replay ID. You can resume within the 72-hour retention window.</p>
+<p><strong>Q: What is ManagedSubscribe and how does it differ from Subscribe?</strong>
+A: With <code>Subscribe</code> you track and resend the Replay ID yourself. With <code>ManagedSubscribe</code> (Beta) you commit the Replay ID to the server and Salesforce remembers your position, so recovery is simpler. It is currently in Beta.</p>
+<p><strong>Q: Which event types does the Pub/Sub API support?</strong>
+A: Platform Events, Change Data Capture events, real-time event monitoring events, and standard platform events, all through the same interface.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a universal remote for Salesforce events. One modern API to publish, subscribe, and read schemas, and the subscriber controls the pace so it never gets flooded."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Pub/Sub API, gRPC, HTTP/2, Apache Avro, <code>Subscribe</code>, <code>ManagedSubscribe</code>, <code>GetSchema</code>, <code>GetTopic</code>, <code>numRequested</code>, flow control, <code>replayPreset</code>, Replay ID - defined here and in <a href="#f01">01-event-driven-basics.md</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/intro.html">Pub/Sub API Developer Guide - Get Started</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/grpc-api.html">Pub/Sub API as a gRPC API</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-avro-serialization.html">Event Data Serialization with Apache Avro</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/flow-control.html">Pull Subscription and Flow Control</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/managed-sub.html">Managed Event Subscriptions (Beta)</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html">Subscribe RPC Method Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Event Message Durability</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-streaming-api-and-outbound-messages.md</a> - the legacy push mechanisms (PushTopic, generic streaming, and declarative outbound messages).</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Streaming API and Outbound Messages</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Two <strong>legacy</strong> ways Salesforce pushed change notifications out before the modern event bus existed. <strong>Streaming API</strong> is a long-polling pub/sub channel. <strong>Outbound Messages</strong> is a declarative SOAP push to one endpoint.
+<strong>Status</strong>: Both are <strong>legacy</strong>. For new builds use <a href="#f02">Platform Events</a>, <a href="#f03">Change Data Capture</a>, and the <a href="#f04">Pub/Sub API</a>. You still meet these in older orgs and managed packages.
+<strong>Goal of this file</strong>: Recognize them, explain how they work, and know <strong>why and when to migrate</strong>.</p>
+</blockquote>
+<p>This is Module 06. New to the event bus and replay? Start with <a href="#f01">01-event-driven-basics.md</a>. For the modern replacement, see <a href="#f04">04-pub-sub-api.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine an old office with two ways to tell the outside world that something changed.</p>
+<p><strong>Streaming API</strong> is the <strong>building intercom</strong>. A clerk announces "Order 12 shipped" over a channel. Anyone holding a handset tuned to that channel hears it live. Nobody phones in to ask; they just keep the line open and listen. That open line is <strong>long polling</strong> over <strong>CometD</strong>.</p>
+<p><strong>Outbound Messages</strong> is the <strong>registered letter</strong>. When a record meets a rule, the org <strong>mails a single SOAP envelope</strong> to one fixed address. The post office keeps <strong>redelivering</strong> until the recipient signs a receipt. No signature, it tries again for up to a day.</p>
+<p>Both predate the modern event bus. They work, but they carry old plumbing (SOAP, CometD, no gRPC) and weaker tooling. Treat them as <strong>brownfield knowledge</strong>: understand them, then steer new work to Platform Events and the Pub/Sub API.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>You will encounter it when</th>
+<th>Prefer the modern path when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Maintaining an <strong>older org</strong> already wired to PushTopics or generic streaming.</td>
+<td>Building anything <strong>new</strong> that pushes events → <a href="#f02">Platform Events</a> + <a href="#f04">Pub/Sub API</a>.</td>
+</tr>
+<tr>
+<td>A <strong>declarative</strong> team wants a no-code push to one endpoint and SOAP is acceptable.</td>
+<td>You need <strong>high throughput</strong>, replay, or many subscribers → event bus.</td>
+</tr>
+<tr>
+<td>Integrating a vendor or <strong>managed package</strong> that still ships Outbound Messages.</td>
+<td>You want <strong>gRPC / Avro</strong> efficiency or external-app subscribe → <a href="#f04">Pub/Sub API</a>.</td>
+</tr>
+<tr>
+<td>Replicating record changes to an external store on legacy tooling.</td>
+<td>You want change events with schema → <a href="#f03">Change Data Capture</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a 10-year-old org notifying an on-prem ERP via Outbound Message SOAP. A legacy Visualforce dashboard listening to a PushTopic for live Case updates. A partner package that fires generic streaming messages to a companion app.</p>
+<p><strong>Why migrate</strong>: the Pub/Sub API gives you one efficient gRPC channel for publish and subscribe, <strong>Avro</strong> binary payloads, server-side replay tracking, and first-class external-app support. Streaming API and Outbound Messages get no new investment.</p>
+<hr />
+<h2>3. How it works (two legacy mechanisms)</h2>
+<div class="mermaid">
+flowchart TB
+    subgraph SA["Streaming API (pub/sub, long polling)"]
+      direction LR
+      PT["PushTopic&lt;br/&gt;SOQL-defined&lt;br/&gt;record changes"] --&gt; CH1["CometD channel&lt;br/&gt;/topic/Name"]
+      GEN["Generic Streaming&lt;br/&gt;arbitrary messages"] --&gt; CH2["CometD channel&lt;br/&gt;/u/Name"]
+      CH1 --&gt; SUB["Subscriber holds&lt;br/&gt;long-poll connection&lt;br/&gt;replay -1 / -2 / id"]
+      CH2 --&gt; SUB
+    end
+
+    subgraph OM["Outbound Messages (declarative push)"]
+      direction LR
+      RULE["Flow or&lt;br/&gt;Workflow Rule"] --&gt; SOAP["SOAP XML message&lt;br/&gt;up to 100 notifications"]
+      SOAP --&gt; EP["External endpoint"]
+      EP -. "must ACK" .-&gt; RETRY["Auto-retry up to 24h&lt;br/&gt;same message Id"]
+      RETRY -. resend .-&gt; EP
+    end
+
+    style PT fill:#607D8B,color:#fff
+    style GEN fill:#607D8B,color:#fff
+    style RULE fill:#F44336,color:#fff
+    style SOAP fill:#F44336,color:#fff
+    style SUB fill:#00A1E0,color:#fff
+
+</div>
+<p><strong>Streaming API walkthrough</strong></p>
+<ol>
+<li>You define a <strong>PushTopic</strong> (a named record holding a <strong>SOQL query</strong>) or a <strong>Generic Streaming</strong> channel (for arbitrary user-defined payloads).</li>
+<li>Salesforce delivers messages over <strong>CometD</strong>, an implementation of the <strong>Bayeux</strong> protocol, using <strong>long polling</strong> (the client holds an open HTTP connection and the server pushes when something arrives).</li>
+<li>The subscriber chooses a <strong>replay option</strong>: <code>-1</code> to receive <strong>only new</strong> events, <code>-2</code> to receive <strong>all retained</strong> events from the start of the window, or a specific <strong>Replay ID</strong> to resume from where it left off.</li>
+<li><strong>PushTopic events are retained for 24 hours</strong> (note: shorter than the 72-hour window for high-volume Platform Events and CDC).</li>
+</ol>
+<p><strong>Outbound Messages walkthrough</strong></p>
+<ol>
+<li>A <strong>declarative</strong> action (a <strong>Flow</strong> Action element, or a legacy <strong>Workflow Rule</strong>) triggers when a record meets criteria.</li>
+<li>Salesforce assembles a <strong>SOAP XML</strong> message containing a <strong>configured set of fields</strong>, sends it to one <strong>configured endpoint URL</strong>, and can bundle <strong>up to 100 notifications</strong> in a single message.</li>
+<li>The endpoint must return a <strong>positive acknowledgment</strong> (an <code>Ack</code> of <code>true</code>). If it does not, Salesforce <strong>retries automatically</strong> with backoff for up to <strong>24 hours</strong> (extendable to 7 days via Support); the <strong>message Id stays the same</strong> across retries so the receiver can deduplicate.</li>
+</ol>
+<hr />
+<h2>4. The actual code and config</h2>
+<p><strong>PushTopic</strong> (created in Apex, then subscribed over CometD):</p>
+<pre><code class="language-apex">PushTopic pt = new PushTopic();
+pt.Name = 'OrderUpdates';
+pt.Query = 'SELECT Id, Name, Status__c FROM Order__c WHERE Status__c = \'Shipped\'';
+pt.ApiVersion = 66.0;
+pt.NotifyForOperationCreate = true;
+pt.NotifyForOperationUpdate = true;
+pt.NotifyForFields = 'Referenced'; // only when referenced fields change
+insert pt;
+// Subscribers then listen on channel:  /topic/OrderUpdates
+</code></pre>
+<p><strong>Generic Streaming</strong> uses a <code>StreamingChannel</code> record (channel <code>/u/MyChannel</code>) and a REST call to push an arbitrary message. The subscribe side is the same CometD long-poll model with the same replay options.</p>
+<p><strong>Subscribing with a replay option</strong> (CometD extension, conceptual):</p>
+<pre><code class="language-javascript">// -1 = new events only, -2 = all retained events, or a specific Replay Id
+cometd.subscribe('/topic/OrderUpdates', callback, { replay: -1 });
+</code></pre>
+<p><strong>Outbound Message</strong> is configured, not coded:</p>
+<ul>
+<li><strong>Setup</strong>: define an <strong>Outbound Message</strong> action (endpoint URL, fields to send, user to run as), then attach it to a <strong>Flow</strong> (Action element) or legacy <strong>Workflow Rule</strong>.</li>
+<li>Salesforce provides a <strong>WSDL</strong> for the message. You generate a listener on the external side that returns the <code>Ack</code>.</li>
+</ul>
+<blockquote>
+<p><strong>Migration note</strong>: <strong>Workflow Rules and Process Builder are no longer supported</strong> as of December 31, 2025. Existing rules keep running, but build new automation in <strong>Flow</strong>, which supports the <strong>Outbound Message</strong> as an Action element. Better still, publish a <strong>Platform Event</strong> and let any subscriber react.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PushTopic retention is 24h</strong></td>
+<td>Shorter than the 72h window for Platform Events and CDC. Long outages lose events.</td>
+<td>Track Replay IDs. For durability prefer the event bus.</td>
+</tr>
+<tr>
+<td><strong>CometD is fragile</strong></td>
+<td>Long polling drops on network blips. No gRPC efficiency.</td>
+<td>Reconnect with the last Replay ID. For new work use <a href="#f04">Pub/Sub API</a>.</td>
+</tr>
+<tr>
+<td><strong>Outbound Message needs an ACK</strong></td>
+<td>No <code>Ack=true</code> means endless retries for 24h.</td>
+<td>Make the listener return the ack fast, even before heavy processing.</td>
+</tr>
+<tr>
+<td><strong>At-least-once, duplicates happen</strong></td>
+<td>Retries reuse the same <strong>message Id</strong>.</td>
+<td>Deduplicate on that Id. Make the handler <strong>idempotent</strong>.</td>
+</tr>
+<tr>
+<td><strong>100 notifications per message</strong></td>
+<td>Bulk changes batch into one SOAP envelope.</td>
+<td>Parse the full notification list, not just the first.</td>
+</tr>
+<tr>
+<td><strong>One fixed endpoint</strong></td>
+<td>Outbound Messages target a single URL.</td>
+<td>No fan-out. If you need many listeners, use the event bus.</td>
+</tr>
+<tr>
+<td><strong>SOAP only</strong></td>
+<td>XML envelope, WSDL listener, heavier than JSON/Avro.</td>
+<td>Accept it for legacy, avoid for greenfield.</td>
+</tr>
+<tr>
+<td><strong>No new investment</strong></td>
+<td>Both are legacy; tooling and features are frozen.</td>
+<td>Plan a migration to Platform Events / Pub/Sub API.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Streaming API and how does it deliver events?</strong>
+A: A legacy pub/sub channel that pushes messages over <strong>CometD</strong>, an implementation of the <strong>Bayeux</strong> protocol, using <strong>long polling</strong>. It supports <strong>PushTopic</strong> events (SOQL-based record-change notifications) and <strong>Generic Streaming</strong> (arbitrary user-defined messages). Subscribers pick a replay option: <code>-1</code> new only, <code>-2</code> all retained, or a specific Replay ID.</p>
+<p><strong>Q: What are Outbound Messages?</strong>
+A: A <strong>declarative</strong> action (from a Flow Action element or legacy Workflow Rule) that sends a <strong>SOAP XML</strong> message with a configured field set to one external endpoint. It batches up to <strong>100 notifications</strong>, <strong>retries automatically for up to 24 hours</strong>, and requires the endpoint to return a positive <strong>acknowledgment</strong>.</p>
+<p><strong>Q: How do Outbound Messages handle reliability and duplicates?</strong>
+A: Delivery is at-least-once. If no <code>Ack=true</code> arrives, Salesforce retries with backoff for up to 24 hours. The <strong>message Id stays the same</strong> across retries, so the receiver deduplicates on it. The listener should ack quickly and process idempotently.</p>
+<p><strong>Q: Why are these legacy, and what replaces them?</strong>
+A: They predate the modern event bus and carry old plumbing (SOAP, CometD). New builds should use <strong>Platform Events</strong> and <strong>Change Data Capture</strong> published and consumed through the <strong>Pub/Sub API</strong> (gRPC, HTTP/2, Avro), which is more efficient, supports replay, and serves external apps natively.</p>
+<p><strong>Q: A legacy org loses PushTopic events during a long outage. Why, and what do you do?</strong>
+A: <strong>PushTopic retention is only 24 hours</strong>, so events older than that age out. Track and resubscribe from the last <strong>Replay ID</strong> to recover what is still in the window. For durability beyond that, migrate the use case to the event bus, which retains high-volume events for <strong>72 hours</strong> and offers managed replay.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Streaming API is an office intercom you keep listening to. Outbound Messages is a registered letter that keeps getting redelivered until someone signs for it. Both are the old way; the new way is a shared digital bus."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>PushTopic, Generic Streaming, CometD, Bayeux, long polling, Replay ID, Outbound Message, SOAP, acknowledgment, retry, idempotency - defined here and in <a href="#f01">01-event-driven-basics.md</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_streaming.meta/api_streaming/BayeauxProtocolAndCometD.htm">Bayeux Protocol, CometD, and Long Polling - Streaming API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_streaming.meta/api_streaming/replay_pushtopic_events.htm">Replay PushTopic Streaming Events - Streaming API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_streaming.meta/api_streaming/using_streaming_api_durability.htm">Message Durability - Streaming API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_om_outboundmessaging_understanding.htm">Understanding Outbound Messaging - SOAP API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_om_outboundmessaging_notifications.htm">Understanding Notifications - SOAP API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.workflow_om_considerations.htm&amp;type=5">Considerations for Outbound Messages - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=000389396&amp;type=1">Transition to Flow: Workflow and Process Builder Retirement - Salesforce Help</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-publishing-subscribing-and-replay.md</a> - the how-to for publishing, subscribing, and replay across every event type.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - Publishing, Subscribing, and Replay</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The practical how-to that ties the module together. <strong>Who can publish</strong>, <strong>who can subscribe</strong>, and <strong>how replay</strong> keeps subscribers from missing or duplicating events.
+<strong>Scope</strong>: Applies across <a href="#f02">Platform Events</a>, <a href="#f03">Change Data Capture</a>, and the <a href="#f04">Pub/Sub API</a>. The legacy mechanisms live in <a href="#f05">05</a>.
+<strong>Goal of this file</strong>: Be able to wire up a publisher, a subscriber, and a resilient replay strategy, and defend the design in an interview.</p>
+</blockquote>
+<p>This is Module 06. If "event bus", "Replay ID", and "at-least-once" are not yet automatic, read <a href="#f01">01-event-driven-basics.md</a> first.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think of the event bus as a <strong>conveyor belt</strong> running through a warehouse. <strong>Publishers</strong> drop labeled boxes onto the belt. <strong>Subscribers</strong> stand alongside and grab the boxes meant for them. Nobody hands a box directly to anyone; the belt is the only contact point. That is the whole decoupling story.</p>
+<p>Every box gets a <strong>position number</strong> as it lands. That number is the <strong>Replay ID</strong>. If a worker steps away and comes back, they do not start over and they do not miss boxes. They say "I last handled position 4012, continue from there." As long as the box is still on the belt (within the <strong>72-hour</strong> retention window), they catch up cleanly.</p>
+<p>So three questions drive every design: <strong>how do I put a box on the belt</strong> (publish), <strong>how do I pick boxes off</strong> (subscribe), and <strong>how do I never lose my place</strong> (replay). The rest is detail.</p>
+<hr />
+<h2>2. Publishers and subscribers at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Option</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Publish</strong></td>
+<td>Apex <code>EventBus.publish()</code></td>
+<td>Custom logic, bulk publishing, callbacks</td>
+</tr>
+<tr>
+<td><strong>Publish</strong></td>
+<td>Flow (Create Records on the event object)</td>
+<td>Low-code, admin-built signals</td>
+</tr>
+<tr>
+<td><strong>Publish</strong></td>
+<td>REST / SOAP API (insert the event sObject)</td>
+<td>External systems publishing in</td>
+</tr>
+<tr>
+<td><strong>Publish</strong></td>
+<td><strong>Pub/Sub API</strong> (gRPC <code>Publish</code>)</td>
+<td>Efficient external publishing, Avro payloads</td>
+</tr>
+<tr>
+<td><strong>Subscribe</strong></td>
+<td><strong>Apex trigger</strong> (<code>after insert</code>)</td>
+<td>Server-side reaction, DML, callouts (async)</td>
+</tr>
+<tr>
+<td><strong>Subscribe</strong></td>
+<td>Flow (event-triggered)</td>
+<td>Low-code reaction inside Salesforce</td>
+</tr>
+<tr>
+<td><strong>Subscribe</strong></td>
+<td><strong>LWC via <code>lightning/empApi</code></strong></td>
+<td>Live UI updates in desktop browsers</td>
+</tr>
+<tr>
+<td><strong>Subscribe</strong></td>
+<td><strong>External app via Pub/Sub API</strong></td>
+<td>Off-platform consumers, microservices</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: inside Salesforce, publish with Apex or Flow and subscribe with a trigger or Flow. For anything <strong>off-platform</strong>, reach for the <strong>Pub/Sub API</strong> on both sides.</p>
+<hr />
+<h2>3. How it works (publishers to bus to subscribers, with replay)</h2>
+<div class="mermaid">
+flowchart LR
+    P1[Apex&lt;br/&gt;EventBus.publish] --&gt; BUS
+    P2[Flow] --&gt; BUS
+    P3[REST / SOAP API] --&gt; BUS
+    P4[External app&lt;br/&gt;Pub/Sub API publish] --&gt; BUS
+
+    BUS{{Event Bus&lt;br/&gt;time-ordered&lt;br/&gt;Replay IDs&lt;br/&gt;72-hour retention}}
+
+    BUS --&gt; S1[Apex trigger&lt;br/&gt;after insert]
+    BUS --&gt; S2[Flow&lt;br/&gt;event-triggered]
+    BUS --&gt; S3[LWC via empApi&lt;br/&gt;desktop browsers]
+    BUS --&gt; S4[External app&lt;br/&gt;Pub/Sub API subscribe]
+
+    RP["Replay: -1 new / -2 all&lt;br/&gt;or specific Replay Id&lt;br/&gt;Managed Subscriptions Beta"] -. resume .-&gt; BUS
+
+    style BUS fill:#ff9900,color:#fff
+    style P4 fill:#9C27B0,color:#fff
+    style S4 fill:#9C27B0,color:#fff
+    style RP fill:#4CAF50,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A publisher writes an event to the bus. With <strong>"Publish Immediately"</strong> behavior the event is sent <strong>outside the database transaction</strong>, so subscribers must not assume the publishing transaction's DML is committed.</li>
+<li>The bus assigns a <strong>Replay ID</strong> and stores the event in <strong>time order</strong> for <strong>72 hours</strong>.</li>
+<li>Each subscriber receives the event. <strong>Apex triggers</strong> fire <code>after insert</code> on the event object, in <strong>batches of up to 2,000</strong> event messages.</li>
+<li>A subscriber that disconnects resumes by passing a <strong>replay option</strong>: <code>-1</code> (new only), <code>-2</code> (all retained), or a <strong>specific Replay ID</strong> it persisted.</li>
+<li>With <strong>Managed Event Subscriptions (Beta)</strong> the server tracks the committed Replay ID for you, so the client does not have to store it.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<p><strong>Publish with Apex</strong> (<code>EventBus.publish</code> returns a <code>Database.SaveResult</code> per event):</p>
+<pre><code class="language-apex">List&lt;Order_Shipped__e&gt; evts = new List&lt;Order_Shipped__e&gt;{
+    new Order_Shipped__e(Order_Id__c = '801xx', Carrier__c = 'DHL')
+};
+List&lt;Database.SaveResult&gt; results = EventBus.publish(evts);
+for (Database.SaveResult sr : results) {
+    if (!sr.isSuccess()) {
+        for (Database.Error err : sr.getErrors()) {
+            System.debug('Publish enqueue failed: ' + err.getMessage());
+        }
+    }
+}
+// Note: SaveResult is the ENQUEUE result, not the final publish result.
+// For the final outcome, pass an EventBus.EventPublishSuccessCallback /
+// EventPublishFailureCallback as the second argument.
+</code></pre>
+<p><strong>Subscribe with an Apex trigger</strong> (idempotent, with retry):</p>
+<pre><code class="language-apex">trigger OrderShippedTrigger on Order_Shipped__e (after insert) {
+    Set&lt;String&gt; uuids = new Set&lt;String&gt;();
+    for (Order_Shipped__e e : Trigger.new) uuids.add(e.EventUuid);
+
+    // Idempotency: skip events already processed (EventUuid, API 52.0+)
+    Set&lt;String&gt; done = new Set&lt;String&gt;(...); // query your processed-log
+
+    List&lt;Task&gt; toCreate = new List&lt;Task&gt;();
+    for (Order_Shipped__e e : Trigger.new) {
+        if (done.contains(e.EventUuid)) continue;
+        try {
+            toCreate.add(new Task(Subject = 'Notify ' + e.Order_Id__c));
+        } catch (CalloutException ex) {
+            // Transient failure: retry the whole batch later
+            throw new EventBus.RetryableException('Transient error, retrying');
+        }
+    }
+    insert toCreate; // also persist EventUuids to your processed-log
+}
+</code></pre>
+<p><strong>Subscribe in an LWC</strong> with <code>lightning/empApi</code> (desktop browsers, API 44.0+):</p>
+<pre><code class="language-javascript">import { subscribe, onError } from 'lightning/empApi';
+// channel '/event/Order_Shipped__e', replayId -1 = new events only
+subscribe('/event/Order_Shipped__e', -1, (msg) =&gt; {
+    // react in the UI
+}).then((sub) =&gt; { this.subscription = sub; });
+onError((err) =&gt; console.error('empApi error', err));
+</code></pre>
+<p><strong>External apps</strong> subscribe through the <strong>Pub/Sub API</strong> (gRPC over HTTP/2, <strong>Avro</strong> payloads) using a <code>ReplayPreset</code> of <code>LATEST</code>, <code>EARLIEST</code>, or <code>CUSTOM</code> with a saved Replay ID. See <a href="#f04">04-pub-sub-api.md</a>.</p>
+<hr />
+<h2>5. Replay, resilience, and error handling</h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>What to know</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Replay options</strong></td>
+<td><code>-1</code> new only, <code>-2</code> all retained, or a specific <strong>Replay ID</strong> to resume.</td>
+<td>Persist the last processed Replay ID after each batch.</td>
+</tr>
+<tr>
+<td><strong>Retention window</strong></td>
+<td>High-volume events and CDC live <strong>72 hours</strong>. PushTopics only 24h.</td>
+<td>Recover within the window; design for catch-up after outages.</td>
+</tr>
+<tr>
+<td><strong>Managed Subscriptions (Beta)</strong></td>
+<td>Server tracks the committed Replay ID via <code>ManagedEventSubscription</code>.</td>
+<td>Use it to drop client-side replay-store bookkeeping.</td>
+</tr>
+<tr>
+<td><strong>At-least-once delivery</strong></td>
+<td>Subscribers can see an event more than once.</td>
+<td>Make handlers <strong>idempotent</strong>, keyed on <strong><code>EventUuid</code></strong>.</td>
+</tr>
+<tr>
+<td><strong>Apex retry</strong></td>
+<td>Throw <strong><code>EventBus.RetryableException</code></strong> to reprocess the batch on transient errors.</td>
+<td>Keep retries to <strong>fewer than 9</strong>; beyond the limit the trigger hits an error state.</td>
+</tr>
+<tr>
+<td><strong>Decoupled commit</strong></td>
+<td>"Publish Immediately" runs outside the publisher's transaction.</td>
+<td>Do not assume publisher DML is committed when the event arrives.</td>
+</tr>
+<tr>
+<td><strong>Publish result</strong></td>
+<td><code>EventBus.publish</code> returns an <strong>enqueue</strong> <code>SaveResult</code>, not the final result.</td>
+<td>Use <strong>publish callbacks</strong> for the real success/failure.</td>
+</tr>
+<tr>
+<td><strong>empApi limits</strong></td>
+<td>Works in <strong>desktop browsers</strong> only, not the Salesforce mobile app.</td>
+<td>For mobile or off-platform, use the Pub/Sub API.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What are the ways to publish an event in Salesforce?</strong>
+A: Apex <code>EventBus.publish()</code>, Flow (create a record on the event object), the REST or SOAP API (insert the event sObject), and the <strong>Pub/Sub API</strong> for efficient external publishing. Inside the platform Apex and Flow are typical; off-platform publishers use Pub/Sub API.</p>
+<p><strong>Q: What are the ways to subscribe?</strong>
+A: <strong>Apex triggers</strong> (<code>after insert</code> on the event or CDC object), <strong>Flow</strong> (event-triggered), <strong>LWC via <code>lightning/empApi</code></strong> for live desktop UI, and <strong>external apps via the Pub/Sub API</strong>. Server-side logic uses triggers; UIs use empApi; off-platform consumers use Pub/Sub API.</p>
+<p><strong>Q: How does replay work and why does it matter?</strong>
+A: Every event gets a <strong>Replay ID</strong> marking its position. A subscriber resumes with <code>-1</code> (new only), <code>-2</code> (all retained), or a specific Replay ID it stored. Because retention is <strong>72 hours</strong>, a subscriber that drops off can catch up by replaying from its last position within that window.</p>
+<p><strong>Q: How do you make an Apex subscriber resilient?</strong>
+A: Make it <strong>idempotent</strong>, keyed on the <strong><code>EventUuid</code></strong> field, so duplicates are harmless. Wrap transient failures and throw <strong><code>EventBus.RetryableException</code></strong> to reprocess the batch, keeping retries to <strong>fewer than nine</strong> so the trigger does not hit its error state. Persist the last Replay ID for recovery.</p>
+<p><strong>Q: What is the trap with <code>EventBus.publish</code> and "Publish Immediately"?</strong>
+A: The returned <code>Database.SaveResult</code> is only the <strong>enqueue</strong> result, not the final publish outcome; use <strong>publish callbacks</strong> for that. And with "Publish Immediately" the event fires <strong>outside the transaction</strong>, so a subscriber must not assume the publisher's DML committed.</p>
+<p><strong>Q: What are Managed Event Subscriptions?</strong>
+A: A <strong>Beta</strong> capability where Salesforce tracks the committed <strong>Replay ID server-side</strong> (configured via <code>ManagedEventSubscription</code>), so the client resumes seamlessly after a disconnect without maintaining its own replay store.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Publishers drop labeled boxes on a conveyor belt, subscribers pick off the ones they want, and every box has a position number so anyone who steps away can come back and continue from exactly where they left off."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Publish, subscribe, <code>EventBus.publish</code>, publish callback, Apex trigger subscriber, <code>lightning/empApi</code>, Pub/Sub API, Replay ID, retention, Managed Event Subscriptions, <code>EventBus.RetryableException</code>, <code>EventUuid</code>, idempotency - defined here and in <a href="#f01">01-event-driven-basics.md</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_publish_apex.htm">Publish Event Messages with Apex - Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_publish_callbacks.htm">Get the Result of Async Publishing with Apex Publish Callbacks - Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_subscribe_apex.htm">Subscribe to Platform Event Notifications with Apex Triggers - Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_subscribe_apex_refire.htm">Retry Event Triggers with EventBus.RetryableException - Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_subscribe_lc.htm">Subscribe to Platform Event Notifications in a Lightning Component (empApi) - Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/managed-sub.html">Managed Event Subscriptions (Beta) - Pub/Sub API</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html">Subscribe RPC Method (ReplayPreset) - Pub/Sub API</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README</a> for the module map, or revisit <a href="#f04">04-pub-sub-api.md</a> for the modern transport in depth.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 06 Event-Driven · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

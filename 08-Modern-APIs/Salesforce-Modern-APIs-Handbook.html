@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Modern APIs Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Modern APIs</h1>
+  <div class="sub">The newer APIs that solve old pain points: GraphQL, sObject Collections, Data Cloud, and the full API landscape.</div>
+  <div>
+    <span class="pill">GraphQL API</span><span class="pill">sObject Collections</span>
+    <span class="pill">Data Cloud APIs</span><span class="pill">API landscape</span>
+    <span class="pill">Composite (Mod 04)</span><span class="pill">Pub/Sub (Mod 06)</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - GraphQL API</a></li>
+<li class=""><a href="#f02">02 - sObject Collections</a></li>
+<li class=""><a href="#f03">03 - Data Cloud APIs</a></li>
+<li class=""><a href="#f04">04 - The Modern API Landscape</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 08 - Modern APIs</h1>
+<blockquote>
+<p><strong>Goal</strong>: Use the newer APIs that solve old pain points, and know how the whole API surface fits together.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>Theme</strong>: stop making 5 calls when 1 will do.</p>
+</blockquote>
+<p>Several "modern API" topics already have homes elsewhere in the vault: <strong>Composite</strong> and <strong>UI API</strong> in <a href="../04-Inbound-APIs/README.md">Module 04</a>, <strong>Pub/Sub API</strong> in <a href="../06-Event-Driven/README.md">Module 06</a>, <strong>Salesforce Connect</strong> and <strong>External Services</strong> in <a href="../05-Outbound-Callouts/README.md">Module 02/05</a>. This module covers what's left and ties it all together: <strong>GraphQL</strong>, <strong>sObject Collections</strong>, <strong>Data Cloud APIs</strong>, and the definitive <strong>API landscape</strong>.</p>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">graphql-api</a></td>
+<td>Field-selective, nested reads in one round-trip</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">sobject-collections</a></td>
+<td>CRUD up to 200 records in one call</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">data-cloud-apis</a></td>
+<td>Ingestion, Query, Profile APIs for Data Cloud</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">modern-api-landscape</a></td>
+<td><strong>The capstone:</strong> which API for which job, across the whole platform</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which modern API? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([Reading or writing data efficiently?]) --&gt; Q1{What do you need?}
+    Q1 --&gt;|Specific fields across related objects| GQL[GraphQL API]
+    Q1 --&gt;|CRUD up to 200 records in one call| COLL[sObject Collections]
+    Q1 --&gt;|Different operations chained in one call| COMP[Composite API - Module 04]
+    Q1 --&gt;|Ingest or query unified big data| DC[Data Cloud APIs]
+    Q1 --&gt;|Real-time events| PUB[Pub/Sub API - Module 06]
+    Q1 --&gt;|Comparing every option| LAND[See the API landscape - file 04]
+
+    style GQL fill:#00A1E0,color:#fff
+    style COLL fill:#4CAF50,color:#fff
+    style COMP fill:#9C27B0,color:#fff
+    style DC fill:#ff9900,color:#fff
+    style PUB fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>The pain points these solve</h2>
+<table>
+<thead>
+<tr>
+<th>Old pain</th>
+<th>Modern fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiple REST calls to get related data</td>
+<td><strong>GraphQL</strong> (one query, nested)</td>
+</tr>
+<tr>
+<td>Looping single-record REST calls for 100 records</td>
+<td><strong>sObject Collections</strong> (200 in one call)</td>
+</tr>
+<tr>
+<td>Chatty multi-step writes</td>
+<td><strong>Composite API</strong> (<a href="../04-Inbound-APIs/05-composite-api.md">Module 04</a>)</td>
+</tr>
+<tr>
+<td>Polling for changes</td>
+<td><strong>Pub/Sub API</strong> (<a href="../06-Event-Driven/04-pub-sub-api.md">Module 06</a>)</td>
+</tr>
+<tr>
+<td>Copying huge external datasets in</td>
+<td><strong>Data Cloud</strong> / <strong>Salesforce Connect</strong></td>
+</tr>
+<tr>
+<td>Writing Apex just to call a REST API from Flow</td>
+<td><strong>External Services</strong> (<a href="../05-Outbound-Callouts/03-external-services.md">Module 05</a>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: GraphQL vs REST?</strong>
+→ GraphQL returns exactly the fields you ask for across related objects in one round-trip (no over/under-fetching). REST is simpler for single-object CRUD and caches better. See <a href="#f01">01</a>.</p>
+<p><strong>Q: sObject Collections vs Composite vs Bulk?</strong>
+→ Collections = same CRUD on <strong>up to 200</strong> records, one <strong>sync</strong> call. Composite = <strong>different</strong> operations chained in one call. Bulk = <strong>async</strong>, thousands+. </p>
+<p><strong>Q: What's the modern way to subscribe to events?</strong>
+→ The <strong>Pub/Sub API</strong> (gRPC + Avro), not the legacy Streaming API. See <a href="../06-Event-Driven/04-pub-sub-api.md">Module 06</a>.</p>
+<p><strong>Q: How do you decide which API to use?</strong>
+→ Match sync/async, volume, and shape to the job. The full matrix is in <a href="#f04">04-modern-api-landscape.md</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/graphql/overview">GraphQL API — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections.htm">sObject Collections — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/data/data-cloud-int/guide/c360-a-api.html">Data Cloud — Salesforce Developers</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - GraphQL API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Ask for <strong>exactly the fields you want</strong>, across <strong>related objects</strong>, in <strong>one round-trip</strong>, and get back exactly that shape, nothing more.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON over HTTP POST. <strong>Auth</strong>: OAuth 2.0 Bearer.
+<strong>Use when</strong>: A client needs specific fields from nested objects and you want to avoid over-fetching and multiple REST calls.</p>
+</blockquote>
+<p>This is Module 08, the modern APIs. New to REST? See <a href="../04-Inbound-APIs/01-standard-rest-api.md">Module 04</a>. For the full "which API" picture, see <a href="#f04">04-modern-api-landscape.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>REST is a <strong>fixed-menu restaurant</strong>: each endpoint serves a set plate. Want the Account, its Contacts, and its Opportunities? That's three trips to three counters, and each plate comes with side dishes (fields) you didn't ask for. <strong>GraphQL is à la carte</strong>: you hand over one order that says exactly which dishes and which related items you want, and the kitchen returns one tray with precisely that.</p>
+<p>Two problems disappear. <strong>Over-fetching</strong> (getting fields you don't need) is gone because you list the fields. <strong>Under-fetching</strong> (having to make follow-up calls for related data) is gone because you traverse relationships in the same query. One request, one response, shaped to your screen.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You need <strong>specific fields</strong> across <strong>nested/related</strong> objects.</td>
+<td>Simple single-object CRUD → <a href="../04-Inbound-APIs/01-standard-rest-api.md">REST API</a>.</td>
+</tr>
+<tr>
+<td><strong>Bandwidth matters</strong> (mobile, low-power clients).</td>
+<td>Bulk loads of 2,000+ records → <a href="../07-Bulk-Async/01-bulk-api-2.md">Bulk API 2.0</a>.</td>
+</tr>
+<tr>
+<td>Dashboards that <strong>aggregate</strong> and combine data.</td>
+<td>Multiple unrelated writes in one call → <a href="../04-Inbound-APIs/05-composite-api.md">Composite</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>field-level versioning</strong> and a typed schema.</td>
+<td>Heavy HTTP caching needs (REST caches better).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a mobile app rendering an Account page with its Contacts and recent Opportunities in one call; a dashboard pulling counts and sums by Stage; a custom UI that wants only <code>Name</code> and <code>Phone</code>.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant SF as GraphQL API&lt;br/&gt;/services/data/v66.0/graphql
+    C-&gt;&gt;SF: POST one query (fields + relationships) + Bearer token
+    SF-&gt;&gt;SF: Validate against schema, enforce FLS and sharing
+    SF--&gt;&gt;C: One JSON response shaped exactly like the query
+
+</div>
+<p>The client sends a <strong>single POST</strong> containing a query document. Salesforce validates it against the <strong>typed schema</strong>, runs it (respecting the user's field-level security and sharing), and returns one JSON response whose shape mirrors the query.</p>
+<hr />
+<h2>4. The actual request</h2>
+<p>Salesforce's GraphQL schema is rooted at <strong><code>uiapi</code></strong> (it builds on the UI API), uses a <strong>connection model</strong> (<code>edges</code> then <code>node</code>), and each field is an object exposing <strong><code>.value</code></strong> (and often <code>.displayValue</code>). This shape surprises people who expect "vanilla" GraphQL.</p>
+<p><strong>Endpoint</strong>: <code>POST https://MyDomainName.my.salesforce.com/services/data/v66.0/graphql</code></p>
+<p><strong>Query</strong> (Accounts in Technology, with their Contacts):</p>
+<pre><code class="language-graphql">query AccountsWithContacts {
+  uiapi {
+    query {
+      Account(first: 10, where: { Industry: { eq: &quot;Technology&quot; } }) {
+        edges {
+          node {
+            Id
+            Name { value }
+            Contacts {
+              edges { node { LastName { value } Email { value } } }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p><strong>Response</strong> (same shape as the query):</p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;uiapi&quot;: {
+      &quot;query&quot;: {
+        &quot;Account&quot;: {
+          &quot;edges&quot;: [
+            { &quot;node&quot;: { &quot;Id&quot;: &quot;001...&quot;, &quot;Name&quot;: { &quot;value&quot;: &quot;Acme Corp&quot; },
+              &quot;Contacts&quot;: { &quot;edges&quot;: [ { &quot;node&quot;: { &quot;LastName&quot;: { &quot;value&quot;: &quot;Khan&quot; }, &quot;Email&quot;: { &quot;value&quot;: &quot;k@acme.com&quot; } } } ] } } }
+          ]
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<blockquote>
+<p><strong>Aggregates</strong>: GraphQL also supports <strong>aggregate queries</strong> (group by, count, sum, avg on numeric/currency fields) via an <code>aggregate</code> root, returning summarized results in one call, which is great for dashboards.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Salesforce shape</strong></td>
+<td>It's <code>uiapi</code> + <code>edges</code>/<code>node</code> + <code>field.value</code>, not plain GraphQL.</td>
+<td>Read fields as <code>node.Field.value</code>.</td>
+</tr>
+<tr>
+<td><strong>Security still applies</strong></td>
+<td>GraphQL respects FLS and sharing.</td>
+<td>A field the user can't see won't return.</td>
+</tr>
+<tr>
+<td><strong>Query complexity</strong></td>
+<td>Deep nesting and large <code>first:</code> are costly.</td>
+<td>Page with <code>first</code>/<code>after</code>; keep depth sane.</td>
+</tr>
+<tr>
+<td><strong>Not for bulk</strong></td>
+<td>It's for shaping reads, not mass loads.</td>
+<td>Use Bulk API 2.0 for volume.</td>
+</tr>
+<tr>
+<td><strong>Caching</strong></td>
+<td>GraphQL POSTs cache worse than REST GETs.</td>
+<td>Use REST where HTTP caching matters.</td>
+</tr>
+<tr>
+<td><strong>Versioning</strong></td>
+<td>Field-level versioning is a strength.</td>
+<td>Pin the API version in the URL.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What problem does GraphQL solve over REST?</strong>
+A: Over-fetching and under-fetching. You request exactly the fields you need across related objects in one round-trip, instead of multiple REST calls each returning fixed, often excessive, payloads.</p>
+<p><strong>Q: How is Salesforce's GraphQL different from standard GraphQL?</strong>
+A: It's rooted at <code>uiapi</code>, uses a connection model (<code>edges</code> → <code>node</code>), and each field is an object with <code>.value</code> / <code>.displayValue</code>. It's built on the UI API, so it returns UI-aware, FLS-respecting data.</p>
+<p><strong>Q: When would you still pick REST over GraphQL?</strong>
+A: Simple single-object CRUD, when HTTP caching matters, or for public/simple integrations. GraphQL shines for nested, field-selective reads and dashboards.</p>
+<p><strong>Q: Does GraphQL bypass field-level security or sharing?</strong>
+A: No. It enforces the running user's FLS and sharing, so restricted fields and records won't appear.</p>
+<p><strong>Q: Can GraphQL do aggregations?</strong>
+A: Yes, group-by and functions like count/sum/avg on numeric and currency fields, returned in a single response, ideal for dashboards.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "REST is a fixed-menu meal; GraphQL is à la carte. You ask for exactly the fields you want, including related records, and get one tidy response, no extra trips."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>GraphQL, over-fetching, under-fetching, field selection, <code>uiapi</code>, edges/node, aggregate query - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/graphql/overview">GraphQL API — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/graphql/guide/intro-graphql-api.html">What is GraphQL API? — Get Started</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/graphql/guide/aggregate.html">Aggregate Queries — GraphQL API</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-sobject-collections.md</a> - work on up to 200 records in a single REST call.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - sObject Collections</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Create, update, upsert, delete, or retrieve <strong>up to 200 records of one object type</strong> in a <strong>single synchronous</strong> REST call, with an optional <strong>all-or-none</strong> rollback.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON over HTTP. <strong>Auth</strong>: OAuth 2.0 Bearer token.
+<strong>Use when</strong>: You have <strong>dozens to ~200 records</strong> to write or read in one round-trip and you want the answer <strong>now</strong>, not on an async job.</p>
+</blockquote>
+<p>This is Module 08, the modern APIs. New to REST? See <a href="../04-Inbound-APIs/01-standard-rest-api.md">Module 04</a>. For the full "which API" picture, see <a href="#f04">04-modern-api-landscape.md</a>. The previous page covered <a href="#f01">01-graphql-api.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine posting letters. The <strong>Standard REST API</strong> is one envelope per letter: 200 records means 200 trips to the post box, 200 stamps (API calls), 200 round-trips. <strong>sObject Collections is a single mail sack</strong>: you drop in up to 200 letters at once, hand it over in one trip, and the post office processes them together and hands you back one receipt sheet listing the outcome of each letter.</p>
+<p>The catch the analogy hides: every letter in the sack must be addressed to the <strong>same object type</strong>. One sack for <strong>Accounts</strong>, another for <strong>Contacts</strong>. And the whole thing happens <strong>synchronously</strong>, you wait on the line and get all 200 results back in the same response. That immediacy is the whole point, and also the reason for the 200 cap.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You have <strong>50-200 records</strong> of <strong>one object</strong> to write in one trip.</td>
+<td>A single record → <a href="../04-Inbound-APIs/01-standard-rest-api.md">Standard REST API</a> sObject Rows.</td>
+</tr>
+<tr>
+<td>You need the result <strong>synchronously</strong>, right now.</td>
+<td><strong>Thousands+</strong> records, async is fine → <a href="../07-Bulk-Async/01-bulk-api-2.md">Bulk API 2.0</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>fewer API calls</strong> and fewer round-trips.</td>
+<td><strong>Different</strong> operations chained together → <a href="../04-Inbound-APIs/05-composite-api.md">Composite API</a>.</td>
+</tr>
+<tr>
+<td>You want optional <strong>all-or-none</strong> rollback across the batch.</td>
+<td>Parent <strong>and</strong> its children in one payload → <a href="../04-Inbound-APIs/05-composite-api.md">sObject Tree</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a nightly micro-sync pushing 180 changed Contacts; an order page submitting 200 line items at once; a dedupe job retrieving 150 Accounts by Id with two fields each; deleting a batch of 200 stale Leads after a campaign.</p>
+<hr />
+<h2>3. How it differs from its cousins</h2>
+<p>These three get confused constantly in interviews. The distinction is the headline.</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th><strong>sObject Collections</strong></th>
+<th><strong>Composite API</strong></th>
+<th><strong>Bulk API 2.0</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it batches</td>
+<td><strong>Same</strong> operation on <strong>many records, one object</strong></td>
+<td><strong>Different</strong> operations chained in order</td>
+<td>One operation on <strong>huge</strong> volumes</td>
+</tr>
+<tr>
+<td>Sync or async</td>
+<td><strong>Synchronous</strong></td>
+<td><strong>Synchronous</strong></td>
+<td><strong>Asynchronous</strong> (job + polling)</td>
+</tr>
+<tr>
+<td>Volume per call</td>
+<td><strong>Up to 200 records</strong></td>
+<td>Up to 25 subrequests</td>
+<td><strong>Thousands to millions</strong></td>
+</tr>
+<tr>
+<td>Chaining results</td>
+<td>❌ No, records are independent</td>
+<td>✅ Yes, <code>@{refId.field}</code></td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Home file</td>
+<td>this page</td>
+<td><a href="../04-Inbound-APIs/05-composite-api.md">05-composite-api.md</a></td>
+<td><a href="../07-Bulk-Async/01-bulk-api-2.md">01-bulk-api-2.md</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The one-liner that nails it</strong>: sObject Collections is for <strong>many records, same job, now</strong>. Composite is for <strong>different jobs that depend on each other</strong>. Bulk is for <strong>volume you can wait on</strong>.</p>
+<div class="mermaid">
+flowchart TD
+    Q["What are you doing?"] --&gt; A{Same operation&lt;br/&gt;on many records&lt;br/&gt;of one object?}
+    A --&gt;|Yes| V{How many?}
+    A --&gt;|"No, different&lt;br/&gt;chained operations"| C[Composite API]
+    V --&gt;|"Up to 200, need it now"| SC[sObject Collections]
+    V --&gt;|"Thousands+, async OK"| B[Bulk API 2.0]
+    style SC fill:#00A1E0,color:#fff
+    style C fill:#9C27B0,color:#fff
+    style B fill:#ff9900,color:#fff
+    style Q fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>4. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External App
+    participant SF as sObject Collections&lt;br/&gt;/composite/sobjects
+    participant DB as Salesforce Data
+    EXT-&gt;&gt;SF: POST one body with up to 200 records + allOrNone + Bearer token
+    SF-&gt;&gt;DB: Process all records together in one transaction context
+    Note over SF,DB: If allOrNone=true and any record fails, roll back ALL
+    DB--&gt;&gt;SF: One result per record (SaveResult array)
+    SF--&gt;&gt;EXT: 200 OK + array of per-record results, same order as input
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>One <code>POST</code> (or <code>PATCH</code>/<code>DELETE</code>/<code>GET</code>) carries the batch. For writes, the body has an <code>allOrNone</code> flag and a <code>records</code> array.</li>
+<li>Salesforce processes every record. Each carries its <code>attributes.type</code> so the platform knows the object.</li>
+<li>With <code>allOrNone:true</code>, a single failure rolls back the <strong>entire</strong> batch. With <code>false</code> (the default), good records commit and only the bad ones report errors, <strong>partial success</strong>.</li>
+<li>You get back <strong>one array</strong>, one entry per input record, in the <strong>same order</strong>. Each entry has <code>success</code>, the new <code>id</code> (on create), and any <code>errors</code>.</li>
+</ol>
+<hr />
+<h2>5. The actual request</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/composite/sobjects</code></p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Method + path</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Create</strong></td>
+<td><code>POST /composite/sobjects</code></td>
+<td><code>SaveResult[]</code></td>
+</tr>
+<tr>
+<td><strong>Update</strong></td>
+<td><code>PATCH /composite/sobjects</code></td>
+<td><code>SaveResult[]</code></td>
+</tr>
+<tr>
+<td><strong>Upsert</strong></td>
+<td><code>PATCH /composite/sobjects/{SObject}/{externalIdField}</code></td>
+<td><code>UpsertResult[]</code></td>
+</tr>
+<tr>
+<td><strong>Delete</strong></td>
+<td><code>DELETE /composite/sobjects?ids=id1,id2&amp;allOrNone=true</code></td>
+<td><code>DeleteResult[]</code></td>
+</tr>
+<tr>
+<td><strong>Retrieve</strong></td>
+<td><code>GET /composite/sobjects/{SObject}?ids=id1,id2&amp;fields=Name,Phone</code></td>
+<td><code>sObject[]</code></td>
+</tr>
+<tr>
+<td><strong>Retrieve (body)</strong></td>
+<td><code>POST /composite/sobjects/{SObject}</code> (ids + fields in body)</td>
+<td><code>sObject[]</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Each record needs its type.</strong> In the body, every record carries <code>"attributes": { "type": "Account" }</code>. That is how one collection can technically mix object types, though most teams keep one type per call.</p>
+</blockquote>
+<p><strong>Create up to 200 records (POST)</strong></p>
+<pre><code>POST /services/data/v66.0/composite/sobjects
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{
+  &quot;allOrNone&quot;: false,
+  &quot;records&quot;: [
+    { &quot;attributes&quot;: { &quot;type&quot;: &quot;Account&quot; }, &quot;Name&quot;: &quot;Acme Corp&quot;, &quot;Industry&quot;: &quot;Technology&quot; },
+    { &quot;attributes&quot;: { &quot;type&quot;: &quot;Account&quot; }, &quot;Name&quot;: &quot;Globex Inc&quot;, &quot;Industry&quot;: &quot;Manufacturing&quot; }
+  ]
+}
+</code></pre>
+<p><strong>Response</strong> (one entry per record, same order):</p>
+<pre><code class="language-json">[
+  { &quot;id&quot;: &quot;001RO0000035frYYAQ&quot;, &quot;success&quot;: true, &quot;errors&quot;: [] },
+  { &quot;success&quot;: false, &quot;errors&quot;: [
+      { &quot;statusCode&quot;: &quot;REQUIRED_FIELD_MISSING&quot;, &quot;message&quot;: &quot;Required fields are missing: [Name]&quot;, &quot;fields&quot;: [&quot;Name&quot;] }
+  ] }
+]
+</code></pre>
+<p>With <code>allOrNone:false</code> above, record 1 commits even though record 2 fails. Flip to <code>allOrNone:true</code> and <strong>neither</strong> would commit.</p>
+<p><strong>Update (PATCH)</strong> — same shape, but each record must include its <code>Id</code>:</p>
+<pre><code>PATCH /services/data/v66.0/composite/sobjects
+{
+  &quot;allOrNone&quot;: true,
+  &quot;records&quot;: [
+    { &quot;attributes&quot;: { &quot;type&quot;: &quot;Contact&quot; }, &quot;id&quot;: &quot;003...AAA&quot;, &quot;Title&quot;: &quot;VP Sales&quot; },
+    { &quot;attributes&quot;: { &quot;type&quot;: &quot;Contact&quot; }, &quot;id&quot;: &quot;003...BBB&quot;, &quot;Title&quot;: &quot;Director&quot; }
+  ]
+}
+</code></pre>
+<p><strong>Delete (DELETE)</strong> — Ids go in the query string:</p>
+<pre><code>DELETE /services/data/v66.0/composite/sobjects?ids=001...AAA,001...BBB&amp;allOrNone=true
+</code></pre>
+<hr />
+<h2>6. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>200-record hard cap</strong></td>
+<td>All operations top out at <strong>200</strong> records per call.</td>
+<td>For more, page into multiple calls or switch to <a href="../07-Bulk-Async/01-bulk-api-2.md">Bulk API 2.0</a>.</td>
+</tr>
+<tr>
+<td><strong>allOrNone default is false</strong></td>
+<td>Without it, you get <strong>partial success</strong>, some commit, some fail silently to your code.</td>
+<td>Always read every result entry. Set <code>allOrNone:true</code> when the batch must be atomic.</td>
+</tr>
+<tr>
+<td><strong>One API call, many records</strong></td>
+<td>The whole batch counts as <strong>one</strong> request against the daily API limit.</td>
+<td>Use it to collapse chatty per-record loops and save limits.</td>
+</tr>
+<tr>
+<td><strong>Synchronous timeout</strong></td>
+<td>It runs inline and is subject to normal sync limits.</td>
+<td>Keep batches sane. Do not stuff 200 heavy records with deep automation.</td>
+</tr>
+<tr>
+<td><strong>Triggers fire per batch</strong></td>
+<td>Your Apex triggers run on these records like any DML.</td>
+<td>Bulkify triggers. 200 records can hit governor limits if logic is sloppy.</td>
+</tr>
+<tr>
+<td><strong>Read the result array</strong></td>
+<td>Results map <strong>positionally</strong> to input. Index 3 in equals index 3 out.</td>
+<td>Match errors back to source records by order, not by guessing.</td>
+</tr>
+<tr>
+<td><strong>Nested allOrNone</strong></td>
+<td>Inside a <a href="../04-Inbound-APIs/05-composite-api.md">Composite</a> request, the outer call and each Collections subrequest each have their own <code>allOrNone</code>.</td>
+<td>Set both deliberately. They interact.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What does sObject Collections do that the Standard REST API does not?</strong>
+A: It performs CRUD on <strong>up to 200 records in a single synchronous call</strong>, returning one result per record. The Standard REST API (sObject Rows) is one record per call, so 200 records would be 200 round-trips and 200 API calls. Collections is one round-trip and one API call.</p>
+<p><strong>Q: sObject Collections vs Composite API, what is the real difference?</strong>
+A: Collections runs the <strong>same</strong> operation across <strong>many records of one object</strong> and they are independent. Composite chains <strong>different</strong> operations in order and lets later steps reference earlier results with <code>@{refId.field}</code>. Use Collections for "200 Contacts, update them all"; use Composite for "create an Account, then a Contact that links to it."</p>
+<p><strong>Q: sObject Collections vs Bulk API 2.0?</strong>
+A: <strong>Synchronous vs asynchronous</strong>, and <strong>200 vs thousands+</strong>. Collections is the right pick for 50-200 records when you need the answer immediately. Bulk 2.0 is for large volumes you can submit as a job and poll for later.</p>
+<p><strong>Q: What is the allOrNone flag and what is its default?</strong>
+A: It controls rollback. Default is <strong>false</strong>, meaning partial success, valid records commit and only the failures report errors. Set it to <strong>true</strong> and any single failure rolls back the entire batch. You must inspect the result array either way.</p>
+<p><strong>Q: How do you create a parent and its children with Collections?</strong>
+A: You do not, directly, because records in a collection are independent and Collections does not chain. Use <strong>sObject Tree</strong> or <strong>Composite</strong> with chaining instead. Collections is for flat batches of one object type.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Instead of mailing 200 letters one at a time, you drop all 200 into one mail sack, hand it over once, and get back one sheet telling you which letters made it and which bounced."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>sObject Collections, <code>/composite/sobjects</code>, SaveResult, UpsertResult, DeleteResult, allOrNone, partial success, synchronous, 200-record limit, external Id (upsert) - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections.htm">sObject Collections (v66.0) — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections_create.htm">Create Records Using sObject Collections — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections_update.htm">Update Records Using sObject Collections — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections_upsert.htm">Upsert Records Using sObject Collections — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections_delete.htm">Delete Records Using sObject Collections — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections_retrieve.htm">Get Records Using sObject Collections — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_allornone.htm">allOrNone Parameters in Composite and Collections Requests — REST API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-data-cloud-apis.md</a> - the APIs for ingesting and querying Salesforce Data Cloud.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Data Cloud APIs</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A separate family of APIs to <strong>stream or bulk-load</strong> external data into <strong>Data Cloud</strong>, then <strong>query</strong>, <strong>profile</strong>, and <strong>act on</strong> the unified result at scale.
+<strong>Direction</strong>: Mostly External → Data Cloud (ingest) and External → Data Cloud (query). <strong>Format</strong>: JSON and CSV over HTTPS. <strong>Auth</strong>: OAuth 2.0, then a <strong>token exchange</strong> for a Data Cloud token.
+<strong>Use when</strong>: Your org <strong>licenses Data Cloud</strong> and you need to unify, query, or activate large external data sets that do not belong in core CRM objects.</p>
+</blockquote>
+<p>This is Module 08, the modern APIs. For the full "which API" picture, see <a href="#f04">04-modern-api-landscape.md</a>. The previous page covered <a href="#f02">02-sobject-collections.md</a>.</p>
+<blockquote>
+<p><strong>Naming note (read this first).</strong> Salesforce is rebranding <strong>Data Cloud</strong> to <strong>Data 360</strong> across its docs in 2025-2026. You will see both names, and they mean the same product. This page uses "Data Cloud" for the concept and flags "Data 360" where the current docs do. These APIs evolve fast, so treat exact endpoints as a snapshot and confirm against the live docs linked at the bottom.</p>
+</blockquote>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Core Salesforce (Sales Cloud, Service Cloud) is your <strong>office filing cabinet</strong>: tidy, governed, but sized for CRM-scale data. <strong>Data Cloud is a giant warehouse next door</strong> built to absorb billions of rows from everywhere, web clicks, mobile events, order systems, data lakes, and stitch them into <strong>one unified profile per person</strong>.</p>
+<p>The Data Cloud APIs are the <strong>loading docks and the search desk</strong> of that warehouse:</p>
+<ul>
+<li>The <strong>Ingestion API</strong> is the loading dock: trucks back up and drop off data, either a <strong>steady trickle</strong> (streaming) or <strong>pallets of CSV</strong> (bulk).</li>
+<li>The <strong>Query API</strong> is the search desk: ask SQL-style questions across everything in the warehouse.</li>
+<li>The <strong>Profile API</strong> is the "pull this one customer's full file" window.</li>
+<li>The <strong>Connect API</strong> is the back office: manage the warehouse itself, its segments, insights, and metadata.</li>
+</ul>
+<p>Critically, this warehouse is a <strong>separately licensed product</strong>. These APIs sit <strong>alongside</strong> the core platform APIs (REST, Bulk, GraphQL), not inside them, and they use a slightly different auth handshake.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Your org <strong>licenses Data Cloud / Data 360</strong>.</td>
+<td>No Data Cloud license → use core APIs. There is nothing to call.</td>
+</tr>
+<tr>
+<td>You ingest <strong>large external data sets</strong> (events, web, IoT).</td>
+<td>A handful of CRM records → <a href="#f02">sObject Collections</a> or <a href="../04-Inbound-APIs/01-standard-rest-api.md">REST</a>.</td>
+</tr>
+<tr>
+<td>You query a <strong>unified profile</strong> across many sources.</td>
+<td>Querying standard CRM objects → SOQL / <a href="#f01">GraphQL</a>.</td>
+</tr>
+<tr>
+<td>You build <strong>segments, insights, activation</strong>.</td>
+<td>Streaming CRM change events → <a href="../06-Event-Driven/04-pub-sub-api.md">Pub/Sub API</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: streaming clickstream events from a website into Data Cloud every few seconds; nightly bulk upload of a 120 MB orders CSV; running a SQL query across unified profiles to build an audience segment; pulling one customer's full unified profile for a service agent screen.</p>
+<hr />
+<h2>3. The four APIs at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Job</th>
+<th>Pattern</th>
+<th>Typical resource root</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ingestion API</strong></td>
+<td>Push external data <strong>in</strong></td>
+<td><strong>Streaming</strong> (JSON) + <strong>Bulk</strong> (CSV)</td>
+<td>Tenant-specific object endpoints</td>
+</tr>
+<tr>
+<td><strong>Query API</strong></td>
+<td>Run <strong>SQL</strong> over Data Cloud objects</td>
+<td>Sync first batch + async pagination</td>
+<td><code>/api/v2/query</code> or Connect <code>/ssot/query-sql</code></td>
+</tr>
+<tr>
+<td><strong>Profile API</strong></td>
+<td>Read a <strong>unified individual</strong> profile</td>
+<td>Synchronous read</td>
+<td>Connect <code>/ssot/...</code> profile resources</td>
+</tr>
+<tr>
+<td><strong>Connect API</strong></td>
+<td>Manage <strong>metadata, segments, insights, actions</strong></td>
+<td>Connect REST resources</td>
+<td><code>/services/data/vXX/ssot/...</code> and <code>/connect/...</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Two SQL query flavors exist.</strong> The older <strong>Query API V1/V2</strong> and the newer <strong>Query Connect API</strong> (<code>/ssot/query-sql</code>, introduced around 2025) coexist. The Connect variant is the direction of travel and has no row-count limit with row-based pagination. Confirm which your org and tooling target before building.</p>
+</blockquote>
+<hr />
+<h2>4. How it works (ingest then query)</h2>
+<div class="mermaid">
+flowchart LR
+    SRC[External sources&lt;br/&gt;web, mobile, orders] --&gt;|Ingestion API&lt;br/&gt;stream JSON or bulk CSV| DC[(Data Cloud&lt;br/&gt;Data Lake Objects)]
+    DC --&gt;|Mapping + Identity Resolution| UP[(Unified Profiles&lt;br/&gt;and Insights)]
+    UP --&gt;|Query API SQL| Q[Analytics / app]
+    UP --&gt;|Profile API| AGENT[Agent / UI single profile]
+    UP --&gt;|Connect API| SEG[Segments / activation]
+    style DC fill:#00A1E0,color:#fff
+    style UP fill:#9C27B0,color:#fff
+    style SEG fill:#4CAF50,color:#fff
+    style SRC fill:#607D8B,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li><strong>Ingest.</strong> External systems call the Ingestion API. <strong>Streaming</strong> sends small JSON payloads as changes happen. <strong>Bulk</strong> uploads large CSV files via a job. Data lands in <strong>Data Lake Objects</strong>.</li>
+<li><strong>Harmonize.</strong> Inside Data Cloud, mapping and <strong>identity resolution</strong> stitch records into <strong>unified profiles</strong> and calculate insights. This is platform work, not an API call.</li>
+<li><strong>Consume.</strong> Query the result with the <strong>Query API</strong> (SQL), pull one person with the <strong>Profile API</strong>, or manage segments and metadata with the <strong>Connect API</strong>.</li>
+</ol>
+<blockquote>
+<p><strong>Eventual consistency.</strong> Ingested data is processed asynchronously. The docs say to allow roughly <strong>30 seconds minimum</strong> before streamed data is queryable, and streaming is processed about <strong>every 3 minutes</strong>. Do not expect read-your-write immediacy.</p>
+</blockquote>
+<hr />
+<h2>5. The actual requests</h2>
+<h3>Authentication: a two-step token exchange</h3>
+<p>Data Cloud does <strong>not</strong> use your normal Salesforce session token directly. You authenticate to Salesforce, then <strong>exchange</strong> that token for a <strong>Data Cloud access token</strong> scoped to a <strong>tenant-specific endpoint</strong>.</p>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant APP as External App
+    participant SF as Salesforce Core OAuth
+    participant DC as Data Cloud Token Exchange
+    APP-&gt;&gt;SF: OAuth flow (e.g. JWT Bearer) for a core access token
+    SF--&gt;&gt;APP: access_token + instance_url
+    APP-&gt;&gt;DC: Exchange core token for Data Cloud token
+    DC--&gt;&gt;APP: Data Cloud access_token + tenant-specific instance_url
+    APP-&gt;&gt;DC: Call Ingestion / Query / Profile against the tenant endpoint
+
+</div>
+<p>Relevant OAuth scopes: <strong><code>cdp_ingest_api</code></strong> (Ingestion), <strong><code>cdp_query_api</code></strong> (Query), <strong><code>cdp_profile_api</code></strong> (Profile), plus the base <strong><code>api</code></strong> and <strong><code>refresh_token</code></strong> scopes.</p>
+<h3>Ingestion API — streaming (small JSON, near real time)</h3>
+<pre><code>POST https://&lt;tenant&gt;.c360a.salesforce.com/api/v1/ingest/sources/{sourceName}/{objectName}
+Authorization: Bearer &lt;DataCloudToken&gt;
+Content-Type: application/json
+
+{ &quot;data&quot;: [
+    { &quot;id&quot;: &quot;c-001&quot;, &quot;email&quot;: &quot;jo@example.com&quot;, &quot;event&quot;: &quot;page_view&quot;, &quot;ts&quot;: &quot;2026-06-18T10:00:00Z&quot; }
+] }
+</code></pre>
+<p>Streaming limits worth knowing: <strong>max ~200 KB per request</strong>, up to <strong>200 records deletable</strong> per call, processed asynchronously roughly every few minutes.</p>
+<h3>Ingestion API — bulk (large CSV, periodic)</h3>
+<p>A bulk load is a <strong>job lifecycle</strong>: create a job, upload one or more CSV files (max <strong>100 files</strong> per job, each up to <strong>150 MB</strong>), then close the job to start processing.</p>
+<pre><code>POST .../api/v1/ingest/jobs            # create job (object + operation: upsert/delete)
+PUT  .../api/v1/ingest/jobs/{id}/batches  # upload CSV
+PATCH .../api/v1/ingest/jobs/{id}      # { &quot;state&quot;: &quot;UploadComplete&quot; } to start
+</code></pre>
+<h3>Query API — SQL over Data Cloud</h3>
+<pre><code>POST https://&lt;tenant&gt;.c360a.salesforce.com/api/v2/query
+Authorization: Bearer &lt;DataCloudToken&gt;
+Content-Type: application/json
+
+{ &quot;sql&quot;: &quot;SELECT FirstName__c, City__c FROM UnifiedIndividual__dlm WHERE City__c = 'Berlin' LIMIT 100&quot; }
+</code></pre>
+<p>The newer <strong>Query Connect API</strong> uses <code>POST /services/data/v66.0/ssot/query-sql</code> to submit, <code>GET .../ssot/query-sql/{queryId}</code> to check status, <code>GET .../ssot/query-sql/{queryId}/rows</code> to page through results, and <code>DELETE</code> to cancel.</p>
+<blockquote>
+<p><strong>Object suffixes.</strong> Data Cloud objects use suffixes like <strong><code>__dlm</code></strong> (Data Model Object) and <strong><code>__dll</code></strong> (Data Lake Object), not the CRM <strong><code>__c</code></strong>. Field names and suffixes depend on your data model.</p>
+</blockquote>
+<hr />
+<h2>6. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Separate license</strong></td>
+<td>Data Cloud is a <strong>paid add-on</strong>. No license, no endpoints.</td>
+<td>Confirm provisioning before designing anything against it.</td>
+</tr>
+<tr>
+<td><strong>Two-step auth</strong></td>
+<td>The core token alone will not work. You need the <strong>exchanged Data Cloud token</strong> and tenant endpoint.</td>
+<td>Implement the token exchange. Cache the tenant <code>instance_url</code>.</td>
+</tr>
+<tr>
+<td><strong>Eventual consistency</strong></td>
+<td>Ingested data is <strong>not instantly</strong> queryable (allow ~30s+).</td>
+<td>Do not build read-after-write flows. Design for async.</td>
+</tr>
+<tr>
+<td><strong>Streaming vs bulk</strong></td>
+<td>Streaming is <strong>small and frequent</strong>; bulk is <strong>large and periodic</strong>.</td>
+<td>Match the pattern to the data shape. Same stream can take both.</td>
+</tr>
+<tr>
+<td><strong>Volume limits</strong></td>
+<td>Streaming ~200 KB/request, bulk CSV 150 MB/file, 100 files/job, rate caps apply.</td>
+<td>Chunk uploads. Honor <strong>HTTP 429</strong> with back-off.</td>
+</tr>
+<tr>
+<td><strong>Rebrand churn</strong></td>
+<td>Docs are mid-rename to <strong>Data 360</strong>; some endpoints and version paths shift.</td>
+<td>Pin the API version. Re-verify endpoints against live docs.</td>
+</tr>
+<tr>
+<td><strong>Not for core CRM</strong></td>
+<td>These do not replace REST/Bulk for Accounts and Contacts.</td>
+<td>Use core APIs for CRM objects; Data Cloud for the unified lake.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What is Data Cloud and why does it have its own APIs?</strong>
+A: Data Cloud (now branded Data 360) is a separately licensed platform for ingesting, unifying, and activating <strong>massive external data sets</strong> into one profile per individual. It has dedicated APIs because it is a different data engine from core CRM, with its own objects (<code>__dlm</code>, <code>__dll</code>), its own scale, and its own auth.</p>
+<p><strong>Q: What are the main Data Cloud APIs?</strong>
+A: The <strong>Ingestion API</strong> (stream or bulk-load data in), the <strong>Query API</strong> (SQL over Data Cloud objects), the <strong>Profile API</strong> (read a unified individual), and the <strong>Connect API</strong> (manage metadata, segments, insights, and actions).</p>
+<p><strong>Q: Streaming vs bulk ingestion, when do you use each?</strong>
+A: <strong>Streaming</strong> for small, frequent JSON payloads in near real time, like clickstream events. <strong>Bulk</strong> for large CSV files loaded periodically, like a nightly orders export. The same data stream can accept both.</p>
+<p><strong>Q: How is authentication different from core APIs?</strong>
+A: It is a <strong>two-step exchange</strong>. You authenticate to Salesforce normally (often JWT Bearer), then exchange that token for a <strong>Data Cloud access token</strong> tied to a <strong>tenant-specific endpoint</strong>, using scopes like <code>cdp_ingest_api</code>, <code>cdp_query_api</code>, and <code>cdp_profile_api</code>.</p>
+<p><strong>Q: Can you read data back the instant you ingest it?</strong>
+A: No. Ingestion is <strong>eventually consistent</strong>, processed asynchronously. The docs advise allowing at least ~30 seconds before ingested data is queryable, so design for async rather than read-after-write.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Core Salesforce is the filing cabinet; Data Cloud is the huge warehouse next door. The Ingestion API is its loading dock, the Query and Profile APIs are its search desk, and you need a special pass (a separate token) to get in."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Data Cloud / Data 360, Ingestion API, Query API, Profile API, Connect API, Data Lake Object (<code>__dll</code>), Data Model Object (<code>__dlm</code>), unified profile, identity resolution, streaming vs bulk ingestion, token exchange, tenant-specific endpoint, eventual consistency - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/data/data-cloud-int/guide/c360-a-ingestion-api.html">Ingestion API — Data 360 Integration Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/data/data-cloud-int/references/data-cloud-ingestionapi-ref/c360-a-api-get-started.html">Get Started with Ingestion API (auth, scopes, limits) — Data 360 Ingestion API Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/data/data-cloud-query-guide/references/data-cloud-query-api-reference/c360a-api-queryservices-overview.html">Query Data using Query API — Data 360 Query Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2025/08/boost-data-cloud-integrations-with-the-new-query-connect-api">Boost Data Cloud Integrations with the New Query Connect API — Salesforce Developers Blog</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.c360a_api.meta/c360a_api/c360a_api_profile_call_overview.htm">Query Customer Profile Information with Profile API — Data 360 Query Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/data/connectapi/references">Data 360 Connect API References</a></li>
+<li><a href="https://developer.salesforce.com/docs/data/data-cloud-dev/guide/dc-quick-start.html">Quick Start — Data 360 Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-modern-api-landscape.md</a> - the capstone "which API do I use?" decision guide.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - The Modern API Landscape</h1>
+<blockquote>
+<p><strong>One-liner</strong>: One page to pick the <strong>right Salesforce API</strong> for any integration, by purpose, sync vs async, format, and volume.
+<strong>Direction</strong>: Both. <strong>Format</strong>: Mixed. <strong>Auth</strong>: OAuth 2.0 (mostly).
+<strong>Use when</strong>: You are designing an integration and need to choose, or an interviewer asks "which API would you use and why?"</p>
+</blockquote>
+<p>This is the <strong>capstone</strong> of Module 08 and a synthesis of the whole vault. Each API below links to its home page across Modules 04, 06, 07, and 08.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Salesforce gives you a <strong>toolbox</strong>, not a single tool. Reaching for REST when you should use Bulk is like digging a foundation with a teaspoon. Reaching for Bulk to fetch one record is like swinging a backhoe to plant a seed. The skill is <strong>matching the tool to the job</strong>.</p>
+<p>Three questions settle almost every choice:</p>
+<ol>
+<li><strong>How much data?</strong> One record, a couple hundred, or millions?</li>
+<li><strong>Sync or async?</strong> Do you need the answer <strong>now</strong>, or can you submit a job and collect results later?</li>
+<li><strong>What shape?</strong> Simple CRUD, a precise field selection, chained operations, or a live event stream?</li>
+</ol>
+<p>Answer those three and the API picks itself. The rest of this page is the lookup table and a decision tree.</p>
+<hr />
+<h2>2. The full comparison table</h2>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Purpose</th>
+<th>Sync / Async</th>
+<th>Format</th>
+<th>Volume</th>
+<th>When to use</th>
+<th>Home</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td>General CRUD + SOQL, the workhorse</td>
+<td>Sync</td>
+<td>JSON / XML</td>
+<td>1 record per call</td>
+<td>Default for most app integrations</td>
+<td><a href="../04-Inbound-APIs/01-standard-rest-api.md">04 · 01</a></td>
+</tr>
+<tr>
+<td><strong>SOAP API</strong></td>
+<td>Legacy, strongly typed, WSDL contract</td>
+<td>Sync</td>
+<td>XML</td>
+<td>1-200 per call</td>
+<td>Old/enterprise clients needing a WSDL</td>
+<td><a href="../04-Inbound-APIs/02-standard-soap-api.md">04 · 02</a></td>
+</tr>
+<tr>
+<td><strong>GraphQL</strong></td>
+<td>Pick exact fields across related objects</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Read-shaped, paged</td>
+<td>Avoid over/under-fetching; dashboards</td>
+<td><a href="#f01">08 · 01</a></td>
+</tr>
+<tr>
+<td><strong>Composite</strong></td>
+<td>Chain several <strong>different</strong> ops in one trip</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Up to 25 subrequests</td>
+<td>Dependent calls, all-or-none</td>
+<td><a href="../04-Inbound-APIs/05-composite-api.md">04 · 05</a></td>
+</tr>
+<tr>
+<td><strong>sObject Collections</strong></td>
+<td>Same op on <strong>many records, one object</strong></td>
+<td>Sync</td>
+<td>JSON</td>
+<td><strong>Up to 200 records</strong></td>
+<td>50-200 records, need it now</td>
+<td><a href="#f02">08 · 02</a></td>
+</tr>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td>Mass load/extract, job-based</td>
+<td><strong>Async</strong></td>
+<td>CSV / JSON</td>
+<td><strong>Thousands to millions</strong></td>
+<td>Large data loads you can poll</td>
+<td><a href="../07-Bulk-Async/01-bulk-api-2.md">07 · 01</a></td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>Publish + subscribe to events over gRPC</td>
+<td>Async stream</td>
+<td>Avro / gRPC</td>
+<td>Event stream</td>
+<td>Modern event-driven, CDC, replay</td>
+<td><a href="../06-Event-Driven/04-pub-sub-api.md">06 · 04</a></td>
+</tr>
+<tr>
+<td><strong>Streaming API</strong></td>
+<td>Legacy CometD push (PushTopic, generic)</td>
+<td>Async stream</td>
+<td>JSON</td>
+<td>Event stream</td>
+<td>Older event subscribers; being superseded</td>
+<td><a href="../06-Event-Driven/05-streaming-api-and-outbound-messages.md">06 · 05</a></td>
+</tr>
+<tr>
+<td><strong>Connect REST API</strong></td>
+<td>Chatter, Experience Cloud, Files, feeds</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Feature-scoped</td>
+<td>Social, communities, files, programmatically</td>
+<td><a href="../04-Inbound-APIs/06-connect-rest-api.md">04 · 06</a></td>
+</tr>
+<tr>
+<td><strong>UI API</strong></td>
+<td>Build Salesforce-like UIs (FLS + layout aware)</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>UI-scoped</td>
+<td>Custom UIs needing layout/FLS metadata</td>
+<td><a href="../04-Inbound-APIs/07-ui-api.md">04 · 07</a></td>
+</tr>
+<tr>
+<td><strong>Metadata API</strong></td>
+<td>Deploy/retrieve <strong>config and metadata</strong></td>
+<td><strong>Async</strong></td>
+<td>XML</td>
+<td>Org metadata</td>
+<td>CI/CD, deployments, org setup</td>
+<td><a href="#overview">README</a></td>
+</tr>
+<tr>
+<td><strong>Tooling API</strong></td>
+<td>Developer tooling, fine-grained metadata</td>
+<td>Sync</td>
+<td>JSON / XML</td>
+<td>Dev artifacts</td>
+<td>IDEs, code analysis, debug logs</td>
+<td><a href="#overview">README</a></td>
+</tr>
+<tr>
+<td><strong>Data Cloud APIs</strong></td>
+<td>Ingest, query, profile unified data</td>
+<td>Both</td>
+<td>JSON / CSV</td>
+<td><strong>Massive</strong></td>
+<td>Data Cloud-licensed orgs only</td>
+<td><a href="#f03">08 · 03</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The two axes that matter most</strong>: <strong>volume</strong> (1 → 200 → millions) and <strong>timing</strong> (sync now vs async job). REST → sObject Collections → Bulk 2.0 is the same axis at three scales. Everything else is about <strong>shape</strong>: GraphQL for field selection, Composite for chaining, Pub/Sub for events, Metadata/Tooling for config.</p>
+</blockquote>
+<hr />
+<h2>3. Decision tree — what are you trying to do?</h2>
+<div class="mermaid">
+flowchart TD
+    START["What are you trying to do?"] --&gt; KIND{Move records,&lt;br/&gt;stream events,&lt;br/&gt;or deploy metadata?}
+
+    KIND --&gt;|Deploy / retrieve config| META["Metadata API (async)&lt;br/&gt;Tooling API (dev tooling)"]
+    KIND --&gt;|React to live events| EV{Modern or legacy?}
+    KIND --&gt;|Move record data| DATA{How many records?}
+
+    EV --&gt;|Modern, gRPC, replay| PS[Pub/Sub API]
+    EV --&gt;|Legacy CometD| STR[Streaming API]
+
+    DATA --&gt;|"Millions, async OK"| BULK[Bulk API 2.0]
+    DATA --&gt;|"Up to 200, one object, now"| COLL[sObject Collections]
+    DATA --&gt;|"A few, different chained ops"| COMP[Composite API]
+    DATA --&gt;|"One record or simple CRUD"| ONE{Special need?}
+
+    ONE --&gt;|Exact fields, nested objects| GQL[GraphQL]
+    ONE --&gt;|Chatter / Files / Community| CONN[Connect REST]
+    ONE --&gt;|Layout + FLS aware UI| UIAPI[UI API]
+    ONE --&gt;|Unified Data Cloud data| DC[Data Cloud APIs]
+    ONE --&gt;|Plain CRUD / SOQL| REST[REST API]
+
+    style PS fill:#9C27B0,color:#fff
+    style BULK fill:#ff9900,color:#fff
+    style COLL fill:#00A1E0,color:#fff
+    style COMP fill:#9C27B0,color:#fff
+    style GQL fill:#00A1E0,color:#fff
+    style REST fill:#4CAF50,color:#fff
+    style DC fill:#00A1E0,color:#fff
+    style META fill:#607D8B,color:#fff
+    style START fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>4. The three-scale spine (memorize this)</h2>
+<p>For plain record movement, picture <strong>one axis</strong> of growing volume. This single line answers most integration questions.</p>
+<table>
+<thead>
+<tr>
+<th>Scale</th>
+<th>Records</th>
+<th>API</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>One</strong></td>
+<td>1 at a time</td>
+<td><a href="../04-Inbound-APIs/01-standard-rest-api.md">REST API</a></td>
+<td>Simple, synchronous, one call per record</td>
+</tr>
+<tr>
+<td><strong>Some</strong></td>
+<td>up to <strong>200</strong>, one object, sync</td>
+<td><a href="#f02">sObject Collections</a></td>
+<td>One round-trip, one API call, immediate</td>
+</tr>
+<tr>
+<td><strong>Many</strong></td>
+<td><strong>thousands to millions</strong>, async</td>
+<td><a href="../07-Bulk-Async/01-bulk-api-2.md">Bulk API 2.0</a></td>
+<td>Job-based, parallelized, poll for results</td>
+</tr>
+</tbody>
+</table>
+<p>Then layer the <strong>shape</strong> exceptions on top:</p>
+<ul>
+<li>Need <strong>specific fields</strong> across related objects? → <a href="#f01">GraphQL</a>.</li>
+<li>Need <strong>different operations chained</strong> with all-or-none? → <a href="../04-Inbound-APIs/05-composite-api.md">Composite</a>.</li>
+<li>Need <strong>parent + children</strong> in one payload? → sObject Tree (in <a href="../04-Inbound-APIs/05-composite-api.md">Composite</a>).</li>
+<li>Need to <strong>react to changes</strong>? → <a href="../06-Event-Driven/04-pub-sub-api.md">Pub/Sub API</a> (modern) over <a href="../06-Event-Driven/05-streaming-api-and-outbound-messages.md">Streaming</a> (legacy).</li>
+</ul>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sync vs async first</strong></td>
+<td>It splits the whole toolbox in two.</td>
+<td>Decide if you can wait. Async (Bulk, Metadata, Pub/Sub) unlocks scale.</td>
+</tr>
+<tr>
+<td><strong>API limits</strong></td>
+<td>Every sync call counts against the daily allocation.</td>
+<td>Batch with Collections/Composite; offload volume to Bulk. See <a href="../09-Security-Limits/README.md">Module 09</a>.</td>
+</tr>
+<tr>
+<td><strong>Legacy vs modern events</strong></td>
+<td>Streaming API is superseded by Pub/Sub.</td>
+<td>Choose <strong>Pub/Sub</strong> for new event work; know Streaming for old systems.</td>
+</tr>
+<tr>
+<td><strong>GraphQL is read-shaped</strong></td>
+<td>It is not a bulk loader.</td>
+<td>Use it to shape reads, not to mass-write.</td>
+</tr>
+<tr>
+<td><strong>Data Cloud is separate</strong></td>
+<td>Different license, different token.</td>
+<td>Only relevant if the org is provisioned. See <a href="#f03">03</a>.</td>
+</tr>
+<tr>
+<td><strong>Metadata vs data</strong></td>
+<td>Metadata API moves <strong>config</strong>, not rows.</td>
+<td>Never use it to move records, and never use data APIs for config.</td>
+</tr>
+<tr>
+<td><strong>Pin the version</strong></td>
+<td>Behavior and shape change by version.</td>
+<td>Use <strong>v66.0</strong> consistently across the integration.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Walk me through choosing an API for a 500,000-record nightly load.</strong>
+A: That is <strong>volume + async</strong>, so <strong>Bulk API 2.0</strong>. It is job-based, parallelized, and built for millions. sObject Collections caps at 200 and is synchronous; REST would be 500,000 calls. Bulk is the only sane fit.</p>
+<p><strong>Q: A mobile app needs an Account with its Contacts and Opportunities in one call, only a few fields each. Which API?</strong>
+A: <strong>GraphQL</strong>. It selects exact fields across related objects in one round-trip, killing over-fetching and under-fetching. Composite could bundle the calls, but GraphQL is purpose-built for field-selective nested reads.</p>
+<p><strong>Q: You must create an Account, then a Contact linked to it, atomically. Which API?</strong>
+A: <strong>Composite</strong> with chaining (<code>@{refId.field}</code>) and <code>allOrNone:true</code>, or <strong>sObject Tree</strong> for the nested parent-child payload. sObject Collections cannot chain because its records are independent.</p>
+<p><strong>Q: REST vs sObject Collections vs Bulk, in one sentence each.</strong>
+A: REST is <strong>one record, sync</strong>. sObject Collections is <strong>up to 200 records of one object, sync, one call</strong>. Bulk 2.0 is <strong>thousands to millions, async, job-based</strong>. Same axis, three scales.</p>
+<p><strong>Q: New project needs to react to record changes in near real time. Which event API?</strong>
+A: <strong>Pub/Sub API</strong>, gRPC-based, bi-directional, with replay and efficient Avro payloads. The older Streaming API still works but is being superseded, so pick Pub/Sub for anything new.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Salesforce hands you a toolbox. One record, use REST. A couple hundred at once, use sObject Collections. Millions, use Bulk. Want exact fields, use GraphQL. Want live events, use Pub/Sub. Match the tool to the job."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>API surface, synchronous, asynchronous, volume, field selection, chaining, event stream, metadata vs data, three-scale spine (REST → Collections → Bulk) - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_which_api.htm">Which API Do I Use? — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_intro.htm">Bulk API 2.0 and Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/overview">Pub/Sub API Documentation</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/graphql/overview">GraphQL API — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_intro.htm">Metadata API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/intro_api_tooling.htm">Tooling API</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README.md</a> - or jump to <a href="../09-Security-Limits/README.md">Module 09 · Security and Limits</a> to see how these APIs are governed.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 08 Modern APIs · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

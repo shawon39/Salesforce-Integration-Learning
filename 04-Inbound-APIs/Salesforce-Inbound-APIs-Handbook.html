@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Inbound APIs Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Inbound APIs</h1>
+  <div class="sub">Every way an external system calls into Salesforce: REST, SOAP, Apex services, Composite, Connect, and UI API.</div>
+  <div>
+    <span class="pill">Standard REST</span><span class="pill">Standard SOAP</span>
+    <span class="pill">Apex REST &amp; SOAP</span><span class="pill">Composite API</span>
+    <span class="pill">Connect REST</span><span class="pill">UI API</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Standard REST API</a></li>
+<li class=""><a href="#f02">02 - Standard SOAP API</a></li>
+<li class=""><a href="#f03">03 - Apex REST</a></li>
+<li class=""><a href="#f04">04 - Apex SOAP Web Services</a></li>
+<li class=""><a href="#f05">05 - Composite API</a></li>
+<li class=""><a href="#f06">06 - Connect REST API</a></li>
+<li class=""><a href="#f07">07 - User Interface API</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 04 - Inbound APIs (External → Salesforce)</h1>
+<blockquote>
+<p><strong>Goal</strong>: Make Salesforce listen. Know every way an external system can push or pull data <strong>into</strong> Salesforce, and which to pick.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>Auth</strong>: every inbound call authenticates via OAuth, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+</blockquote>
+<p>Inbound means the <strong>external system initiates</strong> and Salesforce responds. This is the <a href="../02-Integration-Patterns/04-remote-call-in.md">Remote Call-In pattern</a> in practice. This module covers the built-in APIs (no code) and the custom ones you write in Apex.</p>
+<hr />
+<h2>How to use this module</h2>
+<ol>
+<li>Start with <strong><a href="#f01">01-standard-rest-api.md</a></strong>, the default for most integrations.</li>
+<li>Learn the custom options (<a href="#f03">Apex REST</a>) for when built-in CRUD isn't enough.</li>
+<li>Use the <strong>decision tree</strong> and <strong>comparison table</strong> below to choose fast.</li>
+<li>For how callers log in, see <a href="../03-Authentication/README.md">Module 03 - Authentication</a>.</li>
+</ol>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">standard-rest-api</a></td>
+<td>Auto-generated CRUD + SOQL over JSON. The default.</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">standard-soap-api</a></td>
+<td>WSDL-based (Enterprise/Partner) + the <code>login()</code> retirement</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">apex-rest</a></td>
+<td>Your own REST endpoint (<code>@RestResource</code>)</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">apex-soap-web-services</a></td>
+<td>Your own SOAP endpoint (<code>webservice</code> keyword)</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">composite-api</a></td>
+<td>Many operations in one round-trip</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">connect-rest-api</a></td>
+<td>Chatter, Experience Cloud, Files</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="#f07">ui-api</a></td>
+<td>Records + layouts + metadata for building UIs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which inbound API? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([External system calls Salesforce]) --&gt; Q{What do you need?}
+    Q --&gt;|Standard CRUD or SOQL| REST[Standard REST API&lt;br/&gt;JSON, modern default]
+    Q --&gt;|Legacy partner needs a WSDL| SOAP[Standard SOAP API]
+    Q --&gt;|Custom logic, REST contract| AREST[Apex REST]
+    Q --&gt;|Custom logic, SOAP contract| ASOAP[Apex SOAP web services]
+    Q --&gt;|Many operations in one call| COMP[Composite API]
+    Q --&gt;|Chatter / Experience / Files| CONN[Connect REST API]
+    Q --&gt;|Render a Salesforce-like UI| UIAPI[UI API]
+
+    style REST fill:#00A1E0,color:#fff
+    style AREST fill:#4CAF50,color:#fff
+    style COMP fill:#ff9900,color:#fff
+    style SOAP fill:#9C27B0,color:#fff
+    style ASOAP fill:#9C27B0,color:#fff
+    style CONN fill:#607D8B,color:#fff
+    style UIAPI fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>Comparison table</h2>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>What it's for</th>
+<th>Format</th>
+<th style="text-align: center;">Custom logic?</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Standard REST</strong> (01)</td>
+<td>CRUD + SOQL on objects</td>
+<td>JSON</td>
+<td style="text-align: center;">No</td>
+<td>The default for modern clients.</td>
+</tr>
+<tr>
+<td><strong>Standard SOAP</strong> (02)</td>
+<td>CRUD on objects via WSDL</td>
+<td>XML</td>
+<td style="text-align: center;">No</td>
+<td>Legacy partners needing a contract.</td>
+</tr>
+<tr>
+<td><strong>Apex REST</strong> (03)</td>
+<td>Custom REST endpoint</td>
+<td>JSON</td>
+<td style="text-align: center;"><strong>Yes</strong></td>
+<td>Tailored logic/contract over REST.</td>
+</tr>
+<tr>
+<td><strong>Apex SOAP</strong> (04)</td>
+<td>Custom SOAP endpoint</td>
+<td>XML</td>
+<td style="text-align: center;"><strong>Yes</strong></td>
+<td>Legacy SOAP consumer + custom logic.</td>
+</tr>
+<tr>
+<td><strong>Composite</strong> (05)</td>
+<td>Bundle many calls</td>
+<td>JSON</td>
+<td style="text-align: center;">No</td>
+<td>Cut round-trips and API calls.</td>
+</tr>
+<tr>
+<td><strong>Connect REST</strong> (06)</td>
+<td>Chatter / Experience / Files</td>
+<td>JSON</td>
+<td style="text-align: center;">No</td>
+<td>The social/collaboration layer.</td>
+</tr>
+<tr>
+<td><strong>UI API</strong> (07)</td>
+<td>Records + layout + metadata</td>
+<td>JSON</td>
+<td style="text-align: center;">No</td>
+<td>Build a UI that mirrors Salesforce.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>What changed worth knowing (2025-2026)</h2>
+<ul>
+<li><strong>SOAP API <code>login()</code> is retiring in Summer '27</strong> (gone from API v65.0+, disabled by default in new orgs, gated by the new <strong>Use Any API Auth</strong> permission from Summer '26). Authenticate inbound calls with <strong>OAuth</strong> via External Client Apps. See <a href="#f02">02-standard-soap-api.md</a> and <a href="../03-Authentication/README.md">Module 03</a>.</li>
+<li><strong>REST + JSON</strong> is the default for new inbound builds; SOAP is legacy-but-supported.</li>
+</ul>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: Standard REST vs Apex REST?</strong>
+→ Standard REST is built-in CRUD/SOQL, no code. Apex REST (<code>@RestResource</code>) is a <strong>custom</strong> endpoint for business logic or a tailored contract.</p>
+<p><strong>Q: How do you avoid duplicate inbound records?</strong>
+→ <strong>Upsert by External Id</strong>, which is idempotent against retries.</p>
+<p><strong>Q: Create an Account and its Contacts in one inbound call?</strong>
+→ <strong>Composite API</strong> (sObject Tree or Composite Graph), fewer round-trips and transactional.</p>
+<p><strong>Q: Security gotcha with Apex REST?</strong>
+→ It runs in <strong>system context</strong>, so it does not auto-enforce FLS/sharing. Use <code>with sharing</code> and check CRUD/FLS explicitly. (The Standard REST API enforces the calling user's permissions.)</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide (v66.0) — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_intro.htm">Apex REST — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite.htm">Composite Resources — REST API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=005132110&amp;type=1">SOAP API login() Retirement — Salesforce Help</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Standard REST API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A ready-made HTTP API that lets an external system <strong>create, read, update, delete, and query</strong> Salesforce records, no Apex required.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON (XML optional). <strong>Auth</strong>: OAuth 2.0 Bearer token.
+<strong>Use when</strong>: An outside app needs standard <strong>CRUD or SOQL</strong> on existing objects. The default inbound API.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Standard REST API is a <strong>vending machine for your data</strong>. Salesforce automatically exposes every object (standard and custom) through predictable HTTP URLs. An external app inserts the right "coins" (an OAuth token and a JSON body) and pulls out exactly what it asked for. You did not build the machine. Salesforce generated it for you the moment the object existed.</p>
+<p>Because it is <strong>auto-generated and resource-based</strong>, you do not write or deploy anything. You point HTTP verbs (<code>GET</code>, <code>POST</code>, <code>PATCH</code>, <code>DELETE</code>) at object URLs and Salesforce does the rest, enforcing the calling user's permissions, validation rules, and sharing along the way.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard <strong>CRUD</strong> or <strong>SOQL</strong> on existing objects.</td>
+<td>You need <strong>custom logic / a custom contract</strong> → <a href="#f03">03-apex-rest.md</a>.</td>
+</tr>
+<tr>
+<td>The caller is a <strong>modern app</strong> that speaks JSON.</td>
+<td>Legacy partner that requires a <strong>WSDL</strong> → <a href="#f02">02-standard-soap-api.md</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>zero code</strong> on the Salesforce side.</td>
+<td><strong>Many operations in one round-trip</strong> → <a href="#f05">05-composite-api.md</a>.</td>
+</tr>
+<tr>
+<td>Single or small batches of records.</td>
+<td><strong>Millions</strong> of records → Bulk API 2.0 (Module 07).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a website posts a new Lead, a billing app patches an Account's status, a mobile app queries Contacts.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External App
+    participant SF as Salesforce REST API&lt;br/&gt;/services/data
+    participant DB as Salesforce Data
+    EXT-&gt;&gt;SF: POST /sobjects/Account (Bearer token + JSON)
+    SF-&gt;&gt;SF: Check OAuth token, perms, validation
+    SF-&gt;&gt;DB: Insert record
+    DB--&gt;&gt;SF: New record Id
+    SF--&gt;&gt;EXT: 201 Created + id, success, errors
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The external app sends an HTTP request to a versioned endpoint with an <strong>OAuth Bearer token</strong>.</li>
+<li>Salesforce validates the token, then the <strong>running user's</strong> permissions, FLS, and validation rules.</li>
+<li>The operation hits the database.
+4-5. Salesforce returns a status code and a JSON body (the new <code>id</code> on create, the record on read).</li>
+</ol>
+<hr />
+<h2>4. The actual requests</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/</code></p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Method + path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create</td>
+<td><code>POST /sobjects/Account</code></td>
+</tr>
+<tr>
+<td>Read</td>
+<td><code>GET /sobjects/Account/{id}</code></td>
+</tr>
+<tr>
+<td>Update</td>
+<td><code>PATCH /sobjects/Account/{id}</code></td>
+</tr>
+<tr>
+<td>Delete</td>
+<td><code>DELETE /sobjects/Account/{id}</code></td>
+</tr>
+<tr>
+<td>Upsert by external id</td>
+<td><code>PATCH /sobjects/Account/External_Id__c/{value}</code></td>
+</tr>
+<tr>
+<td>Query (SOQL)</td>
+<td><code>GET /query/?q=SELECT+Id,Name+FROM+Account</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Create request</strong></p>
+<pre><code>POST /services/data/v66.0/sobjects/Account
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{ &quot;Name&quot;: &quot;Acme Corp&quot;, &quot;Industry&quot;: &quot;Technology&quot; }
+</code></pre>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{ &quot;id&quot;: &quot;001bn00000ABCDeAAH&quot;, &quot;success&quot;: true, &quot;errors&quot;: [] }
+</code></pre>
+<blockquote>
+<p><strong>Upsert is your friend</strong>: <code>PATCH</code> on an <strong>External Id</strong> field creates or updates in one idempotent call, so retries do not create duplicates. This is the backbone of safe inbound integrations.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>Every call needs a valid OAuth token.</td>
+<td>Use a flow from <a href="../03-Authentication/README.md">Module 03</a> (JWT Bearer or Client Credentials for server-to-server).</td>
+</tr>
+<tr>
+<td><strong>API allocations</strong></td>
+<td>Calls count against the org's 24-hour API limit.</td>
+<td>Batch with <a href="#f05">Composite</a>; avoid chatty per-record loops.</td>
+</tr>
+<tr>
+<td><strong>Always version the URL</strong></td>
+<td><code>v66.0</code> pins behavior; omitting it breaks later.</td>
+<td>Hardcode the version your client was tested on.</td>
+</tr>
+<tr>
+<td><strong>Runs as the user</strong></td>
+<td>The token's user governs permissions, FLS, sharing.</td>
+<td>Give the integration user least-privilege access.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>Network retries can double-insert.</td>
+<td>Prefer <strong>upsert by External Id</strong>.</td>
+</tr>
+<tr>
+<td><strong>No custom logic</strong></td>
+<td>The API only does CRUD/query.</td>
+<td>Need branching or orchestration? Use <a href="#f03">Apex REST</a>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Standard REST API?</strong>
+A: An auto-generated, resource-based HTTP API for CRUD and SOQL on Salesforce objects, using standard verbs and JSON, authenticated with OAuth. No code to deploy.</p>
+<p><strong>Q: REST API vs Apex REST?</strong>
+A: Standard REST is built-in CRUD/query on objects. Apex REST is a <strong>custom endpoint</strong> you write with <code>@RestResource</code> when you need business logic or a tailored request/response shape.</p>
+<p><strong>Q: How do you avoid duplicates on inbound creates?</strong>
+A: Use <strong>upsert by External Id</strong> (<code>PATCH /sobjects/Object/ExtId__c/value</code>). It is idempotent, so a retried call updates instead of inserting a duplicate.</p>
+<p><strong>Q: How do you reduce API call counts?</strong>
+A: Bundle operations with the <strong>Composite API</strong> (or sObject Collections), and use Bulk API 2.0 for very large volumes.</p>
+<p><strong>Q: Whose permissions apply on an inbound call?</strong>
+A: The user tied to the OAuth token. Salesforce enforces that user's profile, permission sets, FLS, sharing, and validation rules.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Salesforce hands every object a standard set of web URLs. Apps read and write records through those URLs with a token, and Salesforce checks the rules each time."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>REST, endpoint, OAuth Bearer token, SOQL, upsert, External Id, API allocation - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide (v66.0) — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_rows.htm">Work with Records — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query.htm">Execute a SOQL Query — REST API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-standard-soap-api.md</a> - the older WSDL-based API and the login() retirement.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Standard SOAP API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The original <strong>WSDL-based, XML-over-HTTPS</strong> API that lets an external system do CRUD and SOQL against Salesforce with a strongly-typed contract.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: XML (SOAP envelope). <strong>Auth</strong>: OAuth 2.0 Bearer token (legacy <code>login()</code> is retiring).
+<strong>Use when</strong>: A legacy partner or tool <strong>requires a WSDL</strong> or a strongly-typed contract. Otherwise prefer <a href="#f01">01-standard-rest-api.md</a>.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>If the REST API is a vending machine, the SOAP API is a <strong>formal contract with a notary</strong>. Before you can talk to Salesforce, you download a <strong>WSDL</strong> (a machine-readable rulebook). Your tooling reads it and generates strongly-typed classes, so every field, type, and operation is fixed and validated up front. You then exchange <strong>XML envelopes</strong> over HTTPS instead of light JSON.</p>
+<p>This formality is the point. Older enterprise platforms, integration middleware, and partner tools were built around WSDLs and strict typing. SOAP API gives them a stable, predictable, <strong>typed</strong> door into Salesforce. It is <strong>mature and fully supported</strong>, but it is no longer the modern default. New integrations should reach for REST first.</p>
+<p>There are two flavors of WSDL, and choosing the right one is the first real decision.</p>
+<table>
+<thead>
+<tr>
+<th>WSDL</th>
+<th>Typing</th>
+<th>Scope</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Enterprise WSDL</strong></td>
+<td><strong>Strongly typed</strong></td>
+<td><strong>Org-specific</strong> (mirrors your exact objects and fields)</td>
+<td>A tool integrating with <strong>one</strong> org that wants compile-time type safety.</td>
+</tr>
+<tr>
+<td><strong>Partner WSDL</strong></td>
+<td><strong>Loosely typed</strong> (generic name/value)</td>
+<td><strong>Generic</strong> (works across any org)</td>
+<td>A tool (ISV, middleware) integrating with <strong>many</strong> orgs with different schemas.</td>
+</tr>
+</tbody>
+</table>
+<p>The Enterprise WSDL changes whenever your schema changes, so you re-download it after metadata edits. The Partner WSDL stays generic, so a multi-org product consumes it <strong>once per version</strong>.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A <strong>legacy partner or middleware requires a WSDL</strong>.</td>
+<td>A modern app that speaks JSON → <a href="#f01">01-standard-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td>You want a <strong>strongly-typed, contract-first</strong> integration.</td>
+<td>You need <strong>custom logic or a tailored contract</strong> → <a href="#f03">03-apex-rest.md</a>.</td>
+</tr>
+<tr>
+<td>The tool already has <strong>generated SOAP stubs</strong> you must reuse.</td>
+<td><strong>Many operations in one round-trip</strong> → <a href="#f05">05-composite-api.md</a>.</td>
+</tr>
+<tr>
+<td>An ISV product must run <strong>generically across many orgs</strong> (Partner WSDL).</td>
+<td><strong>Millions</strong> of records → Bulk API 2.0 (Module 07).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: an on-prem ERP that only speaks SOAP upserting Accounts, a legacy MDM tool syncing Contacts via the Enterprise WSDL, an ISV data-quality product using the Partner WSDL across its customer base.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External App
+    participant WS as WSDL Contract
+    participant SF as Salesforce SOAP API&lt;br/&gt;/services/Soap
+    participant DB as Salesforce Data
+    EXT-&gt;&gt;WS: Download WSDL, generate typed stubs
+    EXT-&gt;&gt;SF: SOAP request XML over HTTPS&lt;br/&gt;OAuth Bearer in header
+    SF-&gt;&gt;SF: Validate token, perms, validation rules
+    SF-&gt;&gt;DB: create / update / upsert / query
+    DB--&gt;&gt;SF: Result rows or IDs
+    SF--&gt;&gt;EXT: SOAP response XML
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The external tool downloads the <strong>WSDL</strong> (Enterprise or Partner) and generates typed client code from it once.</li>
+<li>It sends a <strong>SOAP XML envelope</strong> over HTTPS to the org endpoint, carrying an <strong>OAuth access token</strong> for authentication.</li>
+<li>Salesforce validates the token, then the <strong>running user's</strong> permissions, FLS, sharing, and validation rules.</li>
+<li>The core operation runs against the database.</li>
+<li>Salesforce returns a <strong>SOAP XML response</strong> with result rows, IDs, success flags, and any errors.</li>
+</ol>
+<hr />
+<h2>4. The actual requests</h2>
+<p><strong>Endpoints</strong> (My Domain host, versioned). The path segment encodes the WSDL type:</p>
+<table>
+<thead>
+<tr>
+<th>WSDL</th>
+<th>Endpoint path</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Enterprise</strong></td>
+<td><code>/services/Soap/c/</code></td>
+<td><code>https://MyDomainName.my.salesforce.com/services/Soap/c/66.0</code></td>
+</tr>
+<tr>
+<td><strong>Partner</strong></td>
+<td><code>/services/Soap/u/</code></td>
+<td><code>https://MyDomainName.my.salesforce.com/services/Soap/u/66.0</code></td>
+</tr>
+</tbody>
+</table>
+<p>Memory hook: <strong>c</strong> = <strong>c</strong>ustomer/enterprise (your schema), <strong>u</strong> = <strong>u</strong>niversal/partner (generic).</p>
+<p><strong>Core operations</strong> (the typed equivalents of CRUD + SOQL):</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create()</code></td>
+<td>Insert one or more records.</td>
+</tr>
+<tr>
+<td><code>retrieve()</code></td>
+<td>Fetch records by ID for given fields.</td>
+</tr>
+<tr>
+<td><code>update()</code></td>
+<td>Update existing records.</td>
+</tr>
+<tr>
+<td><code>upsert()</code></td>
+<td>Create or update by <strong>External Id</strong> (idempotent).</td>
+</tr>
+<tr>
+<td><code>delete()</code></td>
+<td>Delete records by ID.</td>
+</tr>
+<tr>
+<td><code>query()</code></td>
+<td>Run a SOQL query, returns the first batch.</td>
+</tr>
+<tr>
+<td><code>queryMore()</code></td>
+<td>Page through the <strong>next batch</strong> using the <code>queryLocator</code> cursor.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sample SOAP request</strong> (modern auth: OAuth access token in the <code>SessionHeader</code>, no <code>login()</code> call):</p>
+<pre><code class="language-xml">POST /services/Soap/c/66.0 HTTP/1.1
+Host: MyDomainName.my.salesforce.com
+Content-Type: text/xml; charset=UTF-8
+SOAPAction: &quot;&quot;
+
+&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;
+                  xmlns:urn=&quot;urn:enterprise.soap.sforce.com&quot;&gt;
+  &lt;soapenv:Header&gt;
+    &lt;urn:SessionHeader&gt;&lt;urn:sessionId&gt;00D...!AQ...&lt;/urn:sessionId&gt;&lt;/urn:SessionHeader&gt;
+  &lt;/soapenv:Header&gt;
+  &lt;soapenv:Body&gt;
+    &lt;urn:create&gt;
+      &lt;urn:sObjects xsi:type=&quot;urn:Account&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
+        &lt;Name&gt;Acme Corp&lt;/Name&gt;
+        &lt;Industry&gt;Technology&lt;/Industry&gt;
+      &lt;/urn:sObjects&gt;
+    &lt;/urn:create&gt;
+  &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+<p><strong>Response (trimmed)</strong>: a <code>createResponse</code> with a <code>result</code> containing <code>id</code>, <code>success</code>, and any <code>errors</code>. Same data as REST, wrapped in XML.</p>
+<blockquote>
+<p><strong>The <code>sessionId</code> is just your OAuth access token.</strong> Get it from a modern OAuth flow (see section 5), then place it in <code>SessionHeader</code>. You do <strong>not</strong> need the old <code>login()</code> call.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<p>The single most important current fact lives in the first row. Read it carefully.</p>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>login()</code> is retiring</strong></td>
+<td>SOAP API <strong><code>login()</code></strong> in versions <strong>31.0-64.0</strong> is being <strong>retired in Summer '27</strong>. It is <strong>not available in API v65.0+</strong>, and it is <strong>disabled by default in newly created orgs</strong>. From <strong>Summer '26</strong>, in new orgs a user needs the new <strong>"Use Any API Auth"</strong> permission to authenticate via <code>login()</code>.</td>
+<td><strong>Migrate API authentication to OAuth</strong> via <strong>External Client Apps</strong>: Web Server, <strong>JWT Bearer</strong>, or <strong>Client Credentials</strong> flow. Pass the OAuth access token as the <code>sessionId</code>. Do not build new integrations on <code>login()</code>.</td>
+</tr>
+<tr>
+<td><strong>Enterprise WSDL drifts</strong></td>
+<td>It mirrors your exact schema, so adding a field changes the contract.</td>
+<td>Re-download the WSDL and regenerate stubs after metadata changes.</td>
+</tr>
+<tr>
+<td><strong>Partner WSDL is generic</strong></td>
+<td>No object/field types, so you handle name/value pairs yourself.</td>
+<td>Use it for multi-org tools. Accept the extra mapping code as the cost of portability.</td>
+</tr>
+<tr>
+<td><strong>Verbose XML payloads</strong></td>
+<td>SOAP envelopes are larger and slower to parse than JSON.</td>
+<td>Prefer REST for new, chatty, or mobile clients. Reserve SOAP for legacy contracts.</td>
+</tr>
+<tr>
+<td><strong>API allocations</strong></td>
+<td>Calls count against the org's 24-hour API limit, like REST.</td>
+<td>Batch records per call. Use <code>queryMore()</code> to page instead of huge single pulls.</td>
+</tr>
+<tr>
+<td><strong>Runs as the user</strong></td>
+<td>The token's user governs permissions, FLS, and sharing.</td>
+<td>Give the integration user least-privilege access.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>A retried <code>create()</code> double-inserts.</td>
+<td>Prefer <strong><code>upsert()</code> by External Id</strong>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the SOAP API and how does it differ from REST?</strong>
+A: The SOAP API is the original <strong>WSDL-based, strongly-typed, XML-over-HTTPS</strong> API for CRUD and SOQL. REST is lighter, resource-based, and uses JSON. Both do the same core work, but REST is the modern default. SOAP is for legacy or contract-first integrations.</p>
+<p><strong>Q: Enterprise WSDL vs Partner WSDL?</strong>
+A: <strong>Enterprise</strong> is <strong>strongly typed and org-specific</strong>. It mirrors your exact objects and fields, ideal for a single-org integration that wants type safety. <strong>Partner</strong> is <strong>loosely typed and generic</strong>, ideal for ISV or middleware tools that must work across many orgs with different schemas.</p>
+<p><strong>Q: What is happening to SOAP API <code>login()</code>?</strong>
+A: It is <strong>retiring in Summer '27</strong> for versions 31.0-64.0, is <strong>gone in v65.0+</strong>, and is <strong>off by default in new orgs</strong>. From <strong>Summer '26</strong>, new orgs require the <strong>"Use Any API Auth"</strong> permission to use it. The fix is to authenticate with <strong>OAuth</strong> through <strong>External Client Apps</strong> (Web Server, JWT Bearer, or Client Credentials) and pass that token as the session ID.</p>
+<p><strong>Q: How do you authenticate a SOAP call without <code>login()</code>?</strong>
+A: Obtain an <strong>OAuth access token</strong> from a server-to-server flow (JWT Bearer or Client Credentials), then put it in the SOAP <code>SessionHeader</code> as the <code>sessionId</code>. The SOAP operations work unchanged.</p>
+<p><strong>Q: What are <code>query()</code> and <code>queryMore()</code>?</strong>
+A: <code>query()</code> runs a SOQL statement and returns the <strong>first batch</strong> of rows plus a <code>queryLocator</code> cursor. <code>queryMore()</code> uses that cursor to fetch <strong>subsequent batches</strong>, which is how you page through large result sets in SOAP.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "SOAP is the old, formal way in. You download a rulebook called a WSDL, your code learns the exact shapes, and you exchange strict XML. It still works, but the modern door is REST, and the old password-style login is being switched off."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>WSDL, SOAP, Enterprise WSDL, Partner WSDL, XML envelope, <code>queryLocator</code>, upsert, External Id, OAuth Bearer token, External Client App - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. For OAuth flows, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_quickstart_intro.htm">SOAP API Developer Guide (v66.0) - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_partner.htm">Using the Partner WSDL - SOAP API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=release-notes.rn_api_upcoming_retirement_258rn.htm&amp;language=en_US&amp;type=5">SOAP API login() Call in Versions 31.0 Through 64.0 Is Being Retired (Release Update)</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?language=en_US&amp;id=005132110&amp;type=1">Platform SOAP API login() Retirement - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/api_eol_soap.htm">SOAP API End-of-Life Policy - SOAP API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-apex-rest.md</a> - building your own custom REST endpoints in Apex.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Apex REST</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A <strong>custom REST endpoint you write in Apex</strong> when the standard API can't give you the business logic, validation, or contract you need.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON (you control the shape). <strong>Auth</strong>: OAuth 2.0 Bearer token.
+<strong>Use when</strong>: You need <strong>custom logic, orchestration, validation, or a tailored request/response</strong> that the <a href="#f01">Standard REST API</a> cannot express.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Standard REST API is a vending machine: predictable, but it only dispenses standard CRUD. <strong>Apex REST is your own custom counter</strong> where you decide exactly what goes in and what comes out. You write an Apex class, label it as a REST resource, and Salesforce publishes it at a URL you choose.</p>
+<p>Behind that URL you can do anything Apex can do: validate the payload, touch several objects in one call, run business rules, shape a clean response that hides your internal data model. The caller still sends plain JSON with an OAuth token. They never see the Apex. They just see a tidy API that does precisely the job you designed.</p>
+<p>In short: reach for Apex REST when the answer to "can the standard API do this?" is no, because you need <strong>logic or a contract</strong> the generic API can't provide.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You need <strong>custom business logic or validation</strong> on inbound calls.</td>
+<td>Plain CRUD or SOQL on objects → <a href="#f01">01-standard-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td>You want a <strong>tailored request/response contract</strong> that hides internals.</td>
+<td>A legacy SOAP consumer needs a WSDL → <a href="#f04">04-apex-soap-web-services.md</a>.</td>
+</tr>
+<tr>
+<td>One call must <strong>orchestrate several objects or steps</strong>.</td>
+<td>Generic bundling of standard calls → <a href="#f05">05-composite-api.md</a>.</td>
+</tr>
+<tr>
+<td>You want to expose <strong>only a narrow, purpose-built surface</strong>.</td>
+<td><strong>Millions</strong> of records → Bulk API 2.0 (Module 07).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a partner posts an order that creates an Account, Contact, and Opportunity in one validated call; a "submit application" endpoint that runs eligibility logic; a mobile app fetching a custom-shaped dashboard payload that a single SOQL can't build.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External App
+    participant SF as Apex REST Endpoint&lt;br/&gt;/services/apexrest
+    participant APX as Your Apex Class
+    participant DB as Salesforce Data
+    EXT-&gt;&gt;SF: POST /services/apexrest/Cases/ JSON + Bearer
+    SF-&gt;&gt;SF: Validate OAuth token
+    SF-&gt;&gt;APX: Route to @HttpPost method
+    APX-&gt;&gt;APX: Validate input, run business logic
+    APX-&gt;&gt;DB: Insert / update across objects
+    DB--&gt;&gt;APX: Results
+    APX--&gt;&gt;EXT: Custom JSON response + status code
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The external app sends an HTTP request with a JSON body and an <strong>OAuth Bearer token</strong> to your <code>/services/apexrest/...</code> URL.</li>
+<li>Salesforce validates the token, then routes the request based on the <strong>HTTP verb</strong> to the matching annotated method.</li>
+<li>Your Apex method reads the request via <code>RestContext.request</code>, <strong>validates and applies business logic</strong>.</li>
+<li>It performs DML, possibly across several objects, as one transaction.</li>
+<li>It returns an Apex object (auto-serialized to JSON) or writes a custom body and status code to <code>RestContext.response</code>.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<p><strong>Base path</strong>: <code>https://MyDomainName.my.salesforce.com/services/apexrest/</code> + your <code>urlMapping</code>.</p>
+<p>A class becomes an Apex REST resource when it is <strong>global</strong> and annotated with <strong><code>@RestResource</code></strong> carrying a <code>urlMapping</code>. Methods are mapped to HTTP verbs with annotations:</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>HTTP verb</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@HttpGet</code></td>
+<td>GET</td>
+<td>Read / fetch a custom payload.</td>
+</tr>
+<tr>
+<td><code>@HttpPost</code></td>
+<td>POST</td>
+<td>Create, or run an action.</td>
+</tr>
+<tr>
+<td><code>@HttpPatch</code></td>
+<td>PATCH</td>
+<td>Partial update / upsert.</td>
+</tr>
+<tr>
+<td><code>@HttpPut</code></td>
+<td>PUT</td>
+<td>Full update / replace.</td>
+</tr>
+<tr>
+<td><code>@HttpDelete</code></td>
+<td>DELETE</td>
+<td>Delete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sample class</strong> (custom contract over Case, with sharing enforced for the running user):</p>
+<pre><code class="language-apex">@RestResource(urlMapping='/Cases/*')
+global with sharing class CaseResource {
+
+    // GET /services/apexrest/Cases/{caseId}
+    @HttpGet
+    global static Case getCase() {
+        RestRequest req = RestContext.request;
+        String caseId = req.requestURI.substringAfterLast('/');
+        return [SELECT Id, Subject, Status, Priority
+                FROM Case WHERE Id = :caseId];
+    }
+
+    // POST /services/apexrest/Cases/  with JSON body
+    @HttpPost
+    global static String createCase(String subject, String priority) {
+        if (String.isBlank(subject)) {
+            RestContext.response.statusCode = 400;       // custom status
+            return 'Subject is required';
+        }
+        Case c = new Case(Subject = subject, Priority = priority, Origin = 'API');
+        insert c;                                         // business logic + DML
+        RestContext.response.statusCode = 201;
+        return c.Id;                                      // auto-serialized to JSON
+    }
+}
+</code></pre>
+<p><strong>Request</strong></p>
+<pre><code>POST /services/apexrest/Cases/
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{ &quot;subject&quot;: &quot;Login broken&quot;, &quot;priority&quot;: &quot;High&quot; }
+</code></pre>
+<p><strong>Response</strong>: <code>201</code> with the new Case Id as a JSON string. Notice the caller never sees a raw <code>Case</code> insert. They see your contract.</p>
+<blockquote>
+<p><strong>Auto-serialization</strong>: return an Apex object (sObject, custom class, or list) and Salesforce serializes it to JSON for you. Method parameters are auto-deserialized from the JSON body by name. For full control over headers, body, and status, write to <code>RestContext.response</code> directly.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Runs in system context</strong></td>
+<td>An Apex REST method executes in <strong>system context</strong>: object permissions, <strong>FLS, and sharing are NOT enforced automatically</strong>, regardless of the calling user. This is a real security trap.</td>
+<td>Add <strong><code>with sharing</code></strong> and <strong>enforce FLS/CRUD explicitly</strong> (e.g. <code>WITH USER_MODE</code>, <code>Security.stripInaccessible</code>, or <code>Schema</code> checks). Put business logic in a <code>with sharing</code> class and call it from the resource.</td>
+</tr>
+<tr>
+<td><strong>One method per verb</strong></td>
+<td>A class can have <strong>only one</strong> method per HTTP verb (one <code>@HttpGet</code>, one <code>@HttpPost</code>, etc.).</td>
+<td>Branch inside the method on the URI or body. Split distinct resources into separate classes with their own <code>urlMapping</code>.</td>
+</tr>
+<tr>
+<td><strong>Must be <code>global</code></strong></td>
+<td>The class and its annotated methods must be <code>global</code> and <code>static</code> to be reachable.</td>
+<td>Declare the class <code>global</code>; declare each annotated method <code>global static</code>.</td>
+</tr>
+<tr>
+<td><strong>Counts against API limits</strong></td>
+<td>Every call consumes the org's 24-hour API allocation, like the standard API.</td>
+<td>Design coarse-grained endpoints. Avoid making clients call in tight loops.</td>
+</tr>
+<tr>
+<td><strong>Governor limits apply</strong></td>
+<td>Your Apex runs under normal <strong>governor limits</strong> (SOQL, DML, CPU).</td>
+<td>Bulkify. One call should not do per-record DML in a loop.</td>
+</tr>
+<tr>
+<td><strong>Expose only what you need</strong></td>
+<td>A custom endpoint is attack surface.</td>
+<td>Return the minimum fields. Validate every input. Keep the contract narrow.</td>
+</tr>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>Every call needs a valid OAuth token.</td>
+<td>Use a flow from <a href="../03-Authentication/README.md">Module 03</a> (JWT Bearer or Client Credentials for server-to-server).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Apex REST and when do you use it over the Standard REST API?</strong>
+A: Apex REST is a <strong>custom REST endpoint</strong> you build with <code>@RestResource</code> on a global class. Use it when you need <strong>business logic, validation, multi-object orchestration, or a tailored contract</strong>. The Standard REST API only does generic CRUD and SOQL.</p>
+<p><strong>Q: How do you define an Apex REST resource?</strong>
+A: Create a <strong>global</strong> class annotated with <code>@RestResource(urlMapping='/path/*')</code>, then add <code>global static</code> methods annotated with <code>@HttpGet</code>, <code>@HttpPost</code>, <code>@HttpPatch</code>, <code>@HttpPut</code>, or <code>@HttpDelete</code>. It is published under <code>/services/apexrest/</code>.</p>
+<p><strong>Q: In what context does an Apex REST method run? Why does that matter?</strong>
+A: It runs in <strong>system context</strong>, so object permissions, FLS, and sharing are <strong>not enforced by default</strong>, even though the request is authenticated as a specific user. You must add <code>with sharing</code> and enforce FLS/CRUD explicitly (user mode, <code>stripInaccessible</code>, or <code>Schema</code> checks) to avoid exposing data the user shouldn't see.</p>
+<p><strong>Q: How many methods per HTTP verb can a class have?</strong>
+A: Exactly <strong>one</strong> per verb. If you need multiple behaviors for the same verb, branch on the URI or payload inside that method, or split into separate resource classes.</p>
+<p><strong>Q: How do request and response bodies work?</strong>
+A: Read the incoming request via <code>RestContext.request</code> (or let parameters auto-deserialize from JSON). Return an Apex object and Salesforce auto-serializes it to JSON, or write to <code>RestContext.response</code> for full control over status code, headers, and body.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a door I build myself. The standard API only does generic CRUD, so when I need real logic or a clean custom shape, I write a little Apex class, give it a web address, and outsiders call it with a token."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p><code>@RestResource</code>, <code>urlMapping</code>, <code>@HttpGet</code>/<code>@HttpPost</code>/<code>@HttpPatch</code>/<code>@HttpPut</code>/<code>@HttpDelete</code>, <code>RestContext</code>, system context, <code>with sharing</code>, FLS, OAuth Bearer token - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. For OAuth flows, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_methods.htm">Apex REST Methods - Apex Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_annotation_rest_resource.htm">RestResource Annotation - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_code_sample_basic.htm">Apex REST Basic Code Sample - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_methods_system_restcontext.htm">RestContext Class - Apex Reference Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2022/08/writing-apex-rest-services-and-when-not-to">Writing Apex REST Services and When Not To - Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-apex-soap-web-services.md</a> - custom SOAP endpoints in Apex for legacy consumers.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - Apex SOAP Web Services</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A <strong>custom SOAP endpoint you write in Apex</strong> by adding the <code>webservice</code> keyword. Salesforce generates a WSDL for it so legacy SOAP clients can call your logic.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: XML (SOAP). <strong>Auth</strong>: OAuth 2.0 Bearer token (session ID).
+<strong>Use when</strong>: A <strong>legacy SOAP consumer</strong> needs to call <strong>custom Apex logic</strong> and must have a WSDL. For new custom services, prefer <a href="#f03">03-apex-rest.md</a>.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>This is the SOAP cousin of <a href="#f03">Apex REST</a>. You still write a custom Apex method that does whatever you need, but instead of exposing it as a JSON REST endpoint, you expose it as a <strong>SOAP service</strong>. You mark a method with the <strong><code>webservice</code></strong> keyword, and Salesforce <strong>generates a WSDL</strong> from your class. A legacy SOAP client downloads that WSDL, generates typed stubs, and calls your method with XML envelopes.</p>
+<p>Think of it as <strong>publishing a custom function in the formal, contract-first language</strong> that older enterprise systems already speak. The standard SOAP API (<a href="#f02">02-standard-soap-api.md</a>) only gives them generic CRUD. This lets them call <strong>your</strong> business logic the same WSDL way.</p>
+<p>It works and is fully supported, but it is the <strong>older approach for custom services</strong>. For anything new, <strong>Apex REST is preferred</strong> because it is lighter, simpler to consume, and easier to evolve. Reach for Apex SOAP only when a consumer genuinely requires SOAP.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A <strong>legacy SOAP client</strong> must call <strong>custom Apex logic</strong> and needs a WSDL.</td>
+<td>Building a <strong>new</strong> custom service → <a href="#f03">03-apex-rest.md</a> (preferred).</td>
+</tr>
+<tr>
+<td>The consumer's tooling is <strong>contract-first / strongly typed</strong> and SOAP-only.</td>
+<td>The consumer only needs <strong>standard CRUD</strong> over SOAP → <a href="#f02">02-standard-soap-api.md</a>.</td>
+</tr>
+<tr>
+<td>You must match an <strong>existing SOAP integration contract</strong>.</td>
+<td>A modern JSON client → <a href="#f01">01-standard-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Bulk</strong> or <strong>many operations</strong> → Bulk API 2.0 / <a href="#f05">Composite</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: an on-prem billing platform that only generates SOAP stubs calling a custom <code>chargeAccount()</code> method; a legacy middleware flow that must invoke a multi-step Apex routine through a WSDL it already manages.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant DEV as You (Admin/Dev)
+    participant SF as Salesforce
+    participant EXT as Legacy SOAP Client
+    participant APX as Your webservice Method
+    DEV-&gt;&gt;SF: Write global class with webservice static method
+    DEV-&gt;&gt;SF: Setup, Apex Classes, Generate WSDL
+    SF--&gt;&gt;DEV: Custom WSDL file
+    DEV-&gt;&gt;EXT: Hand WSDL to the consumer
+    EXT-&gt;&gt;EXT: Generate typed stubs from WSDL
+    EXT-&gt;&gt;APX: SOAP request XML + session ID
+    APX-&gt;&gt;APX: Run custom logic + DML
+    APX--&gt;&gt;EXT: SOAP response XML
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>You write a <strong>global</strong> Apex class with one or more <strong><code>webservice static</code></strong> methods containing your logic.</li>
+<li>In Setup you open the class and click <strong>Generate WSDL</strong>. Salesforce produces a WSDL describing your method.</li>
+<li>You hand the WSDL to the external consumer, who generates typed client stubs from it.</li>
+<li>The client sends a <strong>SOAP XML request</strong> with an <strong>OAuth access token</strong> as the session ID.</li>
+<li>Your method runs (custom logic plus DML) and returns a <strong>SOAP XML response</strong>.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<p><strong>Endpoint</strong>: custom Apex SOAP services are published under <code>/services/Soap/class/{ClassName}</code>, e.g. <code>https://MyDomainName.my.salesforce.com/services/Soap/class/AccountManager</code>.</p>
+<p><strong>The <code>webservice</code> keyword rules</strong> (this is the exam-favorite part):</p>
+<ul>
+<li>The method must use <strong><code>webservice</code></strong> and must be <strong><code>static</code></strong>.</li>
+<li>Methods with <code>webservice</code> are <strong>inherently global</strong>, so the <strong>enclosing class must be <code>global</code></strong>.</li>
+<li>You <strong>cannot</strong> apply <code>webservice</code> to a <strong>class</strong> itself, only to <strong>methods</strong> and <strong>member variables</strong>.</li>
+<li>It is valid on <strong>top-level (outer) class</strong> methods and variables, and on <strong>inner class</strong> member variables.</li>
+</ul>
+<p><strong>Sample class</strong>:</p>
+<pre><code class="language-apex">global class AccountManager {
+
+    // Inner class members exposed in the generated WSDL
+    global class AccountResult {
+        webservice String accountId;
+        webservice String message;
+    }
+
+    // Becomes a SOAP operation in the generated WSDL
+    webservice static AccountResult createAccount(String name, String industry) {
+        AccountResult r = new AccountResult();
+        Account a = new Account(Name = name, Industry = industry);
+        insert a;                       // your custom logic + DML
+        r.accountId = a.Id;
+        r.message = 'Created';
+        return r;
+    }
+}
+</code></pre>
+<p>After saving, go to <strong>Setup, Apex Classes, open <code>AccountManager</code>, Generate WSDL</strong>. Salesforce builds a WSDL exposing <code>createAccount</code> as a typed SOAP operation, with <code>AccountResult</code> as a complex type. The consumer imports it and calls the operation with a SOAP envelope, passing the <strong>OAuth access token</strong> as the <code>sessionId</code> in the SOAP header (same auth model as the <a href="#f02">Standard SOAP API</a>).</p>
+<blockquote>
+<p><strong>Two WSDLs, do not confuse them.</strong> The <strong>Enterprise/Partner WSDL</strong> (Module 04-02) describes the <strong>standard</strong> API. The WSDL you generate here describes <strong>only your custom class</strong>. A consumer of your method needs <em>your</em> WSDL.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Apex REST is preferred</strong></td>
+<td>Apex SOAP is the <strong>older</strong> model for custom services. SOAP is heavier and harder to evolve.</td>
+<td>Default to <a href="#f03">Apex REST</a> for new work. Use Apex SOAP only for SOAP-only consumers.</td>
+</tr>
+<tr>
+<td><strong>Generate the WSDL in Setup</strong></td>
+<td>Consumers need the WSDL, and it changes when your method signatures change.</td>
+<td>After signature changes, <strong>regenerate</strong> the WSDL and re-share it so stubs stay in sync.</td>
+</tr>
+<tr>
+<td><strong>Type restrictions on <code>webservice</code> methods</strong></td>
+<td>Not every Apex type is allowed as a <code>webservice</code> parameter or return (e.g. maps, certain collections and types are restricted).</td>
+<td>Use supported types (primitives, sObjects, and lists of them, simple custom classes). Keep signatures simple.</td>
+</tr>
+<tr>
+<td><strong><code>webservice</code> keyword placement</strong></td>
+<td>Must be on a <strong>static method in a global class</strong>, or a member variable. It cannot decorate a class.</td>
+<td>Make the class <code>global</code>, methods <code>webservice static</code>. Expose fields with <code>webservice</code> on members.</td>
+</tr>
+<tr>
+<td><strong>Runs as the user</strong></td>
+<td>The session ID's user governs permissions, FLS, and sharing for the request.</td>
+<td>Use a least-privilege integration user. Still enforce sharing/FLS in your logic where needed.</td>
+</tr>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>The session ID is an <strong>OAuth access token</strong>. Legacy <code>login()</code> is retiring (see 04-02).</td>
+<td>Authenticate with <strong>OAuth</strong> (JWT Bearer or Client Credentials) via External Client Apps. See <a href="../03-Authentication/README.md">Module 03</a>.</td>
+</tr>
+<tr>
+<td><strong>Counts against API limits + governor limits</strong></td>
+<td>Calls consume the org's API allocation and run under Apex governor limits.</td>
+<td>Design coarse, bulk-safe operations.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is an Apex SOAP web service?</strong>
+A: A custom Apex method exposed as a <strong>SOAP operation</strong> by adding the <strong><code>webservice</code></strong> keyword. Salesforce <strong>generates a WSDL</strong> for the class so legacy SOAP clients can call your custom logic with XML, under <code>/services/Soap/class/</code>.</p>
+<p><strong>Q: What are the rules for the <code>webservice</code> keyword?</strong>
+A: The method must be <strong><code>static</code></strong> and marked <strong><code>webservice</code></strong>, which makes it inherently <strong>global</strong>, so the <strong>class must be <code>global</code></strong>. You <strong>cannot</strong> put <code>webservice</code> on a class, only on methods and member variables. It works on outer-class methods/variables and inner-class members.</p>
+<p><strong>Q: How is this different from the standard SOAP API?</strong>
+A: The <strong>standard</strong> SOAP API gives generic CRUD/SOQL via the <strong>Enterprise/Partner WSDL</strong>. An <strong>Apex SOAP web service</strong> exposes <strong>your custom logic</strong> via a <strong>WSDL you generate</strong> from your own class.</p>
+<p><strong>Q: Apex SOAP or Apex REST for a new custom service?</strong>
+A: <strong>Apex REST</strong>, almost always. It is lighter, JSON-based, and easier to consume and evolve. Use Apex SOAP only when the consumer is <strong>SOAP-only</strong> or must match an existing SOAP contract.</p>
+<p><strong>Q: How does a consumer get and use the service?</strong>
+A: You click <strong>Generate WSDL</strong> on the class in Setup, hand them the WSDL, they generate typed stubs, then call the operation with a SOAP envelope, passing an <strong>OAuth access token</strong> as the session ID.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Same idea as a custom REST endpoint, but in the older, formal SOAP language. I tag a method with one keyword, Salesforce writes a rulebook (a WSDL) for it, and a legacy system uses that rulebook to call my code."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p><code>webservice</code> keyword, global class, Generate WSDL, SOAP, session ID, complex type, inner class members, OAuth Bearer token - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. For OAuth flows, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_web_services.htm">Exposing Apex Methods as SOAP Web Services - Apex Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_web_services_methods.htm">Webservice Methods - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_web_services_methods_considerations.htm">Considerations for Using the webservice Keyword - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/api_eol_soap.htm">SOAP API End-of-Life Policy - SOAP API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-composite-api.md</a> - bundling many operations into one round-trip.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Composite API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Bundle <strong>many</strong> Salesforce operations into <strong>one</strong> HTTP round-trip, optionally chaining and rolling them back as a single transaction.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON. <strong>Auth</strong>: OAuth 2.0 Bearer token.
+<strong>Use when</strong>: You would otherwise make several Standard REST calls that are related, dependent, or should succeed or fail together.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>. This builds on <a href="#f01">01-standard-rest-api.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Standard REST API is a vending machine: one coin, one snack. The Composite API is a <strong>food court order on a single tray</strong>. You write down everything you want, hand it over once, and the kitchen prepares it all in one trip. You can even say "use the table number from my first order for my second order" (chaining), or "if any one dish is out of stock, cancel the whole tray" (all-or-none).</p>
+<p>In Salesforce terms: instead of firing five separate HTTP requests (each costing a network round-trip and an API call), you send <strong>one</strong> request whose body contains a list of <strong>subrequests</strong>. Salesforce runs them in order and returns one combined response. The headline win is fewer round-trips, fewer API calls, and the option to treat the whole bundle as a single transaction.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Several related calls that should be <strong>one network trip</strong>.</td>
+<td>A single CRUD or SOQL call → <a href="#f01">01-standard-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td>One call <strong>depends on</strong> the result of another (chaining).</td>
+<td>Operations are unrelated and order does not matter → Composite <strong>Batch</strong>.</td>
+</tr>
+<tr>
+<td>You want <strong>all-or-none</strong> transactional behavior.</td>
+<td><strong>Millions</strong> of records → Bulk API 2.0 (Module 07).</td>
+</tr>
+<tr>
+<td>Create a parent <strong>and its children</strong> in one shot.</td>
+<td>You need custom orchestration logic → <a href="#f03">03-apex-rest.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: create an <strong>Account plus its Contacts and an Opportunity</strong> atomically, look up a record then update a related one using the returned Id, or insert 200 order lines in a single nested payload.</p>
+<hr />
+<h2>3. The family at a glance</h2>
+<p>Four resources live under <code>/services/data/v66.0/composite/</code>. Pick by <strong>chaining</strong> and <strong>volume</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Max work per call</th>
+<th>Chaining?</th>
+<th>Transaction</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Composite</strong></td>
+<td><strong>Up to 25 subrequests</strong></td>
+<td>✅ Yes, <code>@{refId.field}</code></td>
+<td>Optional <code>allOrNone</code></td>
+<td>Dependent, mixed operations in order</td>
+</tr>
+<tr>
+<td><strong>Composite Batch</strong></td>
+<td><strong>Up to 25 subrequests</strong></td>
+<td>❌ No</td>
+<td>Each independent</td>
+<td>Unrelated calls, one round-trip</td>
+</tr>
+<tr>
+<td><strong>sObject Tree</strong></td>
+<td><strong>Up to 200 records</strong> total</td>
+<td>Implicit by nesting</td>
+<td>Always all-or-none</td>
+<td>One parent with nested children</td>
+</tr>
+<tr>
+<td><strong>Composite Graph</strong></td>
+<td><strong>Up to 500 records</strong> per request</td>
+<td>✅ Yes, across graphs</td>
+<td>Each <strong>graph</strong> is atomic</td>
+<td>Large, related, multi-graph loads</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. How it works (the Composite resource)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External App
+    participant SF as Composite Endpoint&lt;br/&gt;/composite
+    participant DB as Salesforce Data
+    EXT-&gt;&gt;SF: POST /composite (one JSON body, 25 subrequests)
+    SF-&gt;&gt;DB: Run subrequest 1 (create Account)
+    DB--&gt;&gt;SF: refId NewAccount returns Id
+    SF-&gt;&gt;DB: Run subrequest 2 using @{NewAccount.id}
+    DB--&gt;&gt;SF: Child Contact created
+    Note over SF,DB: If allOrNone=true and any step fails, roll back ALL
+    SF--&gt;&gt;EXT: 200 OK + array of subrequest results
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>One <code>POST</code> carries a body with a <code>compositeRequest</code> array of up to <strong>25</strong> subrequests, each tagged with a <code>referenceId</code>.
+2-3. Subrequest 1 creates an Account. Its result is stored under its <code>referenceId</code>.</li>
+<li>Subrequest 2 references the new Id with <code>@{NewAccount.id}</code>, so the child links to the parent without a second round-trip.</li>
+<li>If <code>allOrNone</code> is <code>true</code>, any failure rolls back <strong>every</strong> completed subrequest.</li>
+<li>Salesforce returns one response: an array of results, each with its own HTTP status code and body.</li>
+</ol>
+<blockquote>
+<p><strong>Chaining is the superpower.</strong> Only the <strong>Composite</strong> resource (and Composite Graph) can reference earlier results. <strong>Composite Batch</strong> runs its 25 subrequests independently with no chaining.</p>
+</blockquote>
+<hr />
+<h2>5. The actual requests</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/</code></p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Method + path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Composite</td>
+<td><code>POST /composite</code></td>
+</tr>
+<tr>
+<td>Composite Batch</td>
+<td><code>POST /composite/batch</code></td>
+</tr>
+<tr>
+<td>sObject Tree</td>
+<td><code>POST /composite/tree/{SObjectName}</code></td>
+</tr>
+<tr>
+<td>Composite Graph</td>
+<td><code>POST /composite/graph</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Composite: create an Account, then a Contact linked to it</strong></p>
+<pre><code>POST /services/data/v66.0/composite
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{
+  &quot;allOrNone&quot;: true,
+  &quot;compositeRequest&quot;: [
+    {
+      &quot;method&quot;: &quot;POST&quot;,
+      &quot;url&quot;: &quot;/services/data/v66.0/sobjects/Account&quot;,
+      &quot;referenceId&quot;: &quot;NewAccount&quot;,
+      &quot;body&quot;: { &quot;Name&quot;: &quot;Acme Corp&quot;, &quot;Industry&quot;: &quot;Technology&quot; }
+    },
+    {
+      &quot;method&quot;: &quot;POST&quot;,
+      &quot;url&quot;: &quot;/services/data/v66.0/sobjects/Contact&quot;,
+      &quot;referenceId&quot;: &quot;NewContact&quot;,
+      &quot;body&quot;: { &quot;LastName&quot;: &quot;Nguyen&quot;, &quot;AccountId&quot;: &quot;@{NewAccount.id}&quot; }
+    }
+  ]
+}
+</code></pre>
+<p><strong>sObject Tree: one Account with nested Contacts (max 200 records)</strong></p>
+<pre><code>POST /services/data/v66.0/composite/tree/Account
+
+{
+  &quot;records&quot;: [{
+    &quot;attributes&quot;: { &quot;type&quot;: &quot;Account&quot;, &quot;referenceId&quot;: &quot;ref1&quot; },
+    &quot;Name&quot;: &quot;Acme Corp&quot;,
+    &quot;Contacts&quot;: { &quot;records&quot;: [
+      { &quot;attributes&quot;: { &quot;type&quot;: &quot;Contact&quot;, &quot;referenceId&quot;: &quot;c1&quot; }, &quot;LastName&quot;: &quot;Nguyen&quot; },
+      { &quot;attributes&quot;: { &quot;type&quot;: &quot;Contact&quot;, &quot;referenceId&quot;: &quot;c2&quot; }, &quot;LastName&quot;: &quot;Okafor&quot; }
+    ]}
+  }]
+}
+</code></pre>
+<p>A successful Composite response is an array of per-subrequest results, each with its own status and body, so you can tell exactly which step did what.</p>
+<hr />
+<h2>6. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Subrequest cap</strong></td>
+<td>Composite and Batch allow <strong>25</strong> subrequests; only a subset may be queries.</td>
+<td>Split larger workloads, or use Composite Graph.</td>
+</tr>
+<tr>
+<td><strong>Record caps</strong></td>
+<td>sObject Tree is <strong>200</strong> records; Composite Graph is <strong>500</strong> records per request.</td>
+<td>Choose the resource that fits the volume.</td>
+</tr>
+<tr>
+<td><strong>All-or-none</strong></td>
+<td>Composite is partial-success <strong>unless</strong> <code>allOrNone:true</code>. sObject Tree is <strong>always</strong> atomic.</td>
+<td>Set <code>allOrNone</code> deliberately when you need a clean rollback.</td>
+</tr>
+<tr>
+<td><strong>Graph atomicity</strong></td>
+<td>In Composite Graph, each <strong>graph</strong> is transactional, not the whole request.</td>
+<td>Group records that must succeed together into one graph.</td>
+</tr>
+<tr>
+<td><strong>Query result cap</strong></td>
+<td>Across subrequests, fetching <strong>2,000</strong> records triggers query locators for the rest.</td>
+<td>Page through locators for large result sets.</td>
+</tr>
+<tr>
+<td><strong>One API call counts as one</strong></td>
+<td>The whole bundle is <strong>one</strong> API request against your allocation.</td>
+<td>Use Composite to cut chatty per-record loops.</td>
+</tr>
+<tr>
+<td><strong>Chaining syntax</strong></td>
+<td><code>@{refId.field}</code> only works in Composite and Graph, not Batch.</td>
+<td>Use Batch only when subrequests are independent.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What problem does the Composite API solve?</strong>
+A: It collapses several related REST calls into <strong>one</strong> round-trip, cutting network latency and API call consumption, and it can run them as a single transaction. The Standard REST API is one operation per call.</p>
+<p><strong>Q: Composite vs Composite Batch?</strong>
+A: Both bundle up to <strong>25</strong> subrequests. <strong>Composite</strong> runs them in order and lets later subrequests reference earlier results with <code>@{refId.field}</code>, and supports <code>allOrNone</code>. <strong>Composite Batch</strong> runs them <strong>independently</strong> with no chaining.</p>
+<p><strong>Q: How do you create an Account and its child Contacts in one call?</strong>
+A: Use <strong>sObject Tree</strong> for a nested parent-child payload (up to <strong>200</strong> records, always all-or-none), or <strong>Composite</strong> with chaining, referencing the new Account Id via <code>@{NewAccount.id}</code>.</p>
+<p><strong>Q: When would you reach for Composite Graph?</strong>
+A: For <strong>larger</strong> related loads, up to <strong>500</strong> records per request, where you want each graph rolled back independently. It scales beyond the 25-subrequest Composite resource while keeping per-graph atomicity.</p>
+<p><strong>Q: Does a Composite call count as one API request or many?</strong>
+A: <strong>One</strong> request against the org's API allocation, even though it contains many subrequests. That is a key reason to batch chatty integrations.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Instead of five separate trips to the counter, you hand over one tray of orders. You can chain them, and you can say cancel everything if any single item fails."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Composite, subrequest, referenceId, <code>@{refId.field}</code> chaining, allOrNone, sObject Tree, Composite Graph, query locator, API allocation - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite_post.htm">Send Multiple Requests Using Composite (v66.0) — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_batch.htm">Composite Batch — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_sobject_tree_create.htm">Create Nested Records (sObject Tree) — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_graph_limits.htm">Composite Graph Limits — REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_allornone.htm">allOrNone Parameters in Composite and Collections Requests — REST API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-connect-rest-api.md</a> - the API for Chatter, Experience Cloud, and Files.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - Connect REST API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The HTTP API for Salesforce's <strong>social and collaboration layer</strong> - Chatter feeds, Experience Cloud sites, and Files - features the sObject APIs do not model well.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON (binary for file uploads). <strong>Auth</strong>: OAuth 2.0 Bearer token.
+<strong>Use when</strong>: You need to post to a feed, manage community content, or work with files programmatically rather than read and write plain records.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>. Compare with <a href="#f01">01-standard-rest-api.md</a> and <a href="#f05">05-composite-api.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Standard REST API gives you the <strong>filing cabinet</strong>: rows, fields, records. But Salesforce is also a <strong>social network and a website builder</strong>, and a feed post or a community page is not a tidy row you can <code>PATCH</code>. The Connect REST API is the <strong>app's own interface</strong> for that world. It is the same API the Salesforce mobile app and Lightning use to render a Chatter feed, complete with avatars, mentions, attachments, likes, and comments already assembled for you.</p>
+<p>Think of it this way: if you asked the sObject API for a feed, you would get raw <code>FeedItem</code> rows and have to stitch the photos, mentions, and comment threads together yourself. Connect REST hands you the <strong>finished, display-ready</strong> feed - the way a human would see it. It is <strong>structured around features</strong> (feeds, groups, files, sites), not around database tables.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Post or read a <strong>Chatter feed</strong>, comment, like, or @mention.</td>
+<td>Plain CRUD or SOQL on records → <a href="#f01">01-standard-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td>Manage <strong>Experience Cloud</strong> (Communities) content or membership.</td>
+<td>Bundling many record operations → <a href="#f05">05-composite-api.md</a>.</td>
+</tr>
+<tr>
+<td>Upload, share, or download <strong>Files / ContentDocuments</strong>.</td>
+<td>Building a record detail UI with layouts → <a href="#f07">07-ui-api.md</a>.</td>
+</tr>
+<tr>
+<td>Work with <strong>groups, followers, notifications</strong>, or some CMS.</td>
+<td>Bulk record loads → Bulk API 2.0 (Module 07).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: an external app <strong>posts a status update</strong> to a record's Chatter feed, an integration <strong>uploads a contract PDF</strong> and shares it, or a portal back-end <strong>manages Experience Cloud site</strong> membership and content.</p>
+<hr />
+<h2>3. Connect REST vs Standard REST</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard REST (sObjects)</th>
+<th>Connect REST</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Models</strong></td>
+<td>Database rows and fields</td>
+<td>Collaboration <strong>features</strong></td>
+</tr>
+<tr>
+<td><strong>Shape</strong></td>
+<td>Generic record JSON</td>
+<td>Feature-specific, display-ready JSON</td>
+</tr>
+<tr>
+<td><strong>You assemble</strong></td>
+<td>Relationships yourself</td>
+<td>Pre-assembled feeds, mentions, attachments</td>
+</tr>
+<tr>
+<td><strong>Typical verbs</strong></td>
+<td><code>GET</code>/<code>POST</code>/<code>PATCH</code>/<code>DELETE</code></td>
+<td>Same verbs, feature-oriented resources</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Data</td>
+<td>Chatter, Experience Cloud, Files</td>
+</tr>
+</tbody>
+</table>
+<p>Both are inbound, both use OAuth, both run as the calling user. The difference is <strong>what they expose</strong>: data versus the social and content layer on top of it.</p>
+<hr />
+<h2>4. How it works</h2>
+<div class="mermaid">
+flowchart LR
+    EXT["External App&lt;br/&gt;OAuth Bearer token"] --&gt;|POST /chatter/feed-elements| CONN["Connect REST API"]
+    CONN --&gt; FEED["Chatter feeds&lt;br/&gt;posts, comments, likes"]
+    CONN --&gt; EXP["Experience Cloud&lt;br/&gt;sites, members, CMS"]
+    CONN --&gt; FILES["Files / Content&lt;br/&gt;upload, share, download"]
+    CONN --&gt; NOTIF["Groups, followers,&lt;br/&gt;notifications"]
+    style EXT fill:#607D8B,color:#fff
+    style CONN fill:#00A1E0,color:#fff
+    style FEED fill:#9C27B0,color:#fff
+    style EXP fill:#ff9900,color:#fff
+    style FILES fill:#4CAF50,color:#fff
+    style NOTIF fill:#607D8B,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The external app authenticates with an <strong>OAuth Bearer token</strong>, exactly like the Standard REST API.</li>
+<li>It calls a <strong>feature-oriented</strong> resource under <code>/connect/</code> or <code>/chatter/</code>, for example posting a feed element.</li>
+<li>Connect REST enforces the running user's permissions, sharing, and visibility, then performs the action.</li>
+<li>The response is <strong>display-ready</strong> JSON: a feed element already populated with body, actor, mentions, and capabilities.</li>
+</ol>
+<hr />
+<h2>5. The actual requests</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/</code></p>
+<p>Connect REST resources live under <strong><code>/chatter/</code></strong> (the Chatter feature set) and <strong><code>/connect/</code></strong> (Experience Cloud, CMS, and newer features).</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Method + path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read a user's news feed</td>
+<td><code>GET /chatter/feeds/news/me/feed-elements</code></td>
+</tr>
+<tr>
+<td>Post a feed item</td>
+<td><code>POST /chatter/feed-elements</code></td>
+</tr>
+<tr>
+<td>Comment on a feed element</td>
+<td><code>POST /chatter/feed-elements/{feedElementId}/capabilities/comments/items</code></td>
+</tr>
+<tr>
+<td>List Experience Cloud sites</td>
+<td><code>GET /connect/communities</code></td>
+</tr>
+<tr>
+<td>Managed Content (CMS)</td>
+<td><code>GET /connect/cms/contents</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Post a text update to a record's feed</strong></p>
+<pre><code>POST /services/data/v66.0/chatter/feed-elements
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{
+  &quot;feedElementType&quot;: &quot;FeedItem&quot;,
+  &quot;subjectId&quot;: &quot;001bn00000ABCDeAAH&quot;,
+  &quot;body&quot;: {
+    &quot;messageSegments&quot;: [
+      { &quot;type&quot;: &quot;Text&quot;, &quot;text&quot;: &quot;Contract signed and uploaded. Great work team!&quot; }
+    ]
+  }
+}
+</code></pre>
+<p>The response returns the created feed element with its Id, actor, body, and the <strong>capabilities</strong> (comments, likes, files) available on it, ready to render in a UI.</p>
+<hr />
+<h2>6. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Feature-oriented, not record-oriented</strong></td>
+<td>Resources map to Chatter, sites, files, not tables.</td>
+<td>Browse by feature in the Connect REST guide, not the object reference.</td>
+</tr>
+<tr>
+<td><strong>Apex twin exists</strong></td>
+<td>The <code>ConnectApi</code> namespace mirrors these resources in Apex.</td>
+<td>Use <code>ConnectApi</code> for in-org logic, Connect REST for external callers.</td>
+</tr>
+<tr>
+<td><strong>Per-user context</strong></td>
+<td>Actions run as the OAuth user and respect Chatter and site visibility.</td>
+<td>Give the integration user the right community and feed access.</td>
+</tr>
+<tr>
+<td><strong>Experience Cloud URLs</strong></td>
+<td>Community resources may need the site Id in the path.</td>
+<td>Build the URL with the correct site context.</td>
+</tr>
+<tr>
+<td><strong>Files are binary</strong></td>
+<td>Uploads use multipart, not plain JSON.</td>
+<td>Send file content as a multipart request part.</td>
+</tr>
+<tr>
+<td><strong>Versioned like all REST</strong></td>
+<td>Behavior is pinned to the API version.</td>
+<td>Hardcode <code>v66.0</code> that your client tested against.</td>
+</tr>
+<tr>
+<td><strong>Rate limits</strong></td>
+<td>Some Connect resources have their own per-app rate limits.</td>
+<td>Read the rate-limit notes in the Connect REST guide.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Connect REST API for?</strong>
+A: It exposes Salesforce's <strong>collaboration layer</strong> - Chatter feeds, Experience Cloud sites, Files, groups, followers, notifications, and some CMS - as display-ready JSON. It covers what the plain sObject APIs do not model well.</p>
+<p><strong>Q: How is it different from the Standard REST API?</strong>
+A: Standard REST is <strong>record-centric</strong> (rows and fields). Connect REST is <strong>feature-centric</strong> and returns pre-assembled structures like a full feed with mentions and attachments, so you do not stitch related records together yourself.</p>
+<p><strong>Q: I need to post to a record's Chatter feed from an external system. Which API?</strong>
+A: <strong>Connect REST</strong>, posting a feed element to <code>/chatter/feed-elements</code> with the record Id as <code>subjectId</code>. The Apex equivalent is the <code>ConnectApi</code> namespace.</p>
+<p><strong>Q: Where does Experience Cloud fit?</strong>
+A: Connect REST manages Experience Cloud (Communities) - sites, membership, content, and CMS - under the <code>/connect/</code> resources, so external systems can drive community experiences.</p>
+<p><strong>Q: Same auth and user model as Standard REST?</strong>
+A: Yes. OAuth Bearer token, and every action runs as the <strong>calling user</strong>, honoring their Chatter and community visibility, sharing, and permissions.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "The record API gives you the database rows. The Connect API gives you the Facebook-style feed and the community site, already put together the way a person would see them."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Connect REST API, Chatter, feed element, capability, Experience Cloud, ContentDocument, CMS, <code>ConnectApi</code> namespace - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/intro_what_is_chatter_connect.htm">Connect REST API Introduction (v66.0) — Connect REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/intro_building_url.htm">Build the Resource URL — Connect REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/connect_resources_feeds.htm">Feeds Resources — Connect REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/features_communities.htm">Experience Cloud Sites — Connect REST API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f07">07-ui-api.md</a> - the API that returns records plus their layouts and metadata to build Salesforce-like UIs.</em></p>
+</section>
+<section id="f07" class="doc">
+<h1>07 - User Interface API</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Returns records <strong>plus</strong> their layouts, metadata, and theming in <strong>one</strong> response, so external or custom apps can render Salesforce-style pages without hardcoding metadata.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Format</strong>: JSON. <strong>Auth</strong>: OAuth 2.0 Bearer token.
+<strong>Use when</strong>: You are building a custom front-end or mobile app that must mirror Salesforce layouts, picklists, and permissions <strong>dynamically</strong>.</p>
+</blockquote>
+<p>This is Module 04, inbound APIs (external systems calling into Salesforce). New to the vocabulary? See <a href="../01-Fundamentals/README.md">Module 01</a>. For how the caller authenticates, see <a href="../03-Authentication/README.md">Module 03</a>. Compare with <a href="#f01">01-standard-rest-api.md</a> and <a href="#f06">06-connect-rest-api.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>The Standard REST API gives you the <strong>ingredients</strong>: the field values of a record. But if you want to <strong>build a screen</strong> that looks like Salesforce, you also need the recipe: which fields go on the layout, in what order, which are required, what the picklist options are, what the record type theme color is, and what this user is allowed to see. Fetching all of that piecemeal is slow and brittle.</p>
+<p>The UI API hands you the <strong>finished meal photo with the recipe card attached</strong>. In a single response you get the record data <strong>and</strong> the metadata describing how to display it. It is the <strong>same API Salesforce uses internally</strong> to build Lightning Experience and the mobile app. Best of all, it already respects the user's <strong>field-level security, page layouts, sharing, and picklist values</strong>, so you do not reimplement those rules. When an admin changes a layout, your custom UI updates automatically because the metadata comes from the org, not from your code.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Building a <strong>custom UI or mobile app</strong> that mirrors Salesforce layouts.</td>
+<td>Plain server-to-server <strong>data sync</strong> → <a href="#f01">01-standard-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>picklists, layouts, theming</strong> delivered dynamically.</td>
+<td>Posting to feeds or managing communities → <a href="#f06">06-connect-rest-api.md</a>.</td>
+</tr>
+<tr>
+<td>You must respect the user's <strong>FLS and permissions</strong> automatically.</td>
+<td>Bundling many writes atomically → <a href="#f05">05-composite-api.md</a>.</td>
+</tr>
+<tr>
+<td>You do <strong>not</strong> want to hardcode metadata in your client.</td>
+<td><strong>Bulk</strong> record processing → Bulk API 2.0 (Module 07).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a <strong>custom mobile app</strong> that shows record pages identical to Salesforce, an <strong>embedded record viewer</strong> in an external portal, or a low-code tool that renders any object's create form by reading its layout at runtime.</p>
+<hr />
+<h2>3. What makes it different</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard REST (sObjects)</th>
+<th>UI API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Returns</strong></td>
+<td>Field values only</td>
+<td>Data <strong>plus</strong> layouts, metadata, theming</td>
+</tr>
+<tr>
+<td><strong>Metadata-aware</strong></td>
+<td>No, you hardcode it</td>
+<td>Yes, layouts and picklists come from the org</td>
+</tr>
+<tr>
+<td><strong>Respects FLS / layouts</strong></td>
+<td>Enforces FLS on data</td>
+<td>Enforces FLS, layouts, sharing, <strong>and</strong> shapes the response to them</td>
+</tr>
+<tr>
+<td><strong>Built for</strong></td>
+<td>Integration and data</td>
+<td><strong>Rendering Salesforce-like UIs</strong></td>
+</tr>
+<tr>
+<td><strong>Used internally by</strong></td>
+<td>General API clients</td>
+<td>Lightning Experience and Salesforce mobile</td>
+</tr>
+</tbody>
+</table>
+<p>The point of the UI API is to make it simple to <strong>replicate Salesforce's own UI</strong> in a custom app, according to the rules and permissions of the running user.</p>
+<hr />
+<h2>4. How it works</h2>
+<div class="mermaid">
+flowchart LR
+    APP["Custom UI / Mobile App&lt;br/&gt;OAuth Bearer token"] --&gt;|GET /ui-api/record-ui/recordId| UIAPI["UI API"]
+    UIAPI --&gt; REC["Record data&lt;br/&gt;field values"]
+    UIAPI --&gt; LAY["Layout metadata&lt;br/&gt;sections, fields, order"]
+    UIAPI --&gt; OBJ["Object info&lt;br/&gt;picklists, FLS, theme"]
+    REC --&gt; RENDER["One response&lt;br/&gt;app renders the page"]
+    LAY --&gt; RENDER
+    OBJ --&gt; RENDER
+    style APP fill:#607D8B,color:#fff
+    style UIAPI fill:#00A1E0,color:#fff
+    style REC fill:#4CAF50,color:#fff
+    style LAY fill:#9C27B0,color:#fff
+    style OBJ fill:#ff9900,color:#fff
+    style RENDER fill:#607D8B,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The custom app authenticates with an <strong>OAuth Bearer token</strong> and requests a record-ui resource for a record Id.</li>
+<li>The UI API gathers the <strong>record data</strong>, the <strong>layout</strong> that applies to this user and record type, and the <strong>object info</strong> (picklists, field-level security, theme).</li>
+<li>All of it is filtered by the running user's <strong>permissions and FLS</strong>, so the response only contains what they may see.</li>
+<li>The app receives <strong>one</strong> combined response and renders a page that matches Salesforce, no hardcoded metadata required.</li>
+</ol>
+<hr />
+<h2>5. The actual requests</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/ui-api/</code></p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Method + path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Record data + object metadata</td>
+<td><code>GET /ui-api/record-ui/{recordIds}</code></td>
+</tr>
+<tr>
+<td>Just the record (with layout-aware fields)</td>
+<td><code>GET /ui-api/records/{recordId}</code></td>
+</tr>
+<tr>
+<td>Object metadata only</td>
+<td><code>GET /ui-api/object-info/{apiName}</code></td>
+</tr>
+<tr>
+<td>Picklist values for a field</td>
+<td><code>GET /ui-api/object-info/{apiName}/picklist-values/{recordTypeId}/{fieldApiName}</code></td>
+</tr>
+<tr>
+<td>Create a record</td>
+<td><code>POST /ui-api/records</code></td>
+</tr>
+<tr>
+<td>Update a record</td>
+<td><code>PATCH /ui-api/records/{recordId}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Get a record with its display metadata in one call</strong></p>
+<pre><code>GET /services/data/v66.0/ui-api/record-ui/001bn00000ABCDeAAH
+Authorization: Bearer 00D...!AQ...
+</code></pre>
+<p>The response bundles three things: <code>records</code> (the field values), <code>layouts</code> (sections, columns, field order, required flags), and <code>objectInfos</code> (picklists, field-level security, theme color). That is everything a client needs to draw the page exactly as Salesforce would.</p>
+<blockquote>
+<p><strong>CRUD is supported</strong>, not just reads. You can create and update records through <code>/ui-api/records</code>, and the responses stay metadata-aware so your forms reflect the org's layouts and picklists.</p>
+</blockquote>
+<hr />
+<h2>6. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Metadata-aware by design</strong></td>
+<td>The response reshapes to the user's layouts and FLS.</td>
+<td>Let the org drive your UI, do not hardcode field lists.</td>
+</tr>
+<tr>
+<td><strong>Read and CRUD scope</strong></td>
+<td>Supports get, create, update, delete, but not the full breadth of the data APIs.</td>
+<td>For bulk or pure data sync, use Standard REST or Bulk.</td>
+</tr>
+<tr>
+<td><strong>Per-user response</strong></td>
+<td>Two users can get different layouts and fields for the same record.</td>
+<td>Test with the actual integration user's permissions.</td>
+</tr>
+<tr>
+<td><strong>Auto-updates with admin changes</strong></td>
+<td>Layout and picklist changes flow through without a client release.</td>
+<td>Rely on this instead of shipping metadata in your app.</td>
+</tr>
+<tr>
+<td><strong>Lightning Data Service uses it</strong></td>
+<td>LWC <code>@wire</code> adapters sit on top of the UI API.</td>
+<td>In-org components should prefer LDS over raw calls.</td>
+</tr>
+<tr>
+<td><strong>Versioned</strong></td>
+<td>Behavior pinned to the API version.</td>
+<td>Hardcode <code>v66.0</code> your client tested against.</td>
+</tr>
+<tr>
+<td><strong>Not for high volume</strong></td>
+<td>It is a UI-rendering API, not a bulk pipe.</td>
+<td>Move large jobs to Bulk API 2.0 (Module 07).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What does the UI API give you that the Standard REST API does not?</strong>
+A: <strong>Metadata alongside data.</strong> One response returns the record values <strong>plus</strong> the layout, picklists, theming, and object info, all filtered by the user's FLS and permissions, so you can render a Salesforce-style page without hardcoding metadata.</p>
+<p><strong>Q: Why would I use it instead of just reading sObjects?</strong>
+A: To build a <strong>custom or mobile UI</strong> that mirrors Salesforce. Reading sObjects gives you values but no layout, no picklist options, and no theme. The UI API delivers all of that dynamically, and it updates when admins change layouts.</p>
+<p><strong>Q: Does it respect field-level security and sharing?</strong>
+A: Yes. It runs as the calling user and shapes the response to their <strong>FLS, page layouts, and sharing</strong>, so the client never sees fields the user cannot access.</p>
+<p><strong>Q: Can you create and update records with it, or is it read-only?</strong>
+A: It supports <strong>CRUD</strong> through <code>/ui-api/records</code>, with metadata-aware responses, though it is not meant for the full breadth or volume that the data APIs and Bulk API handle.</p>
+<p><strong>Q: How does it relate to Lightning Web Components?</strong>
+A: <strong>Lightning Data Service</strong> and the LWC <code>@wire</code> adapters are built on the UI API. Salesforce uses the same API for its own Lightning Experience and mobile app, which is why custom apps can match its behavior.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It gives you the record <strong>and</strong> the instructions for drawing its page, already filtered to what you are allowed to see, so your app looks just like Salesforce without you copying any of Salesforce's setup."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>UI API, record-ui, object-info, layout metadata, picklist values, field-level security, theming, Lightning Data Service - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.uiapi.meta/uiapi/ui_api_get_started.htm">Get Started with User Interface API (v66.0) — UI API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.uiapi.meta/uiapi/ui_api_resources_record_ui.htm">Get Record Data and Object Metadata — UI API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.uiapi.meta/uiapi/ui_api_resources_record_layout.htm">Get Record Layout Metadata — UI API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/lwc/guide/data-ui-api">Lightning Data Service — Lightning Web Components Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">Module 04 README</a>. Related: <a href="../03-Authentication/README.md">Module 03</a> for the OAuth these APIs require, and the Outbound module (<a href="../05-Outbound-Callouts/README.md">Module 05</a>) for when Salesforce calls </em><em>out</em><em> instead.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 04 Inbound APIs · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

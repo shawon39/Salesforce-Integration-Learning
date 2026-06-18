@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Security &amp; Limits Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Security &amp; Limits</h1>
+  <div class="sub">Secure every integration end-to-end, and know every limit before go-live.</div>
+  <div>
+    <span class="pill">Connection security</span><span class="pill">Auth &amp; access</span>
+    <span class="pill">Data security</span><span class="pill">mTLS &amp; Shield</span>
+    <span class="pill">Governor limits</span><span class="pill">API allocations</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Connection Security (CORS vs CSP Trusted Sites vs Remote Site Settings)</a></li>
+<li class=""><a href="#f02">02 - Authentication and Access Controls (WHO Can Call the API)</a></li>
+<li class=""><a href="#f03">03 - Data-Level Security (WHAT a Caller Can See and Do)</a></li>
+<li class=""><a href="#f04">04 - mTLS and Shield Platform Encryption</a></li>
+<li class=""><a href="#f05">05 - Governor and API Limits</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 09 - Security &amp; Limits</h1>
+<blockquote>
+<p><strong>Goal</strong>: Don't get hacked, and don't hit a limit in production.
+<strong>API version</strong>: v66.0 (Spring '26). Two halves: <strong>secure</strong> every integration end-to-end, and <strong>know every limit</strong> before go-live.</p>
+</blockquote>
+<p>Security in Salesforce is layered: connection allowlists, authentication, access controls, data-level security, and encryption. Limits are the guardrails of the multitenant platform. Start with <strong><a href="#f01">01-connection-security.md</a></strong> (the CORS/CSP/Remote-Site confusion). For the OAuth underneath, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">connection-security</a></td>
+<td>CORS vs CSP Trusted Sites vs Remote Site Settings</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">authentication-and-access-controls</a></td>
+<td>API Enabled, profiles/perm sets, IP ranges, scopes</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">data-level-security</a></td>
+<td>CRUD, FLS, sharing, enforcing in Apex</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">mtls-and-shield-encryption</a></td>
+<td>Mutual TLS + Shield Platform Encryption</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">governor-and-api-limits</a></td>
+<td>Callout, async, org, and bulk limits</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The security layers an API call passes through</h2>
+<div class="mermaid">
+flowchart TD
+    EXT[External caller] --&gt; CONN{Connection allowlist&lt;br/&gt;CORS / mTLS}
+    CONN --&gt;|allowed| AUTH{Authentication&lt;br/&gt;OAuth token / cert}
+    AUTH --&gt;|valid| PERM{API Enabled&lt;br/&gt;+ app policy + scope}
+    PERM --&gt;|permitted| OBJ{Object / CRUD&lt;br/&gt;permissions}
+    OBJ --&gt;|allowed| FLS{Field-Level&lt;br/&gt;Security}
+    FLS --&gt;|allowed| SHR{Record-level&lt;br/&gt;sharing}
+    SHR --&gt;|visible| DATA[(Record)]
+
+    style CONN fill:#00A1E0,color:#fff
+    style AUTH fill:#ff9900,color:#fff
+    style PERM fill:#9C27B0,color:#fff
+    style OBJ fill:#4CAF50,color:#fff
+    style FLS fill:#4CAF50,color:#fff
+    style SHR fill:#4CAF50,color:#fff
+
+</div>
+<p>Every layer must pass. Miss one in design and you either leak data or get blocked in production.</p>
+<hr />
+<h2>Limits cheat sheet (corrected and verified)</h2>
+<h3>Callout governor limits (per transaction)</h3>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Callouts per transaction</td>
+<td><strong>100</strong></td>
+</tr>
+<tr>
+<td>Request + response size</td>
+<td><strong>6 MB</strong> sync, <strong>12 MB</strong> async (not 10 MB)</td>
+</tr>
+<tr>
+<td>Timeout per callout</td>
+<td>default 10s, <strong>max 120s</strong></td>
+</tr>
+<tr>
+<td>Total callout time per transaction</td>
+<td><strong>120s</strong></td>
+</tr>
+<tr>
+<td>Callout after uncommitted DML</td>
+<td><strong>Not allowed</strong></td>
+</tr>
+<tr>
+<td>Concurrent long-running sync requests (&gt;5s)</td>
+<td><strong>10</strong> (scales by license up to 50)</td>
+</tr>
+</tbody>
+</table>
+<h3>Org and async limits</h3>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Daily API requests</td>
+<td>By edition + licenses (e.g. Enterprise base <strong>100,000</strong> + per-license)</td>
+</tr>
+<tr>
+<td>Bulk API 1.0</td>
+<td><strong>15,000 batches</strong> / 24h (10,000 records each)</td>
+</tr>
+<tr>
+<td>Bulk API 2.0</td>
+<td><strong>100 million records</strong> / 24h, <strong>150 MB</strong> per job</td>
+</tr>
+<tr>
+<td>Async Apex executions / 24h</td>
+<td>greater of <strong>250,000</strong> or <strong>200 × user licenses</strong></td>
+</tr>
+<tr>
+<td>Check live usage</td>
+<td><code>GET /services/data/v66.0/limits</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: CORS vs CSP Trusted Sites?</strong>
+→ CORS lets external <strong>browsers</strong> call Salesforce (inbound). CSP Trusted Sites lets Salesforce's own <strong>LWC/Aura</strong> reach external resources (outbound from the browser). See <a href="#f01">01</a>.</p>
+<p><strong>Q: How do you secure a high-assurance B2B integration?</strong>
+→ <strong>mTLS</strong> (mutual certificate auth), least-privilege integration user, and <strong>Shield</strong> encryption for sensitive data at rest. On Hyperforce, prefer mTLS over IP allowlists. See <a href="#f04">04</a>.</p>
+<p><strong>Q: Apex REST runs as system context. What must you add?</strong>
+→ Enforce security yourself: <code>with sharing</code>, <code>WITH USER_MODE</code>, and <code>Security.stripInaccessible()</code>. See <a href="#f03">03</a>.</p>
+<p><strong>Q: Max callout response size?</strong>
+→ <strong>6 MB synchronous, 12 MB asynchronous.</strong> (The "10 MB" figure is wrong.)</p>
+<p><strong>Q: How do you check remaining API calls?</strong>
+→ The <code>/limits</code> REST resource or System Overview in Setup.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits — Apex Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.extend_code_cors.htm&amp;type=5">Configure Salesforce CORS Allowlist — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_overview.htm">Limits and Allocations Quick Reference</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.security_pe_overview.htm&amp;type=5">Shield Platform Encryption — Salesforce Help</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Connection Security (CORS vs CSP Trusted Sites vs Remote Site Settings)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Three different "allowlists" decide who may reach Salesforce and where Salesforce may reach out. People constantly confuse them, so nail the distinction.
+<strong>The three</strong>: <strong>CORS</strong> (inbound browser → SF API), <strong>CSP Trusted Sites</strong> (SF's own LWC/Aura browser → external), <strong>Remote Site Settings</strong> (Apex callout → external, legacy).</p>
+</blockquote>
+<p>This is Module 09, security and limits. For the OAuth that authenticates callers, see <a href="../03-Authentication/README.md">Module 03</a>. For outbound callouts, see <a href="../05-Outbound-Callouts/README.md">Module 05</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think of Salesforce as a <strong>secured building</strong>. Three different rules govern doors and errands, and mixing them up is the classic mistake:</p>
+<ul>
+<li><strong>CORS</strong> is the <strong>guest list at the front door</strong>: which outside <strong>browsers</strong> (origins) are allowed to walk in and call the Salesforce API directly from JavaScript.</li>
+<li><strong>CSP Trusted Sites</strong> is <strong>where your in-house staff may go</strong>: which external sites your own <strong>Lightning (LWC/Aura) pages</strong> are permitted to load scripts/images from or call from the browser.</li>
+<li><strong>Remote Site Settings</strong> is the <strong>approved address book for the butler</strong>: which external URLs <strong>Apex server-side callouts</strong> may hit (largely <strong>superseded by Named Credentials</strong>).</li>
+</ul>
+<p>The key axes are <strong>direction</strong> (into Salesforce vs out of Salesforce) and <strong>who</strong> is making the call (an external browser, a Salesforce browser page, or Apex on the server).</p>
+<hr />
+<h2>2. The three controls compared</h2>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Direction</th>
+<th>Who it governs</th>
+<th>When you need it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CORS allowlist</strong></td>
+<td><strong>Inbound</strong></td>
+<td>An <strong>external website's browser</strong> calling the Salesforce REST/UI/etc. API cross-origin</td>
+<td>A SPA on <code>app.example.com</code> calls Salesforce APIs from JavaScript</td>
+</tr>
+<tr>
+<td><strong>CSP Trusted Sites</strong></td>
+<td><strong>Outbound (browser)</strong></td>
+<td><strong>Salesforce's own LWC/Aura</strong> loading or calling external resources</td>
+<td>An LWC pulls an image, script, or <code>fetch()</code>s an external API from the browser</td>
+</tr>
+<tr>
+<td><strong>Remote Site Settings</strong></td>
+<td><strong>Outbound (server)</strong></td>
+<td><strong>Apex HTTP callouts</strong> to a raw URL</td>
+<td>Apex calls an external endpoint <strong>without</strong> a Named Credential</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The 10-second answer</strong>: CORS = let outsiders' browsers <strong>in</strong>. CSP Trusted Sites = let <strong>our</strong> browser pages reach <strong>out</strong>. Remote Site Settings = let <strong>Apex</strong> reach out (use <strong>Named Credentials</strong> instead).</p>
+</blockquote>
+<hr />
+<h2>3. How they fit together</h2>
+<div class="mermaid">
+flowchart LR
+    EXTB[External browser app] --&gt;|cross-origin API call| CORS{CORS allowlist}
+    CORS --&gt;|origin allowed| SFAPI[Salesforce API]
+
+    LWC[Salesforce LWC / Aura&lt;br/&gt;in the browser] --&gt;|load script / fetch| CSP{CSP Trusted Sites}
+    CSP --&gt;|site allowed| EXTR[External resource]
+
+    APX[Apex callout] --&gt;|named credential| NC[Named Credential&lt;br/&gt;RECOMMENDED]
+    APX --&gt;|raw URL| RSS{Remote Site Setting}
+    NC --&gt; EXT[External API]
+    RSS --&gt; EXT
+
+    style CORS fill:#00A1E0,color:#fff
+    style CSP fill:#ff9900,color:#fff
+    style RSS fill:#9C27B0,color:#fff
+    style NC fill:#4CAF50,color:#fff
+
+</div>
+<ul>
+<li><strong>CORS</strong> gates the <strong>inbound</strong> browser call. Note: CORS handles <strong>origin</strong>, not authentication. The caller still needs a valid <strong>OAuth token</strong>.</li>
+<li><strong>CSP Trusted Sites</strong> gates what <strong>Salesforce's own UI</strong> may load or call from the browser.</li>
+<li>For <strong>Apex callouts</strong>, a <strong>Named Credential</strong> both authenticates and authorizes the endpoint, so you do <strong>not</strong> need a Remote Site Setting. Raw-URL callouts still require one.</li>
+</ul>
+<hr />
+<h2>4. Setup / configuration</h2>
+<ul>
+<li><strong>CORS</strong>: Setup → <strong>CORS</strong> → add the external <strong>origin</strong> (e.g. <code>https://app.example.com</code>) to the allowlist. Managed via the <code>CorsWhitelistOrigin</code> metadata.</li>
+<li><strong>CSP Trusted Sites</strong>: Setup → <strong>CSP Trusted Sites</strong> → add the external site and choose the contexts (<code>connect-src</code>, <code>img-src</code>, <code>script-src</code>, etc.). Managed via <code>CspTrustedSite</code> metadata.</li>
+<li><strong>Remote Site Settings</strong>: Setup → <strong>Remote Site Settings</strong> → add the URL. Prefer creating a <strong>Named Credential</strong> instead, which removes this need. (<a href="../05-Outbound-Callouts/02-named-credentials-for-callouts.md">Module 05</a>.)</li>
+</ul>
+<hr />
+<h2>5. Gotchas and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"CORS authenticates the caller."</td>
+<td>No. CORS only allows the <strong>origin</strong>. The request still needs a valid OAuth token.</td>
+</tr>
+<tr>
+<td>"Use Remote Site Settings for callouts."</td>
+<td>Prefer <strong>Named Credentials</strong>, which authenticate and remove the Remote Site requirement.</td>
+</tr>
+<tr>
+<td>"CSP Trusted Sites lets external apps call us."</td>
+<td>No, that's CORS. CSP governs what <strong>our</strong> Lightning pages may reach <strong>outbound</strong> in the browser.</td>
+</tr>
+<tr>
+<td>"CORS and CSP are the same."</td>
+<td>Opposite directions. CORS = inbound to SF API; CSP Trusted Sites = outbound from SF's browser UI.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: CORS vs CSP Trusted Sites vs Remote Site Settings?</strong>
+A: CORS allowlists external <strong>browser origins</strong> calling Salesforce APIs (inbound). CSP Trusted Sites allowlists external resources that Salesforce's <strong>own LWC/Aura</strong> pages load or call (outbound from the browser). Remote Site Settings allowlists URLs for <strong>Apex server-side callouts</strong> (outbound, legacy, superseded by Named Credentials).</p>
+<p><strong>Q: Does CORS replace authentication?</strong>
+A: No. CORS only permits the origin to make cross-origin calls. The caller still authenticates with OAuth.</p>
+<p><strong>Q: When do you NOT need a Remote Site Setting?</strong>
+A: When you use a <strong>Named Credential</strong> for the callout. It registers and authenticates the endpoint, so no Remote Site Setting is required.</p>
+<p><strong>Q: An LWC needs to call a third-party API directly from the browser. What do you configure?</strong>
+A: Add the API's domain to <strong>CSP Trusted Sites</strong> (with the right directive like <code>connect-src</code>). For server-side, you'd use Apex + a Named Credential instead.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Three guest lists: who may come in (CORS), where our staff may go (CSP Trusted Sites), and which addresses the butler may visit (Remote Site Settings, now usually replaced by Named Credentials)."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>CORS, origin, CSP, Trusted Site, Remote Site Setting, Named Credential, cross-origin - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.extend_code_cors.htm&amp;type=5">Configure Salesforce CORS Allowlist — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.security_trusted_urls_manage.htm&amp;type=5">Manage Trusted URLs (CSP) — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_csptrustedsite.htm">CspTrustedSite — Metadata API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-authentication-and-access-controls.md</a> - who is allowed to call the API at all.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Authentication and Access Controls (WHO Can Call the API)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Before a single byte of data is touched, Salesforce asks a chain of "are you even allowed in?" questions. This file is that chain: IP, OAuth scope, the <strong>API Enabled</strong> permission, and the app's own user policy.
+<strong>API version</strong>: v66.0 (Spring '26). For the OAuth flows and tokens that authenticate the caller, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+</blockquote>
+<p>This is Module 09, security and limits. This file is <strong>WHO</strong> may call the API. The next file, <a href="#f03">03-data-level-security.md</a>, is <strong>WHAT</strong> that caller can then see and do.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Authentication answered <em>"who are you?"</em> (<a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>). Access control answers <em>"are you allowed to use this door at all?"</em> Two different questions.</p>
+<p>Think of an office tower with an integration vendor arriving to do work:</p>
+<ul>
+<li><strong>Login IP Ranges</strong> are the <strong>parking gate</strong>: if you did not come from an approved address, the gate never lifts. You never even reach the lobby.</li>
+<li><strong>OAuth scope</strong> is what your <strong>building pass is encoded to open</strong>: a token granted only the <code>api</code> scope can call data APIs but cannot, say, manage users.</li>
+<li><strong>API Enabled</strong> is the <strong>"this badge works for the service entrance, not just the front door"</strong> flag. Without it, the human can log in to the UI but the API turns them away.</li>
+<li><strong>Connected App / External Client App policy</strong> is the <strong>vendor contract</strong>: even with a valid badge, the building owner decides <em>which vendors</em> (apps) are pre-approved to operate.</li>
+</ul>
+<p>Miss any one link and the call fails before a record is ever read. Each layer is independent, so the request must satisfy all of them.</p>
+<hr />
+<h2>2. The access-control layers and when each applies</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Question it answers</th>
+<th>Set where</th>
+<th>Applies to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Login IP Ranges</strong> (profile)</td>
+<td>Did the request come from an allowed network?</td>
+<td>Profile → Login IP Ranges</td>
+<td>The <strong>user</strong> behind the token</td>
+</tr>
+<tr>
+<td><strong>Connected App IP Relaxation</strong></td>
+<td>Should this app bypass or enforce org IP rules?</td>
+<td>The app's OAuth policy</td>
+<td>The <strong>app</strong></td>
+</tr>
+<tr>
+<td><strong>OAuth scopes</strong></td>
+<td>What categories of API is this token allowed to hit?</td>
+<td>App definition + requested at token time</td>
+<td>The <strong>token</strong></td>
+</tr>
+<tr>
+<td><strong>API Enabled</strong> permission</td>
+<td>May this user touch any API at all?</td>
+<td>Profile or permission set</td>
+<td>The <strong>user</strong></td>
+</tr>
+<tr>
+<td><strong>Apex REST Services</strong> permission</td>
+<td>May this user invoke custom Apex REST endpoints?</td>
+<td>Profile or permission set</td>
+<td>The <strong>user</strong> (notably guest/site users)</td>
+</tr>
+<tr>
+<td><strong>Permitted Users</strong> policy</td>
+<td>Is this app pre-authorized for this user?</td>
+<td>App's OAuth policy</td>
+<td>The <strong>app + user</strong> pairing</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The 10-second answer</strong>: IP gates the <strong>network</strong>, scopes gate the <strong>token</strong>, <strong>API Enabled</strong> gates the <strong>user</strong>, and the <strong>Connected App policy</strong> gates the <strong>app</strong>. All four must pass.</p>
+</blockquote>
+<hr />
+<h2>3. How a request flows through the gauntlet</h2>
+<div class="mermaid">
+flowchart LR
+    REQ[API request&lt;br/&gt;with access token] --&gt; IP{Login IP Range&lt;br/&gt;+ App IP Relaxation}
+    IP --&gt;|blocked| DENY[401 / login denied]
+    IP --&gt;|allowed| SCOPE{OAuth scope&lt;br/&gt;covers this API?}
+    SCOPE --&gt;|no| DENY
+    SCOPE --&gt;|yes| APIEN{User has&lt;br/&gt;API Enabled?}
+    APIEN --&gt;|no| DENY
+    APIEN --&gt;|yes| APP{App Permitted Users&lt;br/&gt;policy satisfied?}
+    APP --&gt;|not pre-authorized| DENY
+    APP --&gt;|allowed| DATA[Reaches data-security layer&lt;br/&gt;see file 03]
+
+    style IP fill:#F44336,color:#fff
+    style SCOPE fill:#ff9900,color:#fff
+    style APIEN fill:#00A1E0,color:#fff
+    style APP fill:#9C27B0,color:#fff
+    style DATA fill:#4CAF50,color:#fff
+
+</div>
+<p>Walkthrough:</p>
+<ol>
+<li><strong>IP check first.</strong> If the user's profile has <strong>Login IP Ranges</strong>, a request from any other address is denied. With <strong>Enforce login IP ranges on every request</strong> turned on (Session Settings), this is checked on <em>every</em> API call, not just at login.</li>
+<li><strong>Scope check.</strong> The token only works against APIs covered by the scopes it was issued. A token without <code>api</code> cannot call the REST data API no matter who the user is.</li>
+<li><strong>API Enabled check.</strong> The running user must have the <strong>API Enabled</strong> user permission, or the platform rejects all API access with an error.</li>
+<li><strong>App policy check.</strong> If the Connected App / External Client App is set to <strong>Admin approved users are pre-authorized</strong>, the user must be authorized via a profile or permission set, or access is refused.</li>
+</ol>
+<p>Only after all four pass does the request reach the <strong>data-security</strong> funnel in <a href="#f03">file 03</a>.</p>
+<hr />
+<h2>4. Setup, configuration, and least-privilege</h2>
+<h3>4.1 The user permissions that unlock the API</h3>
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>What it unlocks</th>
+<th>Where granted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API Enabled</strong></td>
+<td>Any API access (REST, SOAP, Bulk, etc.). Without it, <strong>no</strong> API call works.</td>
+<td>Profile or permission set</td>
+</tr>
+<tr>
+<td><strong>API Only User</strong></td>
+<td>User can use the API but <strong>cannot</strong> log in to the UI. Ideal for integration identities.</td>
+<td>Profile or permission set</td>
+</tr>
+<tr>
+<td><strong>Apex REST Services</strong></td>
+<td>Invoke custom <code>@RestResource</code> Apex endpoints. Needed for <strong>guest/site users</strong> calling Apex REST.</td>
+<td>Profile or permission set</td>
+</tr>
+<tr>
+<td><strong>Author Apex</strong></td>
+<td>Write and deploy Apex (and run <code>executeAnonymous</code>). A <em>build-time</em> permission, not a runtime API gate.</td>
+<td>Profile or permission set</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Trap</strong>: "Apex REST Services" and "Author Apex" are different. <strong>Author Apex</strong> lets a developer <em>create</em> the class. <strong>Apex REST Services</strong> lets a user <em>call</em> a custom Apex REST endpoint (most relevant for unauthenticated guest users on Experience Cloud sites).</p>
+</blockquote>
+<h3>4.2 Least-privilege for integration users (the modern pattern)</h3>
+<p>Do not reuse an admin login for integrations. The recommended build:</p>
+<ol>
+<li>Create a dedicated user per integration on the <strong>Minimum Access - API Only Integrations</strong> profile (built on Minimum Access - Salesforce, grants <strong>API Enabled</strong> + <strong>API Only</strong>, and these cannot be edited on the profile).</li>
+<li>Layer on exactly the object, field, and feature permissions the integration needs via <strong>permission sets</strong> (assigned with the <strong>Salesforce API Integration</strong> permission set license).</li>
+<li>Authenticate via the <strong>Client Credentials flow</strong>, choosing that user as the <strong>Run As</strong> execution user. The token inherits <em>that user's</em> permissions, so a tightly scoped user yields a tightly scoped token.</li>
+</ol>
+<p>This is least privilege in practice: a Minimum Access base plus a narrow permission set, never a Modify All Data admin.</p>
+<h3>4.3 IP controls</h3>
+<ul>
+<li><strong>Profile Login IP Ranges</strong>: Setup → Profiles → (profile) → <strong>Login IP Ranges</strong> → add start/end addresses. Any login outside the range is denied. Winter '26 enforces a cap on how many ranges a profile may hold per IP type.</li>
+<li><strong>Org Trusted IP Ranges</strong>: Setup → <strong>Network Access</strong>. Addresses here skip identity verification (no challenge), but are <em>not</em> a login restriction by themselves.</li>
+<li><strong>Connected App IP Relaxation</strong>: in the app's OAuth policy, choose <strong>Enforce IP restrictions</strong> (default, honor org/profile IP rules), <strong>Relax IP restrictions for activated devices</strong>, or <strong>Relax IP restrictions</strong> (ignore org IP rules for this app).</li>
+</ul>
+<h3>4.4 Connected App / External Client App user policy</h3>
+<p>In <strong>Manage</strong> → OAuth Policies, set <strong>Permitted Users</strong>:</p>
+<ul>
+<li><strong>All users may self-authorize</strong> (default): any user can approve the app on first use.</li>
+<li><strong>Admin approved users are pre-authorized</strong>: only users granted the app via a profile or permission set may use it. This is the locked-down choice for production integrations.</li>
+</ul>
+<blockquote>
+<p><strong>Critical bypass</strong>: a user with the <strong>Use Any API Client</strong> permission can use <em>any</em> connected app even when it is set to Admin-approved. Guard that permission carefully in a security review.</p>
+</blockquote>
+<hr />
+<h2>5. Gotchas and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Valid OAuth token means the call works."</td>
+<td>No. The user still needs <strong>API Enabled</strong>, the token needs the right <strong>scope</strong>, the IP must pass, and the app policy must allow it.</td>
+</tr>
+<tr>
+<td>"Login IP Ranges only block interactive logins."</td>
+<td>Only until you enable <strong>Enforce login IP ranges on every request</strong>, which then checks every API call too.</td>
+</tr>
+<tr>
+<td>"Trusted IP Ranges restrict who can log in."</td>
+<td>No. Org <strong>Trusted IP Ranges</strong> only skip the identity-verification challenge. <strong>Profile Login IP Ranges</strong> are the actual restriction.</td>
+</tr>
+<tr>
+<td>"Admin-approved blocks everyone unauthorized."</td>
+<td>Mostly, but <strong>Use Any API Client</strong> overrides it.</td>
+</tr>
+<tr>
+<td>"Author Apex lets you call an Apex REST endpoint."</td>
+<td>No. Calling needs <strong>Apex REST Services</strong> (and access to the class). Author Apex is for <em>building</em> Apex.</td>
+</tr>
+<tr>
+<td>"Scope <code>full</code> includes a refresh token."</td>
+<td>No, you must request <code>refresh_token</code> separately. (See <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>.)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: A partner has a valid access token but every API call returns an error. Where do you look?</strong>
+A: Walk the chain. Confirm the user has <strong>API Enabled</strong>, the token carries the <strong>api</strong> scope, the request's source <strong>IP</strong> is within the profile's Login IP Ranges (or relaxed on the app), and the Connected App's <strong>Permitted Users</strong> policy authorizes that user. Any one of these failing blocks the call before data access.</p>
+<p><strong>Q: What is the modern least-privilege setup for a server-to-server integration?</strong>
+A: A dedicated user on the <strong>Minimum Access - API Only Integrations</strong> profile (API Enabled + API Only), narrow <strong>permission sets</strong> for exactly the needed objects/fields, authenticated via the <strong>Client Credentials</strong> flow with that user as the <strong>Run As</strong> user. The token then inherits only those minimal permissions.</p>
+<p><strong>Q: Difference between profile Login IP Ranges and org Trusted IP Ranges?</strong>
+A: <strong>Profile Login IP Ranges</strong> <em>restrict</em> where a user may authenticate from (outside the range is denied). <strong>Org Trusted IP Ranges</strong> only let users <em>skip</em> the identity-verification challenge. One is a wall, the other is a fast lane.</p>
+<p><strong>Q: What do OAuth scopes control, and how does that relate to access control?</strong>
+A: Scopes gate which <strong>categories of API</strong> a token may call (for example <code>api</code> for data APIs, <code>web</code> for browser sessions). They are AuthZ at the token level: even a powerful user gets a narrow token if the app requested narrow scopes. (Full scope table in <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>.)</p>
+<p><strong>Q: How do you lock a Connected App so only specific integrations can use it?</strong>
+A: Set <strong>Permitted Users</strong> to <strong>Admin approved users are pre-authorized</strong> and grant the app only via specific profiles/permission sets. Then audit who holds <strong>Use Any API Client</strong>, since that permission bypasses the restriction.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Four gates before any data: the network you came from (IP), what your pass is coded to open (scope), whether your badge even works for the service door (API Enabled), and whether the building approved your vendor (the app policy)."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>API Enabled, API Only User, Apex REST Services, Author Apex, Login IP Ranges, Trusted IP Ranges, IP Relaxation, OAuth scope, Permitted Users, Admin approved users are pre-authorized, Use Any API Client, Minimum Access - API Only Integrations, Run As user - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.securityImplGuide.meta/securityImplGuide/admin_userperms.htm">User Permissions (API Enabled, etc.) - Salesforce Security Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=release-notes.rn_api_new_user_profile.htm&amp;type=5">Secure API Access with the New Least-Privilege User Profile - Release Notes</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.integration_user.htm&amp;type=5">Give Integration Users API Only Access - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.login_ip_ranges.htm&amp;type=5">Restrict Login IP Addresses in Profiles - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.connected_app_manage_oauth.htm&amp;type=5">Manage OAuth Access Policies for a Connected App - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.connected_app_continuous_ip.htm&amp;type=5">Connected App IP Relaxation and Continuous IP Enforcement - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.security_api_access_control_all_users.htm&amp;type=5">Restrict Access to APIs with Connected Apps - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2024/02/invoke-rest-apis-with-the-salesforce-integration-user-and-oauth-client-credentials">Invoke REST APIs with the Salesforce Integration User and OAuth Client Credentials - Developer Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-data-level-security.md</a> - once a caller is in, what records and fields can they actually see and change.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Data-Level Security (WHAT a Caller Can See and Do)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Getting <em>in</em> (file 02) is not the same as seeing <em>everything</em>. Salesforce filters every call through object permissions, then field-level security, then record sharing. This file is that funnel, plus how to enforce it yourself in Apex.
+<strong>API version</strong>: v66.0 (Spring '26). Builds on <a href="#f02">02-authentication-and-access-controls.md</a> (who may call) and ties to <a href="../04-Inbound-APIs/03-apex-rest.md">Apex REST</a>.</p>
+</blockquote>
+<p>This is Module 09, security and limits. File 02 answered <strong>WHO</strong> may call the API. This file answers <strong>WHAT</strong> they can read and write once inside.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine a <strong>library</strong> with three nested rules:</p>
+<ul>
+<li><strong>Object permissions (CRUD)</strong> decide <strong>which rooms</strong> you may enter at all: the Accounts room, the Cases room. No Read on Contacts means the Contacts room is locked.</li>
+<li><strong>Field-Level Security (FLS)</strong> decides <strong>which shelves</strong> in a room you may touch: you are in the Accounts room, but the Revenue shelf is blacked out.</li>
+<li><strong>Record-level sharing</strong> decides <strong>which individual books</strong> you may open: you can read Accounts, but only the <em>ones shared with you</em> by org-wide defaults, the role hierarchy, or sharing rules.</li>
+</ul>
+<p>A call must clear all three. You can have full Read on Account (object), see every field (FLS), and still be handed zero records because none are shared with you.</p>
+<p>The twist for integrations: <strong>the Standard REST/SOAP API enforces all three automatically</strong> as the running user. But <strong>Apex REST runs in system context</strong>, which bypasses them, so you must re-add the checks by hand.</p>
+<hr />
+<h2>2. The data-security layers and when each applies</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it controls</th>
+<th>Set where</th>
+<th>Enforced automatically?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Object permissions (CRUD)</strong></td>
+<td>Can you Create / Read / Update / Delete this object type?</td>
+<td>Profiles, permission sets</td>
+<td>Yes, by Standard API and Apex in user mode</td>
+</tr>
+<tr>
+<td><strong>Field-Level Security (FLS)</strong></td>
+<td>Can you see/edit each individual field?</td>
+<td>Permission sets (or profiles)</td>
+<td>Yes, by Standard API and Apex in user mode</td>
+</tr>
+<tr>
+<td><strong>Org-Wide Defaults (OWD)</strong></td>
+<td>Baseline record visibility (Private / Public Read / Public Read-Write)</td>
+<td>Sharing Settings</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Role hierarchy</strong></td>
+<td>Managers inherit access to subordinates' records</td>
+<td>Roles</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Sharing rules</strong></td>
+<td>Exceptions that widen OWD for groups/roles</td>
+<td>Sharing Settings</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Manual / Apex sharing</strong></td>
+<td>One-off or programmatic record grants</td>
+<td>Record share or Apex</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The 10-second answer</strong>: <strong>Object</strong> says which tables, <strong>FLS</strong> says which columns, <strong>sharing</strong> says which rows. The Standard API applies all of them as the running user. Apex REST does not, so you enforce it.</p>
+</blockquote>
+<hr />
+<h2>3. How it works: the security funnel</h2>
+<div class="mermaid">
+flowchart TB
+    CALL[API call as a user] --&gt; OBJ{Object permission&lt;br/&gt;CRUD on the SObject?}
+    OBJ --&gt;|no access| BLOCK[Denied / stripped]
+    OBJ --&gt;|allowed| FLS{Field-Level Security&lt;br/&gt;per field?}
+    FLS --&gt;|field hidden| STRIP[Field removed from result]
+    FLS --&gt;|field visible| REC{Record sharing&lt;br/&gt;OWD + role + rules?}
+    REC --&gt;|not shared| NONE[Row not returned]
+    REC --&gt;|shared| RESULT[Visible, editable data]
+
+    style OBJ fill:#00A1E0,color:#fff
+    style FLS fill:#ff9900,color:#fff
+    style REC fill:#9C27B0,color:#fff
+    style RESULT fill:#4CAF50,color:#fff
+    style BLOCK fill:#F44336,color:#fff
+
+</div>
+<p>Walkthrough:</p>
+<ol>
+<li><strong>Object gate.</strong> No Read on the object and the call returns an error or nothing for that type. No Create and an insert is rejected.</li>
+<li><strong>Field gate.</strong> Even with object access, fields hidden by FLS are <strong>stripped from the response</strong> (and cannot be written). The user simply never sees them.</li>
+<li><strong>Record gate.</strong> Of the records that survive, only those the user can see via <strong>OWD + role hierarchy + sharing rules + manual/Apex shares</strong> are returned. Private OWD with no sharing means an empty list.</li>
+</ol>
+<p>The order matters for interviews: <strong>object then field then record.</strong> All three are AND-ed together.</p>
+<hr />
+<h2>4. Enforcing security in Apex</h2>
+<p>Apex runs in <strong>system mode by default</strong>, meaning it ignores object permissions and FLS, and its sharing behavior depends on the class keyword. For any code that touches data on behalf of a user, you opt back into the checks.</p>
+<h3>4.1 Sharing keywords (record-level)</h3>
+<table>
+<thead>
+<tr>
+<th>Keyword</th>
+<th>Record (sharing) behavior</th>
+<th>Default when...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>with sharing</code></td>
+<td><strong>Enforces</strong> the running user's record sharing</td>
+<td>What you should use for user-facing logic</td>
+</tr>
+<tr>
+<td><code>without sharing</code></td>
+<td><strong>Ignores</strong> sharing, sees all records</td>
+<td>Deliberate elevated operations only</td>
+</tr>
+<tr>
+<td><code>inherited sharing</code></td>
+<td>Runs in the <strong>caller's</strong> sharing mode</td>
+<td>A reusable class that should adapt to its caller</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Sharp edge</strong>: sharing keywords control <strong>record sharing only</strong>. They do <strong>not</strong> enforce object permissions or FLS. Also, if a class is the <strong>entry point</strong> of the transaction and omits a keyword, it defaults to <strong>without sharing</strong>, whereas <code>inherited sharing</code> at the entry point defaults to the safer <strong>with sharing</strong>. Never omit the clause.</p>
+</blockquote>
+<h3>4.2 Enforcing object + field security in SOQL</h3>
+<p>Two clauses, very different vintages:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Enforces</th>
+<th>Behavior on violation</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WITH USER_MODE</code></td>
+<td>Object perms, FLS, <strong>and</strong> sharing</td>
+<td>Throws on access failure</td>
+<td>Modern, recommended, faster, covers all three layers</td>
+</tr>
+<tr>
+<td><code>WITH SECURITY_ENFORCED</code></td>
+<td>Object perms and FLS (not sharing)</td>
+<td>Throws <code>System.QueryException</code>, returns nothing</td>
+<td>Older; less complete than USER_MODE</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-apex">// Modern: one clause enforces CRUD, FLS, and sharing as the running user.
+List&lt;Account&gt; accts = [
+    SELECT Id, Name, AnnualRevenue
+    FROM Account
+    WHERE Industry = 'Tech'
+    WITH USER_MODE
+];
+</code></pre>
+<p>You can also set the mode on DML with <code>Database</code> methods that accept <code>AccessLevel.USER_MODE</code> so inserts/updates honor the user's permissions too.</p>
+<h3>4.3 Graceful stripping with <code>Security.stripInaccessible()</code></h3>
+<p>When you would rather <strong>drop inaccessible fields</strong> than throw, use <code>Security.stripInaccessible()</code>. It returns an <code>SObjectAccessDecision</code>; call <code>getRecords()</code> for the sanitized list.</p>
+<pre><code class="language-apex">SObjectAccessDecision decision = Security.stripInaccessible(
+    AccessType.READABLE, accts
+);
+List&lt;Account&gt; safe = decision.getRecords(); // hidden fields removed
+</code></pre>
+<p>The <code>AccessType</code> enum is <code>CREATABLE</code>, <code>READABLE</code>, <code>UPDATABLE</code>, or <code>UPSERTABLE</code>. It also sanitizes objects deserialized from untrusted input before DML, avoiding exceptions.</p>
+<h3>4.4 Apex REST runs in system context, so enforce it yourself</h3>
+<p>This is the headline integration trap. <strong>Invoking a custom Apex REST method always uses system context.</strong> The caller's permissions, FLS, and sharing are <strong>not</strong> applied automatically. Any user with access to the endpoint wields its full power.</p>
+<p>Therefore, in an <code>@RestResource</code> class you must:</p>
+<ul>
+<li>Declare <code>with sharing</code> (or <code>inherited sharing</code>) for record-level enforcement.</li>
+<li>Query with <code>WITH USER_MODE</code> and/or sanitize results with <code>stripInaccessible()</code>.</li>
+<li>Validate object/field access before DML.</li>
+</ul>
+<p>By contrast, the <strong>Standard REST and SOAP APIs run as the calling user automatically</strong>, so object permissions, FLS, and sharing are all enforced with no extra code. That difference is exactly why hand-rolled Apex REST endpoints are a common source of data leaks. See <a href="../04-Inbound-APIs/03-apex-rest.md">../04-Inbound-APIs/03-apex-rest.md</a>.</p>
+<hr />
+<h2>5. Gotchas and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"<code>with sharing</code> secures everything."</td>
+<td>No. It enforces <strong>record sharing only</strong>, not object permissions or FLS. Add <code>WITH USER_MODE</code> for those.</td>
+</tr>
+<tr>
+<td>"Apex REST respects the caller's permissions."</td>
+<td>No. Apex REST runs in <strong>system context</strong>. You must enforce CRUD, FLS, and sharing yourself.</td>
+</tr>
+<tr>
+<td>"The Standard REST API needs manual FLS checks."</td>
+<td>No. It runs as the <strong>calling user</strong> and enforces object, field, and record security automatically.</td>
+</tr>
+<tr>
+<td>"Omitting a sharing clause is harmless."</td>
+<td>At a transaction entry point, omission defaults to <strong>without sharing</strong>. Always declare it.</td>
+</tr>
+<tr>
+<td>"WITH SECURITY_ENFORCED and WITH USER_MODE are the same."</td>
+<td>USER_MODE also enforces <strong>sharing</strong> and performs better; SECURITY_ENFORCED only covers object + field.</td>
+</tr>
+<tr>
+<td>"Object Read access means you see the records."</td>
+<td>Only the <strong>shared</strong> ones. Private OWD with no sharing rule returns an empty list despite Read access.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Name the three data-security layers Salesforce enforces on a data API call, in order.</strong>
+A: <strong>Object permissions (CRUD)</strong>, then <strong>Field-Level Security (FLS)</strong>, then <strong>record-level sharing</strong> (OWD, role hierarchy, sharing rules, manual/Apex shares). Object = which tables, field = which columns, sharing = which rows. All three are AND-ed.</p>
+<p><strong>Q: Standard REST API vs Apex REST, from a security standpoint?</strong>
+A: The <strong>Standard REST API runs as the calling user</strong> and enforces object, field, and record security automatically. <strong>Apex REST runs in system context</strong>, bypassing all of it, so the developer must re-add <code>with sharing</code>, <code>WITH USER_MODE</code>, and access checks. Forgetting this is a classic data-exposure bug.</p>
+<p><strong>Q: How do you enforce object, field, and record security inside a SOQL query?</strong>
+A: Add <strong><code>WITH USER_MODE</code></strong>, which enforces CRUD, FLS, and sharing as the running user and throws on a violation. It supersedes the older <code>WITH SECURITY_ENFORCED</code>, which covers only object and field security and not sharing.</p>
+<p><strong>Q: When would you use <code>Security.stripInaccessible()</code> instead of <code>WITH USER_MODE</code>?</strong>
+A: When you want to <strong>gracefully drop</strong> fields the user cannot access rather than throw an exception, or to sanitize sObjects from untrusted input before DML. It returns an <code>SObjectAccessDecision</code>; <code>getRecords()</code> gives the cleaned list. <code>AccessType</code> picks READABLE, CREATABLE, UPDATABLE, or UPSERTABLE.</p>
+<p><strong>Q: What does <code>with sharing</code> actually do, and what does it not do?</strong>
+A: It enforces the running user's <strong>record-level sharing</strong>. It does <strong>not</strong> enforce object permissions or FLS, and it is not a substitute for <code>WITH USER_MODE</code>. Use both for full coverage.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Three nested locks on every call: which rooms (object), which shelves (fields), which books (records). The normal API checks all three for you. Hand-written Apex endpoints run as a master key, so you must put the locks back yourself."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Object permissions (CRUD), Field-Level Security (FLS), org-wide defaults (OWD), role hierarchy, sharing rules, manual sharing, Apex managed sharing, system mode, user mode, <code>with sharing</code>, <code>without sharing</code>, <code>inherited sharing</code>, <code>WITH USER_MODE</code>, <code>WITH SECURITY_ENFORCED</code>, <code>Security.stripInaccessible</code>, <code>SObjectAccessDecision</code>, <code>AccessType</code> - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.security_data_access.htm&amp;type=5">Securing Data Access - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_keywords_sharing.htm">Use the with sharing, without sharing, and inherited sharing Keywords - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_enforce_usermode.htm">Set an Access Mode for Database Operations (WITH USER_MODE) - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm">Filter SOQL Queries Using WITH SECURITY_ENFORCED - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm">Enforce Security with the stripInaccessible Method - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_SObjectAccessDecision.htm">SObjectAccessDecision Class - Apex Reference Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_exposing_data.htm">Exposing Data with Apex REST Web Service Methods (system context) - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm">Enforce Object and Field Permissions - Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-mtls-and-shield-encryption.md</a> - encrypting the connection and the data at rest.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - mTLS and Shield Platform Encryption</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Two high-security options that go beyond passwords and tokens. <strong>mTLS</strong> proves <em>who is on each end of the wire</em>. <strong>Shield Platform Encryption</strong> scrambles <em>the data sitting in the database</em>.
+<strong>The split</strong>: mTLS protects <strong>data in transit</strong> with certificates on both sides. Shield protects <strong>data at rest</strong> with org-managed keys.
+<strong>Use when</strong>: A bank, healthcare, or government integration demands certificate-based trust and field-level encryption that even Salesforce staff cannot read.</p>
+</blockquote>
+<p>This is Module 09, security and limits. For the OAuth and Named Credentials that authenticate callers, see <a href="../03-Authentication/README.md">Module 03</a>. For the outbound callouts that carry the certificate, see <a href="../05-Outbound-Callouts/README.md">Module 05</a>. Sibling: <a href="#f01">01-connection-security.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine a <strong>secure courier service</strong> moving a <strong>locked safe</strong> between two buildings.</p>
+<ul>
+<li><strong>mTLS (mutual TLS)</strong> is the <strong>two-way ID check at the door</strong>. Normal TLS only checks the <em>server's</em> badge, like a website showing its padlock. <strong>Mutual</strong> TLS means <strong>both</strong> parties show a badge: the server presents its certificate <strong>and</strong> demands the client present one too. No valid client certificate, no connection. It secures the <strong>road</strong>, not the cargo.</li>
+<li><strong>Shield Platform Encryption</strong> is the <strong>locked safe itself</strong>. Even after the data arrives and sits in the Salesforce database, the sensitive fields stay scrambled. The keys are controlled by <strong>your org</strong>, so the contents are unreadable at rest, even to someone with raw database access.</li>
+</ul>
+<p>Two independent layers. mTLS answers "<strong>can I trust who I am talking to?</strong>" Shield answers "<strong>if someone steals the disk, can they read it?</strong>" Serious regulated integrations use both.</p>
+<hr />
+<h2>2. The mechanisms and when each applies</h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Protects</th>
+<th>Direction / scope</th>
+<th>Reach for it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inbound mTLS</strong></td>
+<td>Data in transit</td>
+<td>External client → Salesforce. SF is the <strong>server</strong> and demands a client cert</td>
+<td>An external system calls the Salesforce API and you must prove the <strong>caller's</strong> identity by certificate</td>
+</tr>
+<tr>
+<td><strong>Outbound mTLS</strong></td>
+<td>Data in transit</td>
+<td>Salesforce → external. SF is the <strong>client</strong> and presents its own cert</td>
+<td>An Apex callout hits a partner endpoint that requires a <strong>client certificate</strong> to let you in</td>
+</tr>
+<tr>
+<td><strong>Shield Platform Encryption</strong></td>
+<td>Data at rest</td>
+<td>Inside the Salesforce database, field and file level</td>
+<td>You must encrypt sensitive fields with <strong>org-controlled keys</strong> and meet compliance like HIPAA, PCI, or GDPR</td>
+</tr>
+<tr>
+<td><strong>Classic encrypted text field</strong></td>
+<td>Data at rest (weakly)</td>
+<td>A single masked text field</td>
+<td>You only need a <strong>masked input</strong> with no real key management. Not a compliance control</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The 10-second answer</strong>: mTLS = mutual certificate check on the <strong>connection</strong>. Shield = strong, key-managed encryption of the <strong>stored data</strong>. Inbound mTLS = SF checks the <em>caller's</em> cert. Outbound mTLS = SF <em>sends</em> its own cert.</p>
+</blockquote>
+<hr />
+<h2>3. How mTLS works: inbound vs outbound</h2>
+<p>The crucial mental model is <strong>who acts as the server</strong> and <strong>who must present a client certificate</strong>.</p>
+<div class="mermaid">
+flowchart TB
+    subgraph IN["INBOUND mTLS - Salesforce is the SERVER"]
+        EXT[External client app] --&gt;|"presents CLIENT cert&lt;br/&gt;on port 8443"| SFS[Salesforce endpoint]
+        SFS --&gt;|"validates cert chains to a&lt;br/&gt;trusted root CA"| VER{Cert valid&lt;br/&gt;and trusted?}
+        VER --&gt;|yes| OK1[Allow API request]
+        VER --&gt;|no| DENY1[Reject handshake]
+    end
+
+    subgraph OUT["OUTBOUND mTLS - Salesforce is the CLIENT"]
+        APX[Apex callout] --&gt;|"via Named Credential"| NC[Named Credential&lt;br/&gt;references stored cert]
+        NC --&gt;|"presents SF CLIENT cert&lt;br/&gt;plus private key"| PART[Partner endpoint]
+        PART --&gt;|validates SF cert| OK2[Allow callout]
+    end
+
+    style SFS fill:#00A1E0,color:#fff
+    style VER fill:#ff9900,color:#fff
+    style NC fill:#4CAF50,color:#fff
+    style PART fill:#9C27B0,color:#fff
+    style DENY1 fill:#F44336,color:#fff
+
+</div>
+<p><strong>Inbound mTLS walkthrough.</strong> An external system connects to your org's API endpoint on <strong>port 8443</strong>. That endpoint sends a <strong>client certificate request</strong> during the TLS handshake. The client presents its certificate <strong>chain</strong>. Salesforce runs standard chain validation: the cert must chain up to a <strong>root CA that Salesforce trusts</strong>. Identity is actually enforced only when the API user has the <strong>Enforce SSL/TLS Mutual Authentication</strong> user permission. Here Salesforce is the <strong>server</strong>, checking the <strong>caller's</strong> badge.</p>
+<p><strong>Outbound mTLS walkthrough.</strong> Your Apex makes a callout. The partner endpoint demands a client certificate. Salesforce, now acting as the <strong>client</strong>, presents a certificate and <strong>private key</strong> stored in <strong>Certificate and Key Management</strong>, referenced through a <strong>Named Credential</strong>. The Named Credential is the clean, modern way to attach the cert so the secret never appears in code. See <a href="../05-Outbound-Callouts/02-named-credentials-for-callouts.md">Module 05 Named Credentials</a>.</p>
+<p><strong>Hyperforce note.</strong> On <strong>Hyperforce</strong>, outbound IP addresses are <strong>dynamic</strong> because the infrastructure runs on public cloud. Salesforce therefore <strong>recommends mTLS over IP allowlists</strong>. Pinning a partner firewall to Salesforce IP ranges is brittle when those ranges shift. A client certificate proves identity regardless of the source IP, so it is the durable control.</p>
+<hr />
+<h2>4. Shield Platform Encryption</h2>
+<p>Shield encrypts sensitive data <strong>at rest</strong> using keys your org manages. Unlike classic encrypted text fields, it is a real key-management and compliance control that preserves most platform functionality.</p>
+<h3>Probabilistic vs deterministic</h3>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>What it does</th>
+<th>Filtering / SOQL</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Probabilistic</strong></td>
+<td>Same input yields a <strong>different</strong> ciphertext each time</td>
+<td><strong>Cannot</strong> be used in filters, WHERE clauses, SOQL/SOSL functions</td>
+<td>Strongest privacy, least usable</td>
+</tr>
+<tr>
+<td><strong>Deterministic</strong></td>
+<td>Same input yields the <strong>same</strong> ciphertext, so values are comparable</td>
+<td><strong>Can</strong> filter in reports, list views, and exact-match SOQL</td>
+<td>Slightly weaker, far more usable</td>
+</tr>
+</tbody>
+</table>
+<p>Deterministic comes in <strong>case-sensitive</strong> and <strong>exact-match case-insensitive</strong> variants, chosen field by field. Use deterministic only on fields you must filter or match on, like an external ID. Otherwise prefer probabilistic.</p>
+<h3>Key management and BYOK</h3>
+<p>Shield uses a <strong>key derivation</strong> model. A <strong>tenant secret</strong> plus a master secret derive the <strong>data encryption key</strong> that actually encrypts your fields. With <strong>BYOK (Bring Your Own Key)</strong> you generate and control your <strong>own</strong> tenant secret on your premises, then upload it via the Platform Encryption REST API, and <strong>rotate</strong> it on your schedule. This means Salesforce never holds the full key material on its own, which is often a hard compliance requirement.</p>
+<h3>Integration impacts (the part that bites)</h3>
+<p>Encrypting a field is not free. On encrypted fields, several operations are <strong>restricted</strong>:</p>
+<ul>
+<li><strong>Probabilistic</strong> fields cannot appear in <strong>WHERE</strong>, <strong>ORDER BY</strong>, <strong>GROUP BY</strong>, or SOQL/SOSL functions.</li>
+<li><strong>Sorting and filtering</strong> in reports and list views work only with <strong>deterministic</strong> encryption.</li>
+<li>Some features, certain <strong>formula</strong> references, external lookups, and matching during lead import behave differently or are unsupported on encrypted fields.</li>
+<li>An integration that previously filtered on a now-encrypted field can <strong>silently return wrong results or error</strong> until you switch that field to deterministic or redesign the query.</li>
+</ul>
+<div class="mermaid">
+flowchart LR
+    DATA[Sensitive field value] --&gt; ENC[Shield encryption&lt;br/&gt;at rest]
+    ENC --&gt; SCHEME{Which scheme?}
+    SCHEME --&gt;|Probabilistic| P[No filtering&lt;br/&gt;strongest privacy]
+    SCHEME --&gt;|Deterministic| D[Filter and exact match&lt;br/&gt;in reports and SOQL]
+    KEY[Your tenant secret&lt;br/&gt;BYOK] -.controls.-&gt; ENC
+    style ENC fill:#00A1E0,color:#fff
+    style SCHEME fill:#ff9900,color:#fff
+    style P fill:#9C27B0,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style KEY fill:#607D8B,color:#fff
+
+</div>
+<h3>Shield vs classic encrypted text fields</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Classic Encrypted Text</strong></th>
+<th><strong>Shield Platform Encryption</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scope</td>
+<td>One custom text field</td>
+<td>Many standard/custom fields, files, attachments</td>
+</tr>
+<tr>
+<td>Key management</td>
+<td>None you control</td>
+<td>Org-managed, rotatable, <strong>BYOK</strong></td>
+</tr>
+<tr>
+<td>Filtering</td>
+<td>Not filterable</td>
+<td>Deterministic option supports filtering</td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>Masked in UI by permission</td>
+<td>Encrypted <strong>at rest</strong>, unreadable in storage</td>
+</tr>
+<tr>
+<td>Compliance grade</td>
+<td>No</td>
+<td>Yes, designed for regulated data</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Gotchas and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"TLS and mTLS are the same."</td>
+<td>Standard TLS checks only the <strong>server</strong> cert. <strong>mTLS</strong> also requires a valid <strong>client</strong> cert. Both ends prove identity.</td>
+</tr>
+<tr>
+<td>"Inbound and outbound mTLS are configured the same way."</td>
+<td>No. <strong>Inbound</strong>: SF is the server validating the caller's cert. <strong>Outbound</strong>: SF is the client presenting its own cert via a <strong>Named Credential</strong>.</td>
+</tr>
+<tr>
+<td>"Use IP allowlists on Hyperforce."</td>
+<td>Hyperforce IPs are <strong>dynamic</strong>. Salesforce recommends <strong>mTLS over IP allowlists</strong> for durable identity.</td>
+</tr>
+<tr>
+<td>"Shield encrypts data in transit."</td>
+<td>No. Shield encrypts data <strong>at rest</strong>. TLS/mTLS handles transit. Different layers.</td>
+</tr>
+<tr>
+<td>"Just turn on Shield, nothing changes."</td>
+<td>Encrypting a field can <strong>break filtering, sorting, and SOQL</strong>. Probabilistic blocks WHERE clauses. Plan deterministic for fields you query.</td>
+</tr>
+<tr>
+<td>"Classic encrypted text fields are compliance-grade."</td>
+<td>They are a <strong>masked input</strong>, not key-managed encryption. Use <strong>Shield</strong> for real compliance.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is mTLS and how does it differ from normal TLS?</strong>
+A: Mutual TLS requires <strong>both</strong> sides to present certificates. Normal TLS validates only the <strong>server</strong>. With mTLS the server also demands a valid <strong>client</strong> certificate during the handshake, so each party cryptographically proves its identity before any data flows.</p>
+<p><strong>Q: Explain inbound vs outbound mTLS in Salesforce.</strong>
+A: <strong>Inbound</strong>, Salesforce is the <strong>server</strong>: an external client connects on <strong>port 8443</strong>, presents a client certificate, and Salesforce validates it chains to a <strong>trusted root CA</strong>, with the <strong>Enforce SSL/TLS Mutual Authentication</strong> permission enforcing it. <strong>Outbound</strong>, Salesforce is the <strong>client</strong>: during an Apex callout it presents its <strong>own</strong> client certificate and private key, stored in Certificate and Key Management and referenced by a <strong>Named Credential</strong>.</p>
+<p><strong>Q: On Hyperforce, why prefer mTLS over IP allowlisting?</strong>
+A: Hyperforce runs on public cloud with <strong>dynamic outbound IPs</strong>, so allowlists need constant maintenance and can break. A <strong>client certificate</strong> proves identity independent of source IP, so Salesforce recommends <strong>mTLS over IP allowlists</strong>.</p>
+<p><strong>Q: Probabilistic vs deterministic encryption in Shield?</strong>
+A: <strong>Probabilistic</strong> produces a different ciphertext each time, giving the strongest privacy but it <strong>cannot</strong> be filtered or used in SOQL WHERE clauses. <strong>Deterministic</strong> produces the same ciphertext for the same input, so values support <strong>filtering, exact-match SOQL, reports, and list views</strong>. Use deterministic only on fields you must query.</p>
+<p><strong>Q: What changes for integrations once a field is Shield-encrypted?</strong>
+A: Operations on the field can be <strong>restricted</strong>. Probabilistic fields cannot appear in WHERE, ORDER BY, GROUP BY, or SOQL functions, and sorting/filtering needs deterministic encryption. Existing queries that filter on a now-encrypted field can break, so you switch the field to deterministic or redesign the query, and you manage key rotation via <strong>BYOK</strong>.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "mTLS is a two-way ID check at the door, both sides show a badge before anyone talks. Shield is a locked safe for the data once it is inside, and only your org holds the key, even if someone steals the disk they cannot read it."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>mTLS, mutual TLS, client certificate, certificate chain, root CA, port 8443, Enforce SSL/TLS Mutual Authentication, Named Credential, Certificate and Key Management, Hyperforce, Shield Platform Encryption, probabilistic encryption, deterministic encryption, tenant secret, data encryption key, BYOK, encryption at rest, classic encrypted text field - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.security_keys_uploading_mutual_auth_cert.htm&amp;type=5">Set Up a Mutual Authentication Certificate for API Login - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.security_keys_uploading_mutual_auth_cert_api.htm&amp;type=5">Configure Your API Client to Use Mutual Authentication - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=000383575&amp;type=1">Certificates in Mutual Authentication for Salesforce - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=000394078&amp;type=1">Preferred Alternatives to IP Allowlisting on Hyperforce - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2025/10/enhance-integration-security-with-mtls-for-salesforce-and-mulesoft">Enhance Integration Security with mTLS for Salesforce and MuleSoft - Salesforce Developers Blog</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.security_pe_overview.htm&amp;type=5">Strengthen Your Data's Security with Shield Platform Encryption - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.securityImplGuide.meta/securityImplGuide/security_pe_deterministic.htm">Filter Encrypted Data with Deterministic Encryption - Salesforce Security Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.security_pe_considerations_general.htm&amp;type=5">General Shield Platform Encryption Considerations - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_encryption_rest_api_guide.meta/platform_encryption_rest_api_guide/api_rest_encryption.htm">Introducing the Salesforce Shield Platform Encryption REST API - Platform Encryption REST API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-governor-and-api-limits.md</a> - the definitive limits reference for the whole module.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Governor and API Limits</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The definitive limits reference for Salesforce integrations. <strong>Per-transaction</strong> governor limits, <strong>org-level</strong> daily API allocations, and the <strong>Bulk, Platform Event, and Async Apex</strong> ceilings you design around.
+<strong>Scope</strong>: Reference + monitoring + design. The numbers an interviewer expects you to recall cold.
+<strong>Use when</strong>: Sizing an integration, debugging a <code>LimitException</code>, or proving you can architect within Salesforce's multitenant guardrails.</p>
+</blockquote>
+<p>This is the <strong>final file in Module 09</strong>. It consolidates the callout limits from <a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">Module 05</a> and adds the org-wide allocations. For event volume, see <a href="../06-Event-Driven/README.md">Module 06</a>. Sibling: <a href="#f04">04-mtls-and-shield-encryption.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Salesforce is a <strong>multitenant apartment building</strong>. Thousands of orgs share the same plumbing, so no single tenant may flood the pipes. The limits come in <strong>two flavors</strong>:</p>
+<ul>
+<li><strong>Governor limits</strong> are the <strong>per-visit rules</strong>. They reset on <strong>every transaction</strong>. How many callouts, how big the payload, how long it may run. Cross one and you get an instant runtime exception, not a slow response.</li>
+<li><strong>Allocations</strong> are the <strong>monthly utility caps</strong>. They are measured over a <strong>rolling 24 hours</strong> across the whole org. Daily API calls, Bulk records, platform event deliveries, async job runs. Burn through the day's budget and further requests are <strong>throttled or rejected</strong> until the window rolls.</li>
+</ul>
+<p>A senior engineer designs so that <strong>neither</strong> ceiling is hit at peak. That means bulkifying, batching, going asynchronous, and monitoring usage <strong>before</strong> the org runs out of headroom on a busy Monday.</p>
+<hr />
+<h2>2. Callout governor limits (per transaction)</h2>
+<p>These match the outbound module exactly. Memorize them.</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Callouts per transaction</strong></td>
+<td><strong>100</strong></td>
+<td>All HTTP and web service callouts combined in one Apex transaction. Bulkify, never loop.</td>
+</tr>
+<tr>
+<td><strong>Max request or response size (sync)</strong></td>
+<td><strong>6 MB</strong></td>
+<td>Synchronous transaction heap context.</td>
+</tr>
+<tr>
+<td><strong>Max request or response size (async)</strong></td>
+<td><strong>12 MB</strong></td>
+<td>Higher ceiling in async: Queueable, Batch, <code>@future</code>.</td>
+</tr>
+<tr>
+<td><strong>Timeout per callout</strong></td>
+<td><strong>120 s</strong></td>
+<td>Default is <strong>10 s</strong>. Set with <code>req.setTimeout(ms)</code>, max <code>120000</code>.</td>
+</tr>
+<tr>
+<td><strong>Total callout time per transaction</strong></td>
+<td><strong>120 s</strong></td>
+<td>Cumulative across all callouts in the transaction.</td>
+</tr>
+<tr>
+<td><strong>Concurrent long-running requests</strong></td>
+<td><strong>10 minimum</strong>, scales by license</td>
+<td><strong>Synchronous</strong> requests running <strong>&gt; 5 s</strong> count, org-wide. See note below.</td>
+</tr>
+<tr>
+<td><strong>No callout after uncommitted DML</strong></td>
+<td>rule</td>
+<td>Pending DML in the same transaction blocks the callout.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Myth correction, read this twice.</strong> The callout request/response maximum is <strong>6 MB synchronous</strong> and <strong>12 MB asynchronous</strong>. It is <strong>NOT 10 MB</strong>. The "10 MB" figure is a persistent myth. The real ceiling depends on the transaction's <strong>heap</strong> context: <strong>6 MB sync, 12 MB async</strong>.</p>
+</blockquote>
+<div class="mermaid">
+flowchart LR
+    A[Outbound callout] --&gt; B{Sync or async?}
+    B --&gt;|Sync| C["6 MB payload&lt;br/&gt;counts toward concurrent&lt;br/&gt;pool if over 5s"]
+    B --&gt;|Async| D["12 MB payload&lt;br/&gt;does not count toward&lt;br/&gt;concurrent pool"]
+    A --&gt; E[100 callouts per txn]
+    A --&gt; F["120s per callout&lt;br/&gt;120s total per txn"]
+    style C fill:#00A1E0,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style E fill:#ff9900,color:#fff
+    style F fill:#9C27B0,color:#fff
+
+</div>
+<p><strong>No callout after DML.</strong> Once a transaction issues DML and has not committed, a callout throws <code>You have uncommitted work pending</code>. Call out <strong>before</strong> any DML, or move the callout to <strong>async</strong> so it runs in its own transaction.</p>
+<p><strong>Concurrent long-running request limit.</strong> Any <strong>synchronous</strong> Apex request running longer than <strong>5 seconds</strong> counts against an org-wide pool. The historical floor is <strong>10</strong>, and Salesforce now <strong>scales</strong> it by license count (roughly one slot per 100 licenses), up to a <strong>maximum of 50</strong>. Asynchronous work, Batch, <code>@future</code>, scheduled, and Bulk API, does <strong>not</strong> count. This is exactly why slow UI callouts use a <a href="../05-Outbound-Callouts/06-continuation-pattern.md">Continuation</a>.</p>
+<hr />
+<h2>3. Org-level API request allocations (daily, rolling 24 h)</h2>
+<p>A single shared daily budget covers <strong>REST, SOAP, and Bulk</strong> API requests. It is calculated from your <strong>edition</strong> plus a <strong>per-user-license</strong> amount.</p>
+<table>
+<thead>
+<tr>
+<th>Edition</th>
+<th>Daily API request allocation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Enterprise</strong></td>
+<td><strong>100,000</strong> base + <strong>1,000 per Salesforce license</strong></td>
+</tr>
+<tr>
+<td><strong>Unlimited / Performance</strong></td>
+<td><strong>100,000</strong> base + <strong>5,000 per Salesforce license</strong></td>
+</tr>
+<tr>
+<td><strong>Developer Edition</strong></td>
+<td><strong>15,000</strong> per day (fixed)</td>
+</tr>
+<tr>
+<td><strong>Add-on</strong></td>
+<td>Purchasable in increments (e.g. <strong>1,000 to 10,000</strong> blocks)</td>
+</tr>
+</tbody>
+</table>
+<p>The total is <strong>shared</strong> across all integration users and tools. One runaway middleware job can starve every other integration. Each REST call typically costs <strong>1</strong> request. <strong>Bulk API</strong> is far more efficient per record because a whole batch or job counts as a small number of API calls, which is the entire reason it exists for high volume.</p>
+<p><strong>How to check usage.</strong></p>
+<ul>
+<li><strong>REST resource</strong>: <code>GET /services/data/v66.0/limits</code> returns the <strong>maximum</strong> and <strong>remaining</strong> allocation for many limits, including <code>DailyApiRequests</code>. Values are accurate within about <strong>5 minutes</strong>.</li>
+<li><strong>System Overview</strong>: Setup → <strong>System Overview</strong> shows API usage against the daily cap at a glance.</li>
+<li><strong>API Usage notifications</strong>: Setup lets you email an alert when usage crosses a percentage threshold of the daily limit.</li>
+</ul>
+<div class="mermaid">
+flowchart TB
+    REST[REST calls] --&gt; POOL[Shared daily&lt;br/&gt;API request pool]
+    SOAP[SOAP calls] --&gt; POOL
+    BULK[Bulk API jobs&lt;br/&gt;few calls per batch] --&gt; POOL
+    POOL --&gt; CHK{Check headroom}
+    CHK --&gt;|"GET /services/data/v66.0/limits"| MON[DailyApiRequests&lt;br/&gt;max and remaining]
+    CHK --&gt;|Setup| SO[System Overview]
+    style POOL fill:#00A1E0,color:#fff
+    style CHK fill:#ff9900,color:#fff
+    style MON fill:#4CAF50,color:#fff
+    style SO fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>4. Bulk API limits</h2>
+<p>Bulk is the high-volume path. The two versions count differently.</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Bulk API 1.0</th>
+<th>Bulk API 2.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Daily ceiling</strong></td>
+<td><strong>15,000 batches</strong> per rolling 24 h</td>
+<td><strong>100 million records</strong> per rolling 24 h</td>
+</tr>
+<tr>
+<td><strong>Job/batch model</strong></td>
+<td>You create and manage batches yourself</td>
+<td>Salesforce <strong>chunks records into batches for you</strong></td>
+</tr>
+<tr>
+<td><strong>Records per batch</strong></td>
+<td><strong>10,000</strong> records per batch</td>
+<td>Managed internally</td>
+</tr>
+<tr>
+<td><strong>Max file size per request</strong></td>
+<td>10 MB per batch (CSV)</td>
+<td><strong>150 MB</strong> per job (uploaded data)</td>
+</tr>
+<tr>
+<td><strong>API cost</strong></td>
+<td>A batch counts as a small number of API calls, not one per record</td>
+<td>Counts toward daily API requests at the batch level</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note</strong>: Salesforce official docs state Bulk API 2.0's daily ingest limit as <strong>100 million records</strong> per 24 hours, not 150 million. Use <strong>100 million</strong>. The per-job <strong>data</strong> cap is <strong>150 MB</strong>.</p>
+</blockquote>
+<p><strong>Why Bulk for integrations.</strong> Loading 1 million records via the REST or SOAP API one row at a time would obliterate the daily request pool. Bulk processes them <strong>asynchronously</strong> in batches, costing only a handful of API calls. Always reach for Bulk above roughly <strong>a few thousand records</strong>, and prefer <strong>Bulk API 2.0</strong> for its simpler record-based model.</p>
+<hr />
+<h2>5. Platform Event and Async Apex allocations</h2>
+<h3>Platform Events (and Change Data Capture)</h3>
+<table>
+<thead>
+<tr>
+<th>Allocation</th>
+<th>What it governs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Daily event delivery</strong></td>
+<td>Max event notifications <strong>delivered</strong> to subscribers (CometD/Pub-Sub, empApi, triggers) in 24 h. Set <strong>by edition/license</strong>, and <strong>shared</strong> across all CometD clients</td>
+</tr>
+<tr>
+<td><strong>Hourly publishing</strong></td>
+<td>Max events <strong>published</strong> per hour, also edition-based</td>
+</tr>
+<tr>
+<td><strong>Add-on</strong></td>
+<td><strong>High-Volume Platform Events</strong> greatly expand both publish and delivery allocations</td>
+</tr>
+</tbody>
+</table>
+<p>Delivery, not publishing, is usually the binding constraint, because <strong>one published event is delivered to every subscriber</strong> and each delivery counts. Monitor with the <code>PlatformEventUsageMetric</code> data and design subscribers to be few and efficient. See <a href="../06-Event-Driven/README.md">Module 06</a>.</p>
+<h3>Async Apex executions</h3>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Async Apex executions per 24 h</strong></td>
+<td><strong>Greater of 250,000</strong> or <strong>200 x number of user licenses</strong></td>
+</tr>
+</tbody>
+</table>
+<p>This pool covers <strong>Batch Apex, Queueable, <code>@future</code>, and scheduled Apex</strong> combined. A 1,000-license org gets <code>max(250000, 200000)</code> = <strong>250,000</strong>. A 2,000-license org gets <code>max(250000, 400000)</code> = <strong>400,000</strong>. Chained Queueables and recursive batches can burn this fast, so a runaway chain is a real outage risk.</p>
+<table>
+<thead>
+<tr>
+<th>Quick reference</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Callouts per transaction</td>
+<td><strong>100</strong></td>
+</tr>
+<tr>
+<td>Callout payload</td>
+<td><strong>6 MB sync / 12 MB async</strong></td>
+</tr>
+<tr>
+<td>Callout timeout</td>
+<td><strong>120 s</strong> per call, <strong>120 s</strong> total</td>
+</tr>
+<tr>
+<td>Enterprise daily API</td>
+<td><strong>100,000 + 1,000/license</strong></td>
+</tr>
+<tr>
+<td>Bulk API 1.0</td>
+<td><strong>15,000 batches / 24 h</strong></td>
+</tr>
+<tr>
+<td>Bulk API 2.0</td>
+<td><strong>100M records / 24 h</strong>, <strong>150 MB/job</strong></td>
+</tr>
+<tr>
+<td>Async Apex</td>
+<td><strong>max(250,000, 200 x licenses) / 24 h</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Gotchas and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Callout payload max is 10 MB."</td>
+<td><strong>Wrong.</strong> It is <strong>6 MB sync, 12 MB async</strong>. The 10 MB figure is a myth.</td>
+</tr>
+<tr>
+<td>"Each governor limit is org-wide."</td>
+<td>No. <strong>Governor</strong> limits reset <strong>per transaction</strong>. <strong>Allocations</strong> (API, Bulk, events, async) are the org-wide, daily ones.</td>
+</tr>
+<tr>
+<td>"REST and Bulk have separate daily pools."</td>
+<td>They draw from the <strong>same</strong> shared daily API request allocation. Bulk is just far cheaper per record.</td>
+</tr>
+<tr>
+<td>"Async raises the callout count."</td>
+<td>No. Async raises the <strong>payload</strong> ceiling to 12 MB. The <strong>100 callouts</strong> per transaction still applies.</td>
+</tr>
+<tr>
+<td>"Batch Apex counts toward concurrent long-running requests."</td>
+<td>No. Only <strong>synchronous</strong> requests over 5 s count. Async is exempt.</td>
+</tr>
+<tr>
+<td>"Publishing is the platform event bottleneck."</td>
+<td>Usually <strong>delivery</strong> is, since one event is delivered to every subscriber and each delivery counts.</td>
+</tr>
+<tr>
+<td>"Buy more licenses to lift any limit."</td>
+<td>Only some scale with licenses (daily API, async Apex, concurrent requests). The <strong>6 MB / 12 MB</strong> payload cap does not.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What are the core callout limits?</strong>
+A: <strong>100</strong> callouts per transaction. Request/response max <strong>6 MB synchronous, 12 MB asynchronous</strong> (not 10 MB). <strong>120 s</strong> per callout and <strong>120 s</strong> total per transaction, default per-callout timeout <strong>10 s</strong>. Plus the org-wide concurrent long-running request limit and the no-callout-after-uncommitted-DML rule.</p>
+<p><strong>Q: How is the daily API request limit calculated, and how do you check it?</strong>
+A: It is a <strong>shared</strong> daily pool from <strong>edition plus per-license</strong>. Enterprise is <strong>100,000 base + 1,000 per Salesforce license</strong>, covering REST, SOAP, and Bulk together. Check it with <code>GET /services/data/v66.0/limits</code> (look at <code>DailyApiRequests</code> max and remaining) or via <strong>System Overview</strong>, and set <strong>API Usage notifications</strong> for thresholds.</p>
+<p><strong>Q: Bulk API 1.0 vs 2.0 limits?</strong>
+A: <strong>1.0</strong>: you manage batches, <strong>15,000 batches</strong> per rolling 24 h, 10,000 records per batch. <strong>2.0</strong>: Salesforce batches for you, <strong>100 million records</strong> per rolling 24 h with up to <strong>150 MB</strong> of data per job. Both are asynchronous and cost only a few API calls per batch, which is why you use them above a few thousand records.</p>
+<p><strong>Q: What is the async Apex daily limit and what counts against it?</strong>
+A: The <strong>greater of 250,000</strong> or <strong>200 x user licenses</strong> per 24 h, shared across <strong>Batch, Queueable, <code>@future</code>, and scheduled</strong> Apex. Chained Queueables and recursive batches can exhaust it, so bound your chains.</p>
+<p><strong>Q: Governor limit vs allocation, what is the difference?</strong>
+A: A <strong>governor limit</strong> resets <strong>per transaction</strong> and throws immediately when crossed, like 100 callouts or 6 MB payload. An <strong>allocation</strong> is an org-wide budget over a <strong>rolling 24 hours</strong>, like daily API requests or Bulk records, and throttles further requests once spent. You design for both at peak load.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Think of two kinds of limits. Per-trip rules that reset every transaction, like how many calls and how big each one can be. And a daily utility budget for the whole org, like total API calls and records moved per day. Good design never hits either at peak, and you watch the meter before it runs out."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Governor limit, allocation, callout limit, transaction, heap, concurrent long-running request, uncommitted DML, daily API request limit, <code>DailyApiRequests</code>, <code>/services/data/v66.0/limits</code>, System Overview, Bulk API 1.0, Bulk API 2.0, batch, Platform Event delivery allocation, High-Volume Platform Events, async Apex, Queueable, Batch Apex - defined here and in the <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits - Apex Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm">API Request Limits and Allocations - Limits and Allocations Quick Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm">Bulk API and Bulk API 2.0 Limits and Allocations - Limits and Allocations Quick Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_event_limits.htm">Platform Event Allocations - Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_limits.htm">List Org Limits - REST API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=release-notes.rn_apex_limit.htm&amp;type=5">Scale Your Concurrent Long-Running Apex Requests Limit - Salesforce Release Notes</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2024/11/api-limits-and-monitoring-your-api-usage">API Limits and Monitoring Your API Usage - Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README.md</a> for the full Module 09 map. That completes the security and limits track. From here, </em><em>Module 10 (Tools &amp; Middleware)</em><em> covers MuleSoft, ETL, and integration platforms that orchestrate these calls, and </em><em>Module 11 (Projects)</em><em> puts the whole curriculum to work in end-to-end build scenarios. Those two are the natural continuation.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 09 Security &amp; Limits · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

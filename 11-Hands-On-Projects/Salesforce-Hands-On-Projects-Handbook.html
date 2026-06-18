@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Hands-On Projects Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Hands-On Projects</h1>
+  <div class="sub">12 end-to-end builds: inbound, outbound, bulk, events, and auth, step by step.</div>
+  <div>
+    <span class="pill">REST &amp; SOAP callouts</span><span class="pill">Remote Call-In</span>
+    <span class="pill">Composite &amp; Bulk</span><span class="pill">Platform Events + LWC</span>
+    <span class="pill">CDC + Pub/Sub</span><span class="pill">Client Credentials</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">Project 01 - Apex REST Callout to a Public API</a></li>
+<li class=""><a href="#f02">Project 02 - SOAP Callout via WSDL2Apex</a></li>
+<li class=""><a href="#f03">Project 03 - External System Creates an Account via REST API</a></li>
+<li class=""><a href="#f04">Project 04 - Account + Contact in One Composite API Call</a></li>
+<li class=""><a href="#f05">Project 05 - Custom Apex REST Inbound Endpoint</a></li>
+<li class=""><a href="#f06">Project 06 - Apex SOAP Web Service Tested in SOAP UI</a></li>
+<li class=""><a href="#f07">Project 07 - Load 100k Records with Bulk API 2.0</a></li>
+<li class=""><a href="#f08">Project 08 - Outbound Message to a Webhook (Pipedream)</a></li>
+<li class=""><a href="#f09">Project 09 - External Services from an OpenAPI 3.0 Schema</a></li>
+<li class=""><a href="#f10">Project 10 - Platform Event to a Live LWC</a></li>
+<li class=""><a href="#f11">Project 11 - Change Data Capture Listener via Pub/Sub API</a></li>
+<li class=""><a href="#f12">Project 12 - OAuth 2.0 Client Credentials Flow</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 11 - Hands-On Projects</h1>
+<blockquote>
+<p><strong>Goal</strong>: Build <strong>12 real integrations</strong> end-to-end. Stop reading, start shipping.
+<strong>API version</strong>: v66.0 (Spring '26). Each project is a standalone build guide you can finish in a Developer org.</p>
+</blockquote>
+<p>This module turns the concepts from Modules 01-09 into working builds. Every project follows the same shape: <strong>business problem → architecture → auth → step-by-step build → test → gotchas → extension → interview angle</strong>. Use a free <a href="https://developer.salesforce.com/signup">Developer Edition org</a> and the <a href="../10-Tools-Middleware/README.md">tools from Module 10</a>.</p>
+<hr />
+<h2>The 12 projects</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Project</th>
+<th>Pattern</th>
+<th>Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">REST callout to a public API</a></td>
+<td>Request-Reply</td>
+<td>Apex + Named Credential</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">SOAP callout via WSDL2Apex</a></td>
+<td>Request-Reply</td>
+<td>WSDL2Apex</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">External system creates an Account (REST)</a></td>
+<td>Remote Call-In</td>
+<td>Postman + REST API</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">Account + Contact in one call (Composite)</a></td>
+<td>Remote Call-In</td>
+<td>Composite API</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">Custom inbound Apex REST endpoint</a></td>
+<td>Remote Call-In</td>
+<td><code>@RestResource</code></td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">Test an Apex SOAP service in SOAP UI</a></td>
+<td>Remote Call-In</td>
+<td>Apex SOAP + SOAP UI</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="#f07">Bulk API 2.0 load of 100K records</a></td>
+<td>Batch Data Sync</td>
+<td>Bulk API + CLI/CSV</td>
+</tr>
+<tr>
+<td>08</td>
+<td><a href="#f08">Outbound Message to a webhook</a></td>
+<td>Fire-and-Forget</td>
+<td>Flow + Outbound Message</td>
+</tr>
+<tr>
+<td>09</td>
+<td><a href="#f09">External Services from an OpenAPI spec</a></td>
+<td>Request-Reply</td>
+<td>External Services + Flow</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="#f10">Platform Event published to an LWC</a></td>
+<td>Fire-and-Forget</td>
+<td>Platform Events + empApi</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="#f11">CDC listener via Pub/Sub API</a></td>
+<td>UI Update on Change</td>
+<td>CDC + Pub/Sub (gRPC)</td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="#f12">OAuth 2.0 Client Credentials server-to-server</a></td>
+<td>Auth pattern</td>
+<td>Connected App / ECA</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Suggested order</h2>
+<div class="mermaid">
+flowchart LR
+    P1[1. REST callout] --&gt; P3[3. External to SF REST]
+    P3 --&gt; P5[5. Apex REST]
+    P5 --&gt; P4[4. Composite]
+    P4 --&gt; P10[10. Platform Event + LWC]
+    P10 --&gt; P11[11. CDC + Pub/Sub]
+    P11 --&gt; P7[7. Bulk 100K]
+    P7 --&gt; P12[12. Client Credentials]
+    P1 -.-&gt; P2[2. SOAP callout]
+    P5 -.-&gt; P6[6. SOAP UI test]
+    P3 -.-&gt; P8[8. Outbound Message]
+    P8 -.-&gt; P9[9. External Services]
+
+    style P1 fill:#4CAF50,color:#fff
+    style P12 fill:#00A1E0,color:#fff
+    style P11 fill:#ff9900,color:#fff
+
+</div>
+<p>Solid line = core path. Dotted = related side quests.</p>
+<hr />
+<h2>Coverage map (project → pattern → concept module)</h2>
+<table>
+<thead>
+<tr>
+<th>Projects</th>
+<th>Pattern</th>
+<th>Concept module</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01, 02, 09</td>
+<td>Request and Reply</td>
+<td><a href="../02-Integration-Patterns/01-request-and-reply.md">Module 02</a> + <a href="../05-Outbound-Callouts/README.md">Module 05</a></td>
+</tr>
+<tr>
+<td>03, 04, 05, 06</td>
+<td>Remote Call-In</td>
+<td><a href="../02-Integration-Patterns/04-remote-call-in.md">Module 02</a> + <a href="../04-Inbound-APIs/README.md">Module 04</a></td>
+</tr>
+<tr>
+<td>07</td>
+<td>Batch Data Sync</td>
+<td><a href="../02-Integration-Patterns/03-batch-data-synchronization.md">Module 02</a> + <a href="../07-Bulk-Async/01-bulk-api-2.md">Module 07</a></td>
+</tr>
+<tr>
+<td>08, 10</td>
+<td>Fire-and-Forget</td>
+<td><a href="../06-Event-Driven/02-platform-events.md">Module 06</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td>UI Update on Change</td>
+<td><a href="../06-Event-Driven/04-pub-sub-api.md">Module 06</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Auth</td>
+<td><a href="../03-Authentication/05-client-credentials-flow.md">Module 03</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Outcome</h2>
+<p>Finish these and you have hands-on proof of every major Salesforce integration pattern: inbound, outbound, bulk, events, and auth. That is a resume-ready portfolio and an interview full of concrete stories.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/signup">Salesforce Developer Edition signup</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts.htm">Apex Developer Guide — Integration</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide (v66.0)</a></li>
+</ul>
+<p><em>Each project has its own Sources section with the specific official docs.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>Project 01 - Apex REST Callout to a Public API</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a> (Salesforce → External, synchronous).
+<strong>Tools</strong>: Apex <code>HttpRequest</code> + a <strong>Named Credential</strong> + a public test API.
+<strong>You will learn</strong>: the cleanest way to call out from Apex without hardcoding anything, and how to test it.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem → architecture → auth → build → test → gotchas → extension. Concepts behind this one live in <a href="../05-Outbound-Callouts/01-http-callouts.md">Module 05</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>Salesforce needs to fetch live data from an external web service (here, a public test API) and use the response in Apex.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant APX as Apex (Anonymous / class)
+    participant NC as Named Credential
+    participant API as Public API
+    APX-&gt;&gt;NC: send(req) endpoint callout:Test_API/users/2
+    NC-&gt;&gt;API: HTTPS GET /users/2
+    API--&gt;&gt;NC: 200 OK + JSON
+    NC--&gt;&gt;APX: HttpResponse (status + body)
+    APX-&gt;&gt;APX: Parse JSON, log result
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>The test API needs no credentials, but we still route through a <strong>Named Credential</strong> so the URL isn't hardcoded and the pattern matches real life.</p>
+<ol>
+<li>Setup → <strong>Named Credentials</strong> → <strong>New</strong> (External Credential + Named Credential, or a legacy Named Credential).</li>
+<li><strong>Label/Name</strong>: <code>Test_API</code>.</li>
+<li><strong>URL</strong>: <code>https://reqres.in</code> (or <code>https://httpbin.org</code>).</li>
+<li><strong>Authentication</strong>: choose <strong>No Authentication</strong> (this public API is open). For an authenticated API you'd pick an External Credential with OAuth/API Key, see <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</li>
+<li>Save. (No <strong>Remote Site Setting</strong> is needed because a Named Credential registers the host. If you ever call the raw URL instead, add a Remote Site Setting.)</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p>Create an Apex class that calls the API and returns the parsed body.</p>
+<pre><code class="language-apex">public with sharing class PublicApiClient {
+    public static String getUser(Integer userId) {
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('callout:Test_API/api/users/' + userId);
+        req.setMethod('GET');
+        req.setHeader('Content-Type', 'application/json');
+        req.setTimeout(120000);
+
+        HttpResponse res = new Http().send(req);
+        if (res.getStatusCode() == 200) {
+            Map&lt;String, Object&gt; body =
+                (Map&lt;String, Object&gt;) JSON.deserializeUntyped(res.getBody());
+            System.debug('User payload: ' + body.get('data'));
+            return res.getBody();
+        }
+        throw new CalloutException('Unexpected status: ' + res.getStatusCode());
+    }
+}
+</code></pre>
+<hr />
+<h2>5. Test</h2>
+<p>Run <strong>Anonymous Apex</strong> (Developer Console → Debug → Open Execute Anonymous, or <code>sf apex run</code>):</p>
+<pre><code class="language-apex">System.debug(PublicApiClient.getUser(2));
+</code></pre>
+<p>Open the <strong>debug log</strong> and confirm a <code>200</code> and the JSON body. Alternatively, test the public endpoint first in <a href="../10-Tools-Middleware/01-postman.md">Postman</a> to see the expected shape.</p>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Unauthorized endpoint</code></td>
+<td>Host not registered. Use a <strong>Named Credential</strong> (<code>callout:</code>) or add a Remote Site Setting.</td>
+</tr>
+<tr>
+<td><code>You have uncommitted work pending</code></td>
+<td>A DML ran before the callout. Call out first, or go async. See <a href="../05-Outbound-Callouts/05-asynchronous-callouts.md">Module 05</a>.</td>
+</tr>
+<tr>
+<td>Public test API rate-limits or requires a key</td>
+<td>Swap to <code>httpbin.org</code>, or add the key via an External Credential.</td>
+</tr>
+<tr>
+<td>Timeout</td>
+<td>Set <code>setTimeout</code>; if the API is slow, use async/Continuation.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Move the call into a <strong>Queueable</strong> so it can run after DML from a trigger.</li>
+<li>Add a <strong><code>HttpCalloutMock</code></strong> test class so the callout has unit-test coverage. See <a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">Module 05</a>.</li>
+<li>Switch the Named Credential to an <strong>API Key</strong> External Credential against an authenticated API.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This project proves you know the <strong>right</strong> way to call out: a <strong>Named Credential</strong> instead of a hardcoded URL/secret, status-code handling, and how callouts interact with DML and governor limits.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts.htm">Invoking Callouts Using Apex — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm">Named Credentials as Callout Endpoints — Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-soap-callout-wsdl2apex.md</a> - call a SOAP service from generated Apex stubs.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>Project 02 - SOAP Callout via WSDL2Apex</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a> (Salesforce → External, synchronous).
+<strong>Tools</strong>: <strong>Generate from WSDL</strong> (Setup → Apex Classes) + a generated stub class + a <strong>Named Credential</strong> + a public SOAP service.
+<strong>You will learn</strong>: how to turn a SOAP <strong>WSDL</strong> into typed Apex stubs, route the endpoint through a Named Credential, and invoke a real SOAP operation without hand-writing XML.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Same shape as Project 01: problem → architecture → auth → build → test → gotchas → extension. The concept behind this one lives in <a href="../05-Outbound-Callouts/04-soap-callouts-wsdl2apex.md">Module 05</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>A legacy partner only exposes a <strong>SOAP</strong> service (here, a public calculator WSDL) and Salesforce must call one of its operations and use the result in Apex.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant APX as Apex (Anonymous)
+    participant STUB as Generated stub class
+    participant NC as Named Credential
+    participant SOAP as External SOAP service
+    APX-&gt;&gt;STUB: call Add(2, 3)
+    STUB-&gt;&gt;STUB: build SOAP envelope from WSDL types
+    STUB-&gt;&gt;NC: WebServiceCallout.invoke endpoint callout:Calc_API
+    NC-&gt;&gt;SOAP: HTTPS POST SOAP 1.1 request
+    SOAP--&gt;&gt;NC: 200 OK + SOAP response XML
+    NC--&gt;&gt;STUB: response parsed into Apex objects
+    STUB--&gt;&gt;APX: return 5
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>The sample calculator is open, but we still route the SOAP endpoint through a <strong>Named Credential</strong> so the host is registered and the URL is not hardcoded.</p>
+<ol>
+<li>Setup → <strong>Named Credentials</strong> → <strong>New</strong>.</li>
+<li><strong>Label/Name</strong>: <code>Calc_API</code>.</li>
+<li><strong>URL</strong>: the SOAP service base, for example <code>https://www.dneonprism.dev</code> (or any public calculator/country-info SOAP host you choose).</li>
+<li><strong>Authentication</strong>: <strong>No Authentication</strong> for an open service. For an authenticated SOAP partner, attach an External Credential, see <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</li>
+<li>Save. A Named Credential registers the host, so no <strong>Remote Site Setting</strong> is needed.</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Get the WSDL.</strong> Download the service's WSDL file to disk (for a classic calculator service the WSDL exposes operations like <code>Add</code>, <code>Subtract</code>, <code>Multiply</code>, <code>Divide</code>). Inspect it first to confirm it is <strong>SOAP 1.1, document/literal</strong> (see gotchas).</p>
+<p><strong>Step 2 - Generate the Apex stubs.</strong> Setup → <strong>Apex Classes</strong> → <strong>Generate from WSDL</strong> → choose the WSDL file → <strong>Parse WSDL</strong>. Salesforce derives an Apex <strong>class name</strong> from the WSDL namespace, which you can rename (for example <code>CalculatorService</code>). Click <strong>Generate Apex code</strong>. Salesforce creates <strong>stub</strong> and <strong>type</strong> classes that mirror the SOAP operations.</p>
+<p><strong>Step 3 - Point the stub at the Named Credential.</strong> The generated stub exposes an <code>endpoint_x</code> property. Set it to the <code>callout:</code> reference so the endpoint and any auth come from the Named Credential instead of the hardcoded URL baked into the WSDL.</p>
+<pre><code class="language-apex">public with sharing class CalculatorClient {
+    public static Integer add(Integer a, Integer b) {
+        // The exact class/port names come from your generated WSDL2Apex code.
+        CalculatorService.CalculatorSoap stub = new CalculatorService.CalculatorSoap();
+        stub.endpoint_x = 'callout:Calc_API';   // route via Named Credential, never hardcode
+        stub.timeout_x = 120000;                 // optional, ms
+
+        // The stub builds the SOAP envelope, calls WebServiceCallout.invoke, parses the reply.
+        Integer result = stub.Add(a, b);
+        System.debug('SOAP Add result: ' + result);
+        return result;
+    }
+}
+</code></pre>
+<p>The generated method internally calls <strong><code>WebServiceCallout.invoke</code></strong>, which performs the actual callout. You never touch the XML.</p>
+<hr />
+<h2>5. Test</h2>
+<p>Run <strong>Anonymous Apex</strong> (Developer Console → Debug → Open Execute Anonymous, or <code>sf apex run</code>):</p>
+<pre><code class="language-apex">System.debug(CalculatorClient.add(2, 3));   // expect 5
+</code></pre>
+<p>Open the <strong>debug log</strong> and confirm the returned value and a successful callout. To see the raw SOAP envelope a service expects, you can also send a request in <strong>SoapUI</strong> (point it at the WSDL, it builds a sample request for each operation) or <strong>Postman</strong> (raw XML body with <code>Content-Type: text/xml</code> and the correct <code>SOAPAction</code> header).</p>
+<p>For unit-test coverage of the stub, implement the built-in <strong><code>WebServiceMock</code></strong> interface and register it with <code>Test.setMock(WebServiceMock.class, new MyCalcMock())</code>. The mock's <code>doInvoke</code> method returns a fake response so the test does not make a live callout. See <a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">Module 05</a>.</p>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parse fails: <strong>unsupported WSDL constructs</strong></td>
+<td>Apex does not support <strong>SOAP 1.2</strong>, <strong>rpc/encoded</strong>, multiple <code>portType</code>/<code>binding</code>/<code>service</code>, or imported external schemas. Trim the WSDL to one SOAP 1.1 document/literal binding, or hand-build the envelope with <code>HttpRequest</code>.</td>
+</tr>
+<tr>
+<td>Generated class exceeds size limit</td>
+<td>If the parsed classes exceed the <strong>1,000,000-character</strong> Apex class limit, generation fails. Split the WSDL or remove unused operations.</td>
+</tr>
+<tr>
+<td>Endpoint hardcoded from WSDL</td>
+<td>Always set <code>stub.endpoint_x = 'callout:NamedCredential'</code> so the host is registered and secrets stay out of code.</td>
+</tr>
+<tr>
+<td>Service changes its contract</td>
+<td>The stubs are a <strong>snapshot</strong>. Re-download the WSDL and <strong>regenerate</strong>; the old stub will not pick up new operations. Re-apply your <code>endpoint_x</code> wiring after regenerating.</td>
+</tr>
+<tr>
+<td>SOAP <strong>fault</strong> returned</td>
+<td>The stub throws a <code>CalloutException</code> (or a generated fault type). Wrap the call in try/catch and read the fault detail.</td>
+</tr>
+<tr>
+<td>Test fails with "callout not allowed"</td>
+<td>Tests cannot make live callouts. Use <strong><code>WebServiceMock</code></strong> + <code>Test.setMock</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Add a <strong><code>WebServiceMock</code></strong> implementation and a test class that asserts <code>add(2, 3) == 5</code> with a mocked SOAP response.</li>
+<li>Wrap the stub call in a <strong>Queueable</strong> so it can run after DML from a trigger (SOAP callouts obey the same uncommitted-work rule as REST).</li>
+<li>Swap the calculator for a <strong>country-info</strong> WSDL and surface a country capital on a record page.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This proves you can integrate a <strong>legacy SOAP</strong> partner the supported way: generate typed stubs with <strong>WSDL2Apex</strong>, recognize which WSDL constructs Apex rejects (<strong>SOAP 1.2, rpc/encoded, multiple bindings, schema imports</strong>), route the endpoint through a <strong>Named Credential</strong> via <code>endpoint_x</code>, and cover the callout with <strong><code>WebServiceMock</code></strong>. Bonus signal: knowing the stub is a snapshot that must be <strong>regenerated</strong> when the contract changes.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_wsdl2apex.htm">SOAP Services: Defining a Class from a WSDL Document - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_wsdl2apex_gen_code.htm">Understanding the Generated Code - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_wsdl2apex_testing.htm">Test Web Service Callouts (WebServiceMock) - Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-external-creates-account-rest.md</a> - an external system creates an Account via the standard REST API.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>Project 03 - External System Creates an Account via REST API</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/04-remote-call-in.md">Remote Call-In</a> (External → Salesforce, synchronous).
+<strong>Tools</strong>: <strong>Postman</strong> + a <strong>Connected App / External Client App</strong> (OAuth) + the standard <strong>REST API</strong>.
+<strong>You will learn</strong>: how an outside system authenticates to Salesforce and inserts a record with a single <code>POST</code>, plus how to make the insert idempotent.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Same shape as Project 01: problem → architecture → auth → build → test → gotchas → extension. The concept behind this one lives in <a href="../04-Inbound-APIs/01-standard-rest-api.md">Module 04</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>An external system needs to create an <strong>Account</strong> in Salesforce without any custom Apex, using only the platform's standard REST API.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External system (Postman)
+    participant OAUTH as Salesforce OAuth token endpoint
+    participant API as Salesforce REST API
+    participant DB as Salesforce database
+    EXT-&gt;&gt;OAUTH: POST /services/oauth2/token (client credentials)
+    OAUTH--&gt;&gt;EXT: access_token + instance_url
+    EXT-&gt;&gt;API: POST /services/data/v66.0/sobjects/Account (Bearer token + JSON)
+    API-&gt;&gt;DB: insert Account (validation, FLS, sharing)
+    DB--&gt;&gt;API: new record Id
+    API--&gt;&gt;EXT: 201 Created + id, success, errors
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>Use the <strong>OAuth 2.0 client credentials flow</strong> (server-to-server, no user prompt). It needs an app definition and a designated <strong>integration ("run-as") user</strong>.</p>
+<ol>
+<li>Setup → <strong>App Manager</strong> → <strong>New External Client App</strong> (or <strong>New Connected App</strong>).</li>
+<li>Enable <strong>OAuth Settings</strong>. Set a callback URL (any valid value, for example <code>https://login.salesforce.com/services/oauth2/callback</code>) and add the <strong>api</strong> scope (Manage user data via APIs).</li>
+<li>Enable the <strong>Client Credentials Flow</strong> and select a low-privilege <strong>integration user</strong> to run as. This flow returns tokens on behalf of that user, so its profile/permission set governs what the API can do.</li>
+<li>Save, then copy the <strong>Consumer Key</strong> and <strong>Consumer Secret</strong>.</li>
+<li>In Postman, <code>POST</code> to <code>https://login.salesforce.com/services/oauth2/token</code> (use <code>test.salesforce.com</code> for a sandbox) with <code>x-www-form-urlencoded</code> body:</li>
+</ol>
+<pre><code>grant_type=client_credentials
+client_id=&lt;Consumer Key&gt;
+client_secret=&lt;Consumer Secret&gt;
+</code></pre>
+<p>The response gives an <strong><code>access_token</code></strong> and an <strong><code>instance_url</code></strong>. The client credentials flow does <strong>not</strong> issue a refresh token. Never hardcode the secret in code; in Salesforce-to-elsewhere callouts you would store it in a <code>callout:NamedCredential</code>.</p>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Set Postman variables.</strong> Save <code>access_token</code> and <code>instance_url</code> from the token response (a Postman test script can capture them automatically).</p>
+<p><strong>Step 2 - Build the create request.</strong></p>
+<ul>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>URL</strong>: <code>{{instance_url}}/services/data/v66.0/sobjects/Account</code></li>
+<li><strong>Headers</strong>: <code>Authorization: Bearer {{access_token}}</code> and <code>Content-Type: application/json</code></li>
+<li><strong>Body</strong> (raw JSON):</li>
+</ul>
+<pre><code class="language-json">{
+  &quot;Name&quot;: &quot;Acme Inc&quot;,
+  &quot;Phone&quot;: &quot;1234567890&quot;,
+  &quot;Industry&quot;: &quot;Technology&quot;
+}
+</code></pre>
+<p><strong>Step 3 - Send.</strong> A successful insert returns <strong>HTTP 201 Created</strong>:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;001XXXXXXXXXXXXAAA&quot;,
+  &quot;success&quot;: true,
+  &quot;errors&quot;: []
+}
+</code></pre>
+<p><strong>Step 4 (recommended) - Make it idempotent with upsert.</strong> A plain <code>POST</code> creates a new Account every time it runs, so retries make duplicates. If the Account has an <strong>External Id</strong> field (for example <code>External_Account_Id__c</code>), switch to <code>PATCH</code> against the external-id resource:</p>
+<ul>
+<li><strong>Method</strong>: <code>PATCH</code></li>
+<li><strong>URL</strong>: <code>{{instance_url}}/services/data/v66.0/sobjects/Account/External_Account_Id__c/A-1001</code></li>
+<li><strong>Body</strong>: the same JSON (omit the external-id field from the body).</li>
+</ul>
+<p>Salesforce <strong>creates</strong> the record if the external id is new (<strong>201</strong>) or <strong>updates</strong> the existing one if it matches (<strong>200/204</strong>). This is the standard way to avoid duplicates on retries.</p>
+<hr />
+<h2>5. Test</h2>
+<ol>
+<li>In <strong>Postman</strong>, run the token request, then the <code>POST</code>. Confirm <strong>201</strong> and copy the returned <code>id</code>.</li>
+<li>Verify in Salesforce: open the Account, or run a quick query in <strong>Workbench</strong> / Developer Console: <code>SELECT Id, Name, Industry FROM Account WHERE Name = 'Acme Inc'</code>.</li>
+<li>Re-send the same <code>POST</code> and watch a <strong>duplicate</strong> appear, then repeat with the <code>PATCH</code> upsert and confirm only <strong>one</strong> record exists. That contrast is the lesson.</li>
+</ol>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>400</code> with REQUIRED_FIELD_MISSING</td>
+<td>Account's only system-required field is <strong>Name</strong>, but admins often add required fields or <strong>validation rules</strong>. Include every required field in the body.</td>
+</tr>
+<tr>
+<td><code>403</code> INSUFFICIENT_ACCESS / FIELD not writeable</td>
+<td>The <strong>integration (run-as) user</strong> lacks object/field permission or <strong>FLS</strong>. Grant create on Account and edit on each field via a permission set.</td>
+</tr>
+<tr>
+<td><code>401</code> INVALID_SESSION_ID</td>
+<td>Token missing, malformed, or expired. Re-run the token request (client credentials has <strong>no refresh token</strong>, just fetch a new one).</td>
+</tr>
+<tr>
+<td>Duplicate Accounts on retry</td>
+<td>A <code>POST</code> is <strong>not</strong> idempotent. Use <code>PATCH</code> upsert by <strong>External Id</strong> so retries update instead of insert.</td>
+</tr>
+<tr>
+<td>Wrong API version or host</td>
+<td>Use <code>/services/data/**v66.0**/...</code> and the <strong><code>instance_url</code></strong> from the token response, not <code>login.salesforce.com</code>.</td>
+</tr>
+<tr>
+<td>Duplicate rules block insert</td>
+<td>Org <strong>duplicate rules</strong> can return a DUPLICATES_DETECTED error. Adjust the rule or include the <code>Sforce-Duplicate-Rule-Header</code> to allowSave.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Add a <strong>child Contact</strong> in a second call, then collapse both into one request in <a href="#f04">Project 04</a> with the Composite API.</li>
+<li>Add an <strong>External Id</strong> field and prove idempotency by hammering the upsert in a Postman <strong>collection runner</strong>.</li>
+<li>Lock the integration user down to <strong>least privilege</strong> (only the objects/fields it needs) and confirm the call still succeeds.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This shows you can stand up a <strong>Remote Call-In</strong> with zero custom code: pick the right <strong>OAuth flow</strong> (client credentials for server-to-server, with a designated <strong>run-as user</strong>), hit the standard <strong><code>/sobjects</code></strong> REST resource, read a <strong>201 + id</strong>, and know that the integration user's <strong>profile/FLS</strong> is the real access boundary. The senior signal is choosing <strong>upsert by External Id</strong> for <strong>idempotency</strong> so retries never create duplicates.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_create.htm">Create a Record - REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_sobject_upsert_patch.htm">Upsert Records Using sObject Rows by External ID - REST API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_client_credentials_flow.htm&amp;type=5">OAuth 2.0 Client Credentials Flow for Server-to-Server Integration - Salesforce Help</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-composite-account-contact.md</a> - create an Account and a child Contact in one Composite API call.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>Project 04 - Account + Contact in One Composite API Call</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/04-remote-call-in.md">Remote Call-In</a> (External → Salesforce, synchronous).
+<strong>Tools</strong>: <strong>Postman</strong> + OAuth access token + the <strong>Composite API</strong>.
+<strong>You will learn</strong>: how to chain dependent inserts in a single round trip, reference a record created earlier in the same request, and make the whole thing transactional.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Same shape as Project 01: problem → architecture → auth → build → test → gotchas → extension. The concept behind this one lives in <a href="../04-Inbound-APIs/05-composite-api.md">Module 04</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>An external system must create an <strong>Account and its child Contact together</strong>, in one network call, so they either both succeed or both roll back.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External system (Postman)
+    participant API as Composite API endpoint
+    participant DB as Salesforce database
+    EXT-&gt;&gt;API: POST /services/data/v66.0/composite (2 subrequests, allOrNone true)
+    API-&gt;&gt;DB: subrequest 1 - insert Account (refAccount)
+    DB--&gt;&gt;API: new Account Id
+    API-&gt;&gt;DB: subrequest 2 - insert Contact with AccountId @{refAccount.id}
+    DB--&gt;&gt;API: new Contact Id
+    API--&gt;&gt;EXT: 200 OK + compositeResponse (per-subrequest results)
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>Reuse the OAuth setup from <a href="#f03">Project 03</a>: a <strong>Connected App / External Client App</strong> with the <strong>client credentials flow</strong> and a designated <strong>integration user</strong>. In Postman, fetch the token (<code>POST {{login}}/services/oauth2/token</code>, <code>grant_type=client_credentials</code>) and store the <strong><code>access_token</code></strong> and <strong><code>instance_url</code></strong>. The secret stays out of code; for Salesforce-to-elsewhere callouts you would use a <code>callout:NamedCredential</code>.</p>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Build the request.</strong></p>
+<ul>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>URL</strong>: <code>{{instance_url}}/services/data/v66.0/composite</code></li>
+<li><strong>Headers</strong>: <code>Authorization: Bearer {{access_token}}</code> and <code>Content-Type: application/json</code></li>
+</ul>
+<p><strong>Step 2 - Body.</strong> Each entry in <code>compositeRequest</code> has a <code>method</code>, a relative <code>url</code>, a unique <code>referenceId</code>, and a <code>body</code>. The Contact subrequest references the Account created above with the <strong><code>@{referenceId.id}</code></strong> syntax. <code>allOrNone: true</code> makes it one transaction.</p>
+<pre><code class="language-json">{
+  &quot;allOrNone&quot;: true,
+  &quot;compositeRequest&quot;: [
+    {
+      &quot;method&quot;: &quot;POST&quot;,
+      &quot;url&quot;: &quot;/services/data/v66.0/sobjects/Account&quot;,
+      &quot;referenceId&quot;: &quot;refAccount&quot;,
+      &quot;body&quot;: { &quot;Name&quot;: &quot;Acme Inc&quot;, &quot;Industry&quot;: &quot;Technology&quot; }
+    },
+    {
+      &quot;method&quot;: &quot;POST&quot;,
+      &quot;url&quot;: &quot;/services/data/v66.0/sobjects/Contact&quot;,
+      &quot;referenceId&quot;: &quot;refContact&quot;,
+      &quot;body&quot;: {
+        &quot;LastName&quot;: &quot;Doe&quot;,
+        &quot;FirstName&quot;: &quot;Jane&quot;,
+        &quot;AccountId&quot;: &quot;@{refAccount.id}&quot;
+      }
+    }
+  ]
+}
+</code></pre>
+<p><strong>Step 3 - Send.</strong> Subrequests run <strong>sequentially</strong> in order, so <code>refAccount</code> exists before the Contact references it. The response wraps each subrequest's result and <strong>HTTP status</strong>:</p>
+<pre><code class="language-json">{
+  &quot;compositeResponse&quot;: [
+    {
+      &quot;body&quot;: { &quot;id&quot;: &quot;001XXXXXXXXXXXXAAA&quot;, &quot;success&quot;: true, &quot;errors&quot;: [] },
+      &quot;httpStatusCode&quot;: 201,
+      &quot;referenceId&quot;: &quot;refAccount&quot;
+    },
+    {
+      &quot;body&quot;: { &quot;id&quot;: &quot;003XXXXXXXXXXXXAAA&quot;, &quot;success&quot;: true, &quot;errors&quot;: [] },
+      &quot;httpStatusCode&quot;: 201,
+      &quot;referenceId&quot;: &quot;refContact&quot;
+    }
+  ]
+}
+</code></pre>
+<p><strong>Alternative - sObject Tree.</strong> For purely <strong>parent-with-children inserts</strong> you can instead <code>POST</code> to <code>/services/data/v66.0/composite/tree/Account</code> with nested <code>records</code> and local <code>referenceId</code>s. sObject Tree is insert-only and nests children inside the parent; the general <strong>Composite</strong> resource is more flexible (mixed methods, cross-references between any subrequests), which is why it is the primary path here.</p>
+<hr />
+<h2>5. Test</h2>
+<ol>
+<li>In <strong>Postman</strong>, run the token request, then the composite <code>POST</code>. Expect the <strong>top-level 200</strong> with a <code>compositeResponse</code> array of two <strong>201</strong> results, each carrying an <code>id</code>.</li>
+<li>Verify the link in <strong>Workbench</strong> or Developer Console: <code>SELECT Id, LastName, AccountId, Account.Name FROM Contact WHERE Account.Name = 'Acme Inc'</code> and confirm <code>AccountId</code> matches the Account's <code>id</code>.</li>
+<li>Test rollback: set the Contact's <code>LastName</code> to an empty string (required field) and resend with <code>allOrNone: true</code>. The whole request <strong>rolls back</strong> and <strong>no Account</strong> is created. Flip <code>allOrNone</code> to <code>false</code> and observe the Account persisting while the Contact fails.</li>
+</ol>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>allOrNone</code> misunderstood</td>
+<td><code>true</code> = any failure <strong>rolls back the whole</strong> request. <code>false</code> = independent subrequests still commit and only <strong>dependent</strong> ones are skipped. Choose deliberately.</td>
+</tr>
+<tr>
+<td>Reference syntax wrong</td>
+<td>It is <strong><code>@{referenceId.id}</code></strong> with the exact <code>referenceId</code> you assigned and a dotted field. A typo yields a "cannot resolve reference" error.</td>
+</tr>
+<tr>
+<td>Order matters</td>
+<td>Subrequests run <strong>top to bottom</strong>. The Account must come <strong>before</strong> the Contact that references it.</td>
+</tr>
+<tr>
+<td><code>referenceId</code> not unique</td>
+<td>Each <code>referenceId</code> must be <strong>unique</strong> within the request, or references become ambiguous.</td>
+</tr>
+<tr>
+<td>Too many subrequests</td>
+<td>Limit is <strong>25</strong> subrequests per composite call. For more, or for multiple independent transactional groups, use <strong>Composite Graph</strong>.</td>
+</tr>
+<tr>
+<td>Missing required fields / FLS</td>
+<td>Each subrequest still enforces <strong>validation rules</strong>, required fields, and the integration user's <strong>FLS</strong>. A <code>400</code>/<code>403</code> on one subrequest can roll back the rest when <code>allOrNone</code> is true.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Add a <strong>third subrequest</strong> that creates an Opportunity linked to the same Account via <code>@{refAccount.id}</code>, and confirm all three commit together.</li>
+<li>Switch the Account insert to an <strong>upsert by External Id</strong> subrequest (<code>PATCH .../sobjects/Account/External_Account_Id__c/A-1001</code>) so reruns do not duplicate the parent.</li>
+<li>Rebuild the same parent-children insert with <strong>Composite Graph</strong> and compare the response shape and limits.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This demonstrates the senior move of collapsing <strong>chatty, dependent calls</strong> into <strong>one transactional round trip</strong>: the <strong><code>@{refId.id}</code></strong> reference passes a freshly created Id between subrequests, <strong><code>allOrNone</code></strong> controls all-or-nothing commit, and you respect the <strong>25-subrequest</strong> ceiling (escalating to <strong>Composite Graph</strong> beyond it). Knowing when <strong>sObject Tree</strong> suffices versus when you need full <strong>Composite</strong> flexibility is the differentiator.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/requests_composite.htm">Composite Request Body - REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_junction_object.htm">Update an Account, Create a Contact, and Link Them - REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_sobject_tree_create.htm">Create Nested Records (sObject Tree) - REST API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-apex-rest-custom-inbound.md</a> - expose a custom inbound endpoint with Apex REST.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>Project 05 - Custom Apex REST Inbound Endpoint</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/04-remote-call-in.md">Remote Call-In</a> (External → Salesforce, synchronous).
+<strong>Tools</strong>: Apex <code>@RestResource</code> + <code>RestContext</code> + an OAuth token + <strong>Postman</strong>.
+<strong>You will learn</strong>: how to publish your own REST endpoint under <code>/services/apexrest/</code>, secure it correctly, and call it from outside.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem to architecture to auth to build to test to gotchas to extension. Concepts behind this one live in <a href="../04-Inbound-APIs/03-apex-rest.md">Apex REST</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>An external order system needs to create and read <strong>Cases</strong> in Salesforce using a shape <strong>you</strong> define, not the generic sObject REST API. You want one clean URL, a custom request body, and a custom response, with all the validation living in Apex.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External System
+    participant OAuth as Salesforce Token Endpoint
+    participant REST as Apex REST class CaseService
+    participant DB as Case object
+    EXT-&gt;&gt;OAuth: POST /services/oauth2/token
+    OAuth--&gt;&gt;EXT: access_token + instance_url
+    EXT-&gt;&gt;REST: POST /services/apexrest/Cases with Bearer token
+    REST-&gt;&gt;DB: insert Case with sharing + FLS check
+    DB--&gt;&gt;REST: new Case Id
+    REST--&gt;&gt;EXT: 200 OK + JSON CaseId
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>Apex REST requires an authenticated session. The cleanest route for a server-to-server caller is an <strong>OAuth 2.0</strong> access token from a Connected App.</p>
+<ol>
+<li>Setup to <strong>App Manager</strong> to <strong>New Connected App</strong> (or <strong>New External Client App</strong>). Enable <strong>OAuth Settings</strong>.</li>
+<li>Add the OAuth scopes <strong>Manage user data via APIs (api)</strong> and <strong>Perform requests at any time (refresh_token, offline_access)</strong>.</li>
+<li>Save, then copy the <strong>Consumer Key</strong> and <strong>Consumer Secret</strong>.</li>
+<li>In Postman, POST to <code>https://MyDomain.my.salesforce.com/services/oauth2/token</code> with <code>grant_type</code>, <code>client_id</code>, <code>client_secret</code>, and (for a user flow) <code>username</code> + <code>password+securitytoken</code>. Read more in <a href="../03-Authentication/12-authorization-code-and-credentials-flow.md">Module 03</a>.</li>
+<li>The response gives you <code>access_token</code> and <code>instance_url</code>. Send the token as <code>Authorization: Bearer &lt;access_token&gt;</code> on every call.</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>1. Write the Apex REST class.</strong> The class is annotated with <code>@RestResource</code> and the <strong>urlMapping</strong> registers the path. One method per HTTP verb. Use <code>RestContext</code> to read the request and shape the response.</p>
+<pre><code class="language-apex">@RestResource(urlMapping='/Cases/*')
+global with sharing class CaseService {
+
+    @HttpPost
+    global static Map&lt;String, Object&gt; createCase(String subject, String description) {
+        Case c = new Case(Subject = subject, Description = description, Origin = 'API');
+        // Apex REST runs in system context, so enforce FLS yourself.
+        SObjectAccessDecision d = Security.stripInaccessible(AccessType.CREATABLE,
+            new List&lt;Case&gt;{ c });
+        insert d.getRecords();
+        Case inserted = (Case) d.getRecords()[0];
+        return new Map&lt;String, Object&gt;{ 'caseId' =&gt; inserted.Id, 'status' =&gt; 'created' };
+    }
+
+    @HttpGet
+    global static Case getCase() {
+        // Read the Id from the trailing URL segment via RestContext.
+        RestRequest req = RestContext.request;
+        String caseId = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
+        return [SELECT Id, CaseNumber, Subject, Status FROM Case WHERE Id = :caseId WITH USER_MODE];
+    }
+}
+</code></pre>
+<p><strong>2. Deploy it.</strong> Use <code>sf project deploy start</code> or the Developer Console. The endpoint is live the moment the class saves.</p>
+<p><strong>3. Call POST from Postman.</strong> Method <strong>POST</strong>, URL <code>{{instance_url}}/services/apexrest/Cases</code>, header <code>Authorization: Bearer {{access_token}}</code> and <code>Content-Type: application/json</code>, body:</p>
+<pre><code class="language-json">{ &quot;subject&quot;: &quot;Login fails on mobile&quot;, &quot;description&quot;: &quot;User cannot log in from the app.&quot; }
+</code></pre>
+<p><strong>4. Call GET from Postman.</strong> Method <strong>GET</strong>, URL <code>{{instance_url}}/services/apexrest/Cases/&lt;caseId&gt;</code>, same Bearer header. The trailing segment is parsed by <code>RestContext</code>.</p>
+<hr />
+<h2>5. Test</h2>
+<ul>
+<li>In Postman, the POST should return <code>200 OK</code> with <code>{ "caseId": "500...", "status": "created" }</code>.</li>
+<li>Confirm the record in Salesforce (<strong>Service</strong> to <strong>Cases</strong>) or via the GET call.</li>
+<li>Write an Apex unit test that builds a <code>RestRequest</code>, assigns it to <code>RestContext.request</code>, and invokes <code>CaseService.createCase(...)</code> directly, then asserts the Case exists. Apex REST methods are plain static methods, so they unit-test like any other.</li>
+</ul>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Two <code>@HttpPost</code> methods in one class</td>
+<td>Not allowed. <strong>One method per HTTP verb</strong> per class. Split into separate resources.</td>
+</tr>
+<tr>
+<td>Endpoint returns data the caller should not see</td>
+<td><strong>Apex REST runs in system context.</strong> Add <code>with sharing</code> and enforce FLS with <code>stripInaccessible</code> or <code>WITH USER_MODE</code>.</td>
+</tr>
+<tr>
+<td><code>401 Unauthorized</code> / <code>INVALID_SESSION_ID</code></td>
+<td>Missing or expired token. Re-run the OAuth token request and resend the <code>Bearer</code> header.</td>
+</tr>
+<tr>
+<td><code>404</code> on the URL</td>
+<td>Wrong path. It is <code>/services/apexrest</code> + your <code>urlMapping</code>, case-sensitive.</td>
+</tr>
+<tr>
+<td>Class will not save</td>
+<td>Apex REST classes must be <strong>global</strong> (the class and the methods).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Add an <code>@HttpPatch</code> method to update Case Status, and an <code>@HttpDelete</code> to close it.</li>
+<li>Return a custom error body with the right status by setting <code>RestContext.response.statusCode = 400</code> on bad input.</li>
+<li>Accept the raw JSON body via <code>RestContext.request.requestBody</code> and <code>JSON.deserialize</code> into a typed wrapper instead of named parameters.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This proves you can build inbound APIs the <strong>Salesforce way</strong>: a <code>@RestResource</code> with <code>urlMapping</code>, the one-method-per-verb rule, reading requests through <code>RestContext</code>, and the security point that matters most. <strong>Apex REST runs in system context</strong>, so <code>with sharing</code> plus FLS enforcement is on you, not the platform.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_annotation_rest_resource.htm">RestResource Annotation - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_methods.htm">Apex REST Methods - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_methods_system_restrequest.htm">RestContext / RestRequest Class - Apex Reference Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-soapui-test-apex-soap.md</a> - expose an Apex SOAP service and call it from SOAP UI.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>Project 06 - Apex SOAP Web Service Tested in SOAP UI</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/04-remote-call-in.md">Remote Call-In</a> (External to Salesforce, synchronous, SOAP).
+<strong>Tools</strong>: Apex <code>webservice</code> method + generated <strong>WSDL</strong> + <strong>SOAP UI</strong> + a session id.
+<strong>You will learn</strong>: how to expose an Apex method over SOAP, generate its contract, and exercise it from a classic SOAP client.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem to architecture to auth to build to test to gotchas to extension. Concepts behind this one live in <a href="../04-Inbound-APIs/04-apex-soap-web-services.md">Apex SOAP Web Services</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>A legacy partner integration speaks <strong>SOAP only</strong> and needs a strongly typed contract (a WSDL) to generate its client stubs. You must publish a Salesforce operation that creates an Account and returns its Id, then prove it works from <strong>SOAP UI</strong> before handing the WSDL to the partner.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant UI as SOAP UI
+    participant Login as Enterprise WSDL login
+    participant SOAP as Apex SOAP service AccountWS
+    participant DB as Account object
+    UI-&gt;&gt;Login: login(username, password)
+    Login--&gt;&gt;UI: sessionId + serverUrl
+    UI-&gt;&gt;SOAP: createAccount(name) with SessionHeader
+    SOAP-&gt;&gt;DB: insert Account
+    DB--&gt;&gt;SOAP: new Account Id
+    SOAP--&gt;&gt;UI: Account Id in SOAP response
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>A SOAP call into Salesforce needs a <strong>session id</strong>. You get one by calling <code>login()</code> from the <strong>Enterprise WSDL</strong> (or Partner WSDL), then pass that id on the custom call.</p>
+<ol>
+<li>Setup to <strong>API</strong> to <strong>Generate Enterprise WSDL</strong>, then <strong>Generate</strong> and save the file.</li>
+<li>In SOAP UI, <strong>File</strong> to <strong>New SOAP Project</strong>, point it at the Enterprise WSDL.</li>
+<li>Run the <strong>login</strong> operation with your username and <code>password + security token</code>. Copy the returned <strong>sessionId</strong> and <strong>serverUrl</strong> from the response.</li>
+<li>The same session id authenticates the custom Apex service call. (You can also use an OAuth <code>access_token</code> as the session id.)</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>1. Write the Apex SOAP class.</strong> The class must be <strong>global</strong>, and each exposed method uses the <strong><code>webservice static</code></strong> keywords.</p>
+<pre><code class="language-apex">global with sharing class AccountWS {
+
+    webservice static Id createAccount(String name) {
+        Account a = new Account(Name = name);
+        insert a;
+        return a.Id;
+    }
+
+    webservice static Account getAccount(Id accountId) {
+        return [SELECT Id, Name, AccountNumber FROM Account WHERE Id = :accountId];
+    }
+}
+</code></pre>
+<p><strong>2. Deploy</strong> with <code>sf project deploy start</code> or the Developer Console.</p>
+<p><strong>3. Generate the class WSDL.</strong> Setup to <strong>Apex Classes</strong>, click <strong>AccountWS</strong>, then <strong>Generate WSDL</strong>. Save it (for example <code>AccountWS.wsdl</code>). This WSDL describes only your custom operations and points at <code>/services/Soap/class/AccountWS</code>.</p>
+<p><strong>4. Import the WSDL into SOAP UI.</strong> Right-click your existing project to <strong>Add WSDL</strong> and choose <code>AccountWS.wsdl</code>. SOAP UI generates a sample request for <code>createAccount</code>.</p>
+<p><strong>5. Set the endpoint and session.</strong> Make sure the request endpoint host matches the <strong>serverUrl</strong> instance from login. In the request XML, populate the <strong>SessionHeader</strong> with the session id:</p>
+<pre><code class="language-xml">&lt;soapenv:Header&gt;
+   &lt;urn:SessionHeader&gt;
+      &lt;urn:sessionId&gt;YOUR_SESSION_ID&lt;/urn:sessionId&gt;
+   &lt;/urn:SessionHeader&gt;
+&lt;/soapenv:Header&gt;
+&lt;soapenv:Body&gt;
+   &lt;urn:createAccount&gt;
+      &lt;urn:name&gt;Acme via SOAP UI&lt;/urn:name&gt;
+   &lt;/urn:createAccount&gt;
+&lt;/soapenv:Body&gt;
+</code></pre>
+<hr />
+<h2>5. Test</h2>
+<ul>
+<li>Submit the <code>createAccount</code> request in SOAP UI. The response body returns the new <strong>Account Id</strong> inside a <code>&lt;result&gt;</code> element.</li>
+<li>Verify the record in Salesforce (<strong>Sales</strong> to <strong>Accounts</strong>), or call <code>getAccount</code> with that Id.</li>
+<li>A <code>INVALID_SESSION_ID</code> fault means the session id is stale, re-run <strong>login</strong> and paste the fresh one.</li>
+</ul>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Class will not compile</td>
+<td>Methods exposed over SOAP must use the <strong><code>webservice</code></strong> keyword, and the <strong>class must be <code>global</code></strong>.</td>
+</tr>
+<tr>
+<td><code>webservice</code> on a non-static or inner detail</td>
+<td><code>webservice</code> methods must be <strong>static</strong>; they cannot be in a trigger, and the keyword has placement rules.</td>
+</tr>
+<tr>
+<td><code>INVALID_SESSION_ID</code> fault</td>
+<td>No session, or it expired. Get a fresh <strong>sessionId</strong> from the Enterprise WSDL <code>login</code> call.</td>
+</tr>
+<tr>
+<td>Request hits the wrong host</td>
+<td>Use the <strong>serverUrl</strong> instance returned by login as the endpoint, not <code>login.salesforce.com</code>.</td>
+</tr>
+<tr>
+<td>Namespace mismatch in the XML</td>
+<td>The <code>urn:</code> prefix must match the target namespace in the generated class WSDL. Let SOAP UI build the request from the WSDL.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Add a <code>webservice static</code> method that accepts a custom Apex wrapper class as a parameter and returns one, then see how it appears as a complex type in the WSDL.</li>
+<li>Generate the <strong>Partner WSDL</strong> instead and compare how it handles sObjects generically.</li>
+<li>Turn the SOAP UI request into an automated <strong>TestCase</strong> with an assertion on the returned Id, the start of a regression suite.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This shows you can still deliver the <strong>SOAP</strong> half of Remote Call-In: the <code>global class</code> plus <code>webservice static</code> rules, generating a class WSDL versus using the Enterprise WSDL, and the authentication detail interviewers probe, you need a <strong>session id</strong> (from <code>login</code> or OAuth) carried in the <strong>SessionHeader</strong>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_web_services_methods.htm">Webservice Methods - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_web_services.htm">Exposing Apex Classes as SOAP Web Services - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_sessionheader.htm">SessionHeader - SOAP API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f07">07-bulk-api-load-100k.md</a> - load 100k records with Bulk API 2.0.</em></p>
+</section>
+<section id="f07" class="doc">
+<h1>Project 07 - Load 100k Records with Bulk API 2.0</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/03-batch-data-synchronization.md">Batch Data Synchronization</a> (External to Salesforce, asynchronous, high volume).
+<strong>Tools</strong>: <strong>Bulk API 2.0</strong> ingest jobs via the <strong>Salesforce CLI</strong> or raw REST + a CSV.
+<strong>You will learn</strong>: the Bulk API 2.0 job lifecycle, how to load ~100,000 records two ways, and how to make it idempotent and reviewable.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem to architecture to auth to build to test to gotchas to extension. Concepts behind this one live in <a href="../07-Bulk-Async/01-bulk-api-2.md">Bulk API 2.0</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>A nightly export from an ERP produces ~100,000 Account rows that must land in Salesforce. Row-by-row REST calls would blow the API limits and take hours. <strong>Bulk API 2.0</strong> is built for exactly this, you hand it a CSV and it processes the rows asynchronously in optimized batches.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+flowchart LR
+    A["CSV ~100k rows"] --&gt; B["Create job&lt;br/&gt;POST /jobs/ingest"]
+    B --&gt; C["Upload data&lt;br/&gt;PUT .../batches"]
+    C --&gt; D["Close job&lt;br/&gt;PATCH state UploadComplete"]
+    D --&gt; E["Salesforce processes&lt;br/&gt;InProgress"]
+    E --&gt; F["JobComplete"]
+    F --&gt; G["GET successfulResults"]
+    F --&gt; H["GET failedResults"]
+    style A fill:#00A1E0,color:#fff,stroke:#0070D2
+    style F fill:#00A1E0,color:#fff,stroke:#0070D2
+    style H fill:#FFB75D,color:#032D60,stroke:#FE9339
+
+</div>
+<hr />
+<h2>3. Auth setup</h2>
+<p>Bulk API 2.0 is a REST resource, so it uses the same <strong>OAuth access token</strong> as any REST call. The CLI handles auth for you once the org is connected.</p>
+<ol>
+<li><strong>CLI route</strong>: run <code>sf org login web --alias myorg</code> once. The CLI stores and refreshes the token.</li>
+<li><strong>Raw REST route</strong>: get an <code>access_token</code> and <code>instance_url</code> from <code>POST /services/oauth2/token</code> (see <a href="../03-Authentication/12-authorization-code-and-credentials-flow.md">Module 03</a>). Send <code>Authorization: Bearer &lt;access_token&gt;</code> on every Bulk call.</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<h3>CSV shape</h3>
+<p>A header row of API field names, then one record per line. For an <strong>upsert</strong>, include the External Id column.</p>
+<pre><code class="language-csv">Name,AccountNumber,Industry,ERP_Id__c
+Acme Corp,A-1001,Technology,ERP-1001
+Globex,A-1002,Manufacturing,ERP-1002
+</code></pre>
+<h3>Route 1 - Salesforce CLI (simplest)</h3>
+<p>Insert with Bulk API 2.0 and wait for completion:</p>
+<pre><code class="language-bash">sf data import bulk --file accounts.csv --sobject Account --wait 10 --target-org myorg
+</code></pre>
+<p>For an <strong>idempotent upsert</strong> keyed on an External Id field, use the upsert command:</p>
+<pre><code class="language-bash">sf data upsert bulk --file accounts.csv --sobject Account --external-id ERP_Id__c --wait 10 --target-org myorg
+</code></pre>
+<p>The CLI creates the job, uploads the CSV, closes it, and polls for you. Drop <code>--wait</code> to return immediately and track the job later.</p>
+<h3>Route 2 - Raw REST (the lifecycle in full)</h3>
+<p><strong>1. Create the job.</strong> <code>POST {{instance_url}}/services/data/v66.0/jobs/ingest</code></p>
+<pre><code class="language-json">{ &quot;object&quot;: &quot;Account&quot;, &quot;operation&quot;: &quot;upsert&quot;, &quot;externalIdFieldName&quot;: &quot;ERP_Id__c&quot;, &quot;contentType&quot;: &quot;CSV&quot;, &quot;lineEnding&quot;: &quot;LF&quot; }
+</code></pre>
+<p>The response returns a job <strong>id</strong> and <code>state: Open</code>.</p>
+<p><strong>2. Upload the CSV.</strong> <code>PUT {{instance_url}}/services/data/v66.0/jobs/ingest/&lt;jobId&gt;/batches</code> with header <code>Content-Type: text/csv</code> and the raw CSV as the body.</p>
+<p><strong>3. Close the job.</strong> <code>PATCH {{instance_url}}/services/data/v66.0/jobs/ingest/&lt;jobId&gt;</code></p>
+<pre><code class="language-json">{ &quot;state&quot;: &quot;UploadComplete&quot; }
+</code></pre>
+<p>Salesforce now moves the job through <code>InProgress</code> to <code>JobComplete</code>.</p>
+<p><strong>4. Poll for status.</strong> <code>GET {{instance_url}}/services/data/v66.0/jobs/ingest/&lt;jobId&gt;</code> until <code>state</code> is <code>JobComplete</code> (or <code>Failed</code>). Watch <code>numberRecordsProcessed</code> and <code>numberRecordsFailed</code>.</p>
+<p><strong>5. Pull the results.</strong> Both return CSV bodies:</p>
+<ul>
+<li><code>GET .../jobs/ingest/&lt;jobId&gt;/successfulResults</code></li>
+<li><code>GET .../jobs/ingest/&lt;jobId&gt;/failedResults</code> returns each bad row with <code>sf__Id</code> and <code>sf__Error</code>.</li>
+</ul>
+<hr />
+<h2>5. Test and monitor</h2>
+<ul>
+<li>Start with a 10-row CSV before the full 100k file.</li>
+<li>Watch progress live in <strong>Setup</strong> to <strong>Bulk Data Load Jobs</strong>, you see records processed, failed, and throughput per job.</li>
+<li>After <code>JobComplete</code>, download <strong>failedResults</strong> and read the <code>sf__Error</code> column to fix data issues, then reload only those rows.</li>
+<li>Re-run the <strong>same upsert</strong> file, record counts should not double, proving idempotency.</li>
+</ul>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rows silently fail or shift columns</td>
+<td>CSV formatting. Match the <strong>header to API field names</strong>, quote fields with commas, and set <code>lineEnding</code> (<code>LF</code> or <code>CRLF</code>) to match the file.</td>
+</tr>
+<tr>
+<td>Re-running the load creates duplicates</td>
+<td>Use <strong><code>operation: upsert</code></strong> with <strong><code>externalIdFieldName</code></strong> so existing rows update instead of insert.</td>
+</tr>
+<tr>
+<td>Job says complete but data looks wrong</td>
+<td>Always pull <strong>failedResults</strong>, <code>sf__Error</code> tells you exactly which rows and why.</td>
+</tr>
+<tr>
+<td><code>Job size exceeds limits</code></td>
+<td>A single job allows up to <strong>150 MB</strong> of data, split very large files into multiple jobs.</td>
+</tr>
+<tr>
+<td>Hitting the daily ceiling</td>
+<td>Bulk API 2.0 allows up to <strong>100 million records per rolling 24 hours</strong>, batch your loads accordingly.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Script the <strong>full raw lifecycle</strong> in a shell or Apex <code>Http</code> client and add exponential-backoff polling.</li>
+<li>Add a <strong>hard-delete</strong> ingest job (<code>operation: hardDelete</code>) to purge test data, note the permission it requires.</li>
+<li>Compare wall-clock time of the CLI insert versus upsert on the same 100k file and reason about why upsert costs more.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This proves you reach for the <strong>right tool at volume</strong>: Bulk API 2.0 over row-by-row REST, and that you know the <strong>job lifecycle</strong> cold (create to upload to UploadComplete to poll to results). The senior signals are <strong>upsert by External Id for idempotency</strong>, always reviewing <strong>failedResults</strong>, and respecting the <strong>150 MB per job</strong> and <strong>100M records / 24h</strong> limits.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/walkthrough_upload_ingest_records.htm">Bulk API 2.0 Ingest Jobs - Bulk API 2.0 and Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_concepts_limits.htm">Bulk API 2.0 Limits and Allocations - Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_data_commands_unified.htm">data Commands (sf data import bulk / upsert bulk) - Salesforce CLI Command Reference</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f08">08-outbound-message-pipedream.md</a> - fire a declarative Outbound Message to an external listener.</em></p>
+</section>
+<section id="f08" class="doc">
+<h1>Project 08 - Outbound Message to a Webhook (Pipedream)</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/02-fire-and-forget.md">Fire and Forget</a> (Salesforce → External, asynchronous, no reply consumed).
+<strong>Tools</strong>: a record-triggered <strong>Flow</strong> + an <strong>Outbound Message</strong> (SOAP XML) + a free webhook receiver (<strong>Pipedream</strong> or webhook.site).
+<strong>You will learn</strong>: how Salesforce pushes a SOAP notification to an external endpoint with zero Apex, why it needs an acknowledgment, and why this feature is <strong>legacy</strong>.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem → architecture → setup → build → test → gotchas → extension. Concepts behind this one live in <a href="../06-Event-Driven/05-streaming-api-and-outbound-messages.md">Module 06</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>When an <strong>Opportunity</strong> is marked <strong>Closed Won</strong>, an external billing system needs to know immediately so it can raise an invoice. We do not need a response back into Salesforce, just a reliable push of the record data. This is the classic <strong>fire-and-forget</strong> shape: notify and move on.</p>
+<p>An <strong>Outbound Message</strong> fits because it is declarative, it sends the field values as a <strong>SOAP XML</strong> notification, and the platform <strong>retries</strong> automatically until the receiver acknowledges.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+flowchart LR
+    REC[Opportunity record&lt;br/&gt;Closed Won] --&gt; FLOW[Record-triggered Flow]
+    FLOW --&gt; OM[Outbound Message&lt;br/&gt;SOAP XML]
+    OM --&gt;|HTTPS POST| WH[Pipedream webhook]
+    WH --&gt;|Ack true| OM
+
+    style REC fill:#00A1E0,stroke:#032D60,color:#fff
+    style FLOW fill:#0070D2,stroke:#032D60,color:#fff
+    style OM fill:#1B96FF,stroke:#032D60,color:#fff
+    style WH fill:#16325C,stroke:#032D60,color:#fff
+
+</div>
+<p>The Outbound Message delivers asynchronously in a separate queue. Salesforce expects the endpoint to reply with an acknowledgment so it knows delivery succeeded.</p>
+<hr />
+<h2>3. Setup</h2>
+<p><strong>A. Create a free webhook receiver.</strong></p>
+<ol>
+<li>Go to <strong>Pipedream</strong> (<code>pipedream.com</code>) and create a new <strong>Workflow</strong> with an <strong>HTTP / Webhook</strong> trigger. Copy the generated URL, for example <code>https://eoxxxxxxxx.m.pipedream.net</code>. (Or use <code>webhook.site</code> and copy its unique URL.)</li>
+<li>This URL must be <strong>HTTPS</strong> and publicly reachable. Salesforce only sends to valid SSL endpoints.</li>
+</ol>
+<p><strong>B. No Named Credential is required.</strong> The endpoint URL is set directly on the Outbound Message, and Salesforce signs the call with its own org certificate. The receiver can verify the sender via the <code>OrganizationId</code> in the payload.</p>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Create the Outbound Message.</strong></p>
+<ol>
+<li>Setup → quick find <strong>Outbound Messages</strong> → <strong>New Outbound Message</strong>.</li>
+<li><strong>Object</strong>: <code>Opportunity</code>.</li>
+<li><strong>Name</strong>: <code>Notify_Billing_Closed_Won</code>.</li>
+<li><strong>Endpoint URL</strong>: paste the Pipedream URL.</li>
+<li><strong>User to send as</strong>: pick an integration user (their field-level security governs what is sent).</li>
+<li><strong>Fields to send</strong>: select <code>Id</code>, <code>Name</code>, <code>Amount</code>, <code>StageName</code>, <code>CloseDate</code>. <code>Id</code> and <code>OrganizationId</code> are always included.</li>
+<li>(Optional) tick <strong>Send Session ID</strong> if the receiver will call back into Salesforce.</li>
+<li>Save.</li>
+</ol>
+<p><strong>Step 2 - Build a record-triggered Flow to fire it.</strong></p>
+<p>Workflow Rules are <strong>no longer enhanced</strong> by Salesforce, so use <strong>Flow</strong> as the trigger.</p>
+<ol>
+<li>Setup → <strong>Flows</strong> → <strong>New Flow</strong> → <strong>Record-Triggered Flow</strong>.</li>
+<li><strong>Object</strong>: <code>Opportunity</code>. <strong>Trigger</strong>: <em>A record is updated</em>.</li>
+<li><strong>Entry conditions</strong>: <code>StageName Equals Closed Won</code>. Set <strong>Optimize for</strong>: <em>Actions and Related Records</em>.</li>
+<li>Add an <strong>Action</strong> element → search the action type <strong>Outbound Message</strong> → select <code>Notify_Billing_Closed_Won</code>.</li>
+<li>Save and <strong>Activate</strong> the Flow.</li>
+</ol>
+<p><strong>Step 3 - The SOAP payload that leaves the org.</strong></p>
+<p>Salesforce sends a SOAP <code>notifications</code> envelope. The receiver sees something like this:</p>
+<pre><code class="language-xml">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;
+  &lt;soapenv:Body&gt;
+    &lt;notifications xmlns=&quot;http://soap.sforce.com/2005/09/outbound&quot;&gt;
+      &lt;OrganizationId&gt;00Dxx0000001gPLEAY&lt;/OrganizationId&gt;
+      &lt;ActionId&gt;04kxx00000000A1AAI&lt;/ActionId&gt;
+      &lt;SessionId xsi:nil=&quot;true&quot;/&gt;
+      &lt;EnterpriseUrl&gt;https://yourorg.my.salesforce.com/services/Soap/c/66.0/00Dxx&lt;/EnterpriseUrl&gt;
+      &lt;PartnerUrl&gt;https://yourorg.my.salesforce.com/services/Soap/u/66.0/00Dxx&lt;/PartnerUrl&gt;
+      &lt;Notification&gt;
+        &lt;Id&gt;006xx000004TmiQAAS&lt;/Id&gt;
+        &lt;sObject xsi:type=&quot;sf:Opportunity&quot; xmlns:sf=&quot;urn:sobject.enterprise.soap.sforce.com&quot;&gt;
+          &lt;sf:Id&gt;006xx000004TmiQAAS&lt;/sf:Id&gt;
+          &lt;sf:Amount&gt;50000.0&lt;/sf:Amount&gt;
+          &lt;sf:CloseDate&gt;2026-06-30&lt;/sf:CloseDate&gt;
+          &lt;sf:Name&gt;Acme - 500 Widgets&lt;/sf:Name&gt;
+          &lt;sf:StageName&gt;Closed Won&lt;/sf:StageName&gt;
+        &lt;/sObject&gt;
+      &lt;/Notification&gt;
+    &lt;/notifications&gt;
+  &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+<p><strong>Step 4 - Acknowledge.</strong> The endpoint <strong>must</strong> reply with a SOAP body containing <code>&lt;Ack&gt;true&lt;/Ack&gt;</code>. Pipedream returns HTTP 200 by default, but for a real listener you return:</p>
+<pre><code class="language-xml">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;
+  &lt;soapenv:Body&gt;
+    &lt;notificationsResponse xmlns=&quot;http://soap.sforce.com/2005/09/outbound&quot;&gt;
+      &lt;Ack&gt;true&lt;/Ack&gt;
+    &lt;/notificationsResponse&gt;
+  &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+<hr />
+<h2>5. Test</h2>
+<ol>
+<li>Open an <strong>Opportunity</strong> and set <strong>Stage</strong> to <strong>Closed Won</strong>, then save.</li>
+<li>Switch to the <strong>Pipedream</strong> workflow and watch the <strong>inspector</strong>: a new event appears with the SOAP XML body within a few seconds.</li>
+<li>Confirm the field values match the record.</li>
+<li>To see retries, point the endpoint at a URL that returns a 500, change a record, then check Setup → <strong>Outbound Messages</strong> → <strong>View Message Delivery Status</strong> (the <strong>Outbound message delivery status</strong> page) to watch the queued/failed attempts.</li>
+</ol>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Receiver gets the message but Salesforce keeps re-sending</td>
+<td>The endpoint did not return <code>&lt;Ack&gt;true&lt;/Ack&gt;</code>. Salesforce retries with <strong>exponential back-off for up to 24 hours</strong>.</td>
+</tr>
+<tr>
+<td>Endpoint never receives anything</td>
+<td>URL must be <strong>HTTPS</strong> with a valid SSL cert and publicly reachable. Check <strong>Outbound message delivery status</strong> for the error.</td>
+</tr>
+<tr>
+<td>Tried to fire it from a Workflow Rule</td>
+<td><strong>Workflow Rules are no longer enhanced</strong>, build the trigger in <strong>Flow</strong> instead.</td>
+</tr>
+<tr>
+<td>Field missing from payload</td>
+<td>The <strong>send-as user</strong> lacks field-level read access, or the field was not selected on the Outbound Message.</td>
+</tr>
+<tr>
+<td>Need loose coupling or many subscribers</td>
+<td>Outbound Messages are <strong>legacy</strong> and point-to-point. Use <strong>Platform Events</strong> (see <a href="#f10">Project 10</a>) for the modern pub/sub approach.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Replace the Outbound Message with a <strong>Platform Event</strong> published from the same Flow, then subscribe externally via the <strong>Pub/Sub API</strong>. Compare the developer experience.</li>
+<li>Build a tiny SOAP listener (a Pipedream code step) that parses the XML and returns a proper <code>&lt;Ack&gt;true&lt;/Ack&gt;</code> envelope so retries stop cleanly.</li>
+<li>Add error handling: log every delivery failure from the <strong>delivery status</strong> page into a custom object for monitoring.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This project shows you know the <strong>declarative</strong> fire-and-forget option and its trade-offs: Outbound Messages need an <strong>acknowledgment</strong>, <strong>auto-retry for 24 hours</strong>, and send <strong>SOAP XML</strong> point-to-point. Crucially, you can say <em>why you would not pick it today</em>, it is <strong>legacy</strong>, Workflow Rules are frozen, and <strong>Platform Events</strong> give loose coupling, multiple subscribers, and replay.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.workflow_managing_outbound_messages.htm&amp;type=5">Outbound Messaging — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.workflow_defining_outbound_messages.htm&amp;type=5">Define Outbound Messages — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_om_outboundmessaging_understanding.htm">Understanding Outbound Messaging (SOAP Notifications) — SOAP API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.flow_ref_elements_actions_outboundmessage.htm&amp;type=5">Send an Outbound Message Action — Flow Builder (Salesforce Help)</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f09">09-external-services-openapi.md</a> - generate invocable actions from an OpenAPI 3.0 schema and use one in a Flow.</em></p>
+</section>
+<section id="f09" class="doc">
+<h1>Project 09 - External Services from an OpenAPI 3.0 Schema</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a> (Salesforce → External, synchronous) done <strong>low-code</strong>.
+<strong>Tools</strong>: an <strong>External Service</strong> registered from an <strong>OpenAPI 3.0</strong> schema + a <strong>Named Credential</strong> + <strong>Flow Builder</strong>.
+<strong>You will learn</strong>: how to turn a REST API into clickable <strong>invocable actions</strong> with no Apex, and use one inside a Flow.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem → architecture → auth → build → test → gotchas → extension. Concepts behind this one live in <a href="../05-Outbound-Callouts/03-external-services.md">Module 05</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>The team needs to call an external REST API (here, a simple number-to-words or quotes service) from automation, but the admins do not write Apex. <strong>External Services</strong> lets you register the API's <strong>OpenAPI</strong> specification once, and Salesforce auto-generates <strong>invocable actions</strong> you can drop straight into a <strong>Flow</strong>, all declaratively. Authentication and the endpoint host are handled by a <strong>Named Credential</strong>.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+flowchart LR
+    SCHEMA[OpenAPI 3.0 schema&lt;br/&gt;SwaggerHub or pasted] --&gt; ES[External Service&lt;br/&gt;registration]
+    NC[Named Credential] --&gt; ES
+    ES --&gt; ACT[Generated invocable actions]
+    ACT --&gt; FLOW[Flow Builder]
+    FLOW --&gt;|callout via NC| API[External REST API]
+    API --&gt;|JSON response| FLOW
+
+    style SCHEMA fill:#00A1E0,stroke:#032D60,color:#fff
+    style ES fill:#0070D2,stroke:#032D60,color:#fff
+    style NC fill:#1B96FF,stroke:#032D60,color:#fff
+    style ACT fill:#16325C,stroke:#032D60,color:#fff
+    style FLOW fill:#0070D2,stroke:#032D60,color:#fff
+    style API fill:#16325C,stroke:#032D60,color:#fff
+
+</div>
+<p>The schema describes the operations, Salesforce converts each operation into an action, and the Named Credential supplies the base URL plus auth at run time.</p>
+<hr />
+<h2>3. Auth setup</h2>
+<p>External Services <strong>requires a Named Credential</strong> for the endpoint, you cannot point it at a raw URL.</p>
+<ol>
+<li>Setup → <strong>Named Credentials</strong> → <strong>New</strong>. Create an <strong>External Credential</strong> first if the API needs auth (OAuth, API Key); for an open API choose <strong>No Authentication</strong>. See <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</li>
+<li><strong>Label/Name</strong>: <code>Numbers_API</code>.</li>
+<li><strong>URL</strong>: the API base host, for example <code>https://api.example.com</code>.</li>
+<li>Save. The host in your OpenAPI <code>servers</code> block should match this base so paths resolve cleanly.</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Prepare an OpenAPI 3.0 schema.</strong></p>
+<p>Host it on <strong>SwaggerHub</strong> (and copy the public URL) or paste the JSON directly during registration. A minimal <strong>OpenAPI 3.0</strong> spec:</p>
+<pre><code class="language-json">{
+  &quot;openapi&quot;: &quot;3.0.0&quot;,
+  &quot;info&quot;: { &quot;title&quot;: &quot;Numbers API&quot;, &quot;version&quot;: &quot;1.0.0&quot; },
+  &quot;servers&quot;: [{ &quot;url&quot;: &quot;https://api.example.com&quot; }],
+  &quot;paths&quot;: {
+    &quot;/math/{number}&quot;: {
+      &quot;get&quot;: {
+        &quot;operationId&quot;: &quot;getMathFact&quot;,
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;number&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: { &quot;type&quot;: &quot;integer&quot; }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;A math fact&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;type&quot;: &quot;object&quot;,
+                  &quot;properties&quot;: {
+                    &quot;text&quot;: { &quot;type&quot;: &quot;string&quot; },
+                    &quot;number&quot;: { &quot;type&quot;: &quot;integer&quot; },
+                    &quot;found&quot;: { &quot;type&quot;: &quot;boolean&quot; }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>The <code>operationId</code> (<code>getMathFact</code>) becomes the <strong>action name</strong>, so give every operation a clear, unique one.</p>
+<p><strong>Step 2 - Register the External Service.</strong></p>
+<ol>
+<li>Setup → quick find <strong>External Services</strong> → <strong>New</strong> (or <strong>Add an External Service</strong>).</li>
+<li>Choose <strong>From API Specification</strong>.</li>
+<li><strong>Service Name</strong>: <code>NumbersService</code> (this prefixes the generated action API names).</li>
+<li><strong>Service Schema - Named Credential</strong>: select <code>Numbers_API</code>.</li>
+<li><strong>Schema source</strong>: pick <strong>Service Schema Complete URL</strong> and paste the SwaggerHub URL, or pick <strong>Schema</strong> and paste the JSON above.</li>
+<li>Click <strong>Save &amp; Next</strong>. Salesforce parses the spec and lists the operations it found.</li>
+<li>Review the operations and parameters, then <strong>Finish</strong>.</li>
+</ol>
+<p><strong>Step 3 - Confirm the generated actions.</strong></p>
+<p>After registration, each operation appears as an invocable action. In <strong>Flow Builder</strong> you will find it under <strong>Action</strong> → category <strong>External Services</strong> → <code>NumbersService</code>, with <code>getMathFact</code> available.</p>
+<p><strong>Step 4 - Use the action in a Flow.</strong></p>
+<ol>
+<li>Setup → <strong>Flows</strong> → <strong>New Flow</strong> → <strong>Screen Flow</strong> (simplest to test) or an autolaunched flow.</li>
+<li>(Screen Flow) Add a <strong>Screen</strong> with a <strong>Number</strong> input variable <code>inputNumber</code>.</li>
+<li>Add an <strong>Action</strong> element → <strong>External Services</strong> → <code>NumbersService</code> → <code>getMathFact</code>.</li>
+<li>Map the input <strong>number</strong> = <code>{!inputNumber}</code>.</li>
+<li>Store the output, then add a second <strong>Screen</strong> that displays the returned <code>text</code> field from the action output.</li>
+<li>Save and <strong>Activate</strong>.</li>
+</ol>
+<hr />
+<h2>5. Test</h2>
+<ol>
+<li><strong>Run</strong> the Flow (Flow Builder → <strong>Run</strong>, or <strong>Debug</strong> with a sample input).</li>
+<li>Enter a number, for example <code>42</code>, on the first screen.</li>
+<li>The Flow calls the API through the Named Credential and the second screen shows the returned fact text.</li>
+<li>If something fails, open <strong>Setup → Debug Logs</strong> (or the Flow <strong>debug</strong> panel) to see the raw request/response and confirm the callout used <code>callout:Numbers_API</code>.</li>
+</ol>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Registration fails on a large spec</td>
+<td>The schema has a <strong>100,000 character maximum</strong>. Trim unused paths/definitions or split the API.</td>
+</tr>
+<tr>
+<td>Spec rejected as unsupported</td>
+<td>External Services supports <strong>OpenAPI 2.0 and 3.0</strong>. Validate the document and confirm the <code>openapi</code>/<code>swagger</code> version field.</td>
+</tr>
+<tr>
+<td>Action name or parameter missing</td>
+<td>A derived object/property type name must be <strong>under 255 characters</strong> to surface in Apex or Flow, and each operation needs a unique <code>operationId</code>.</td>
+</tr>
+<tr>
+<td>No Named Credential to choose</td>
+<td>External Services <strong>requires</strong> a Named Credential, create one first (Section 3).</td>
+</tr>
+<tr>
+<td>API changed and the action is stale</td>
+<td><strong>Re-register / regenerate</strong> the External Service from the updated schema, the actions do not auto-sync.</td>
+</tr>
+<tr>
+<td>Callout blocked</td>
+<td>The Named Credential registers the host, so no Remote Site Setting is needed, confirm the <code>servers</code> URL matches the Named Credential base.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Swap the open API for an <strong>authenticated</strong> one and wire up an <strong>OAuth 2.0</strong> or <strong>API Key</strong> External Credential, no code changes needed in the Flow.</li>
+<li>Call the same generated action from <strong>Apex</strong> (<code>ExternalService.NumbersService.getMathFact(...)</code>) to compare low-code vs pro-code invocation.</li>
+<li>Add a <code>POST</code> operation with a request body to the schema, regenerate, and pass a structured Apex-defined object from the Flow.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This proves you can deliver an integration <strong>without Apex</strong>: register an <strong>OpenAPI 3.0</strong> spec, let the platform generate <strong>invocable actions</strong>, and consume them in <strong>Flow</strong>. You can speak to the real constraints, the <strong>100,000-character</strong> schema limit, <strong>OpenAPI 2.0/3.0</strong> support, the mandatory <strong>Named Credential</strong>, and the need to <strong>regenerate</strong> when the contract changes, which is exactly what separates a low-code shortcut from a maintainable one.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.external_services.htm&amp;type=5">External Services — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.external_services_intro_openapi_2_3_support.htm&amp;type=5">OpenAPI 2.0 and 3.0 Support — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.external_services_considerations.htm&amp;type=5">External Services Considerations and Limitations — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2022/02/learn-moar-in-spring-22-with-openapi-3-0-support-for-external-services">Learn MOAR: OpenAPI 3.0 Support for External Services — Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f10">10-platform-event-lwc.md</a> - publish a Platform Event from Apex and react to it live in an LWC.</em></p>
+</section>
+<section id="f10" class="doc">
+<h1>Project 10 - Platform Event to a Live LWC</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/02-fire-and-forget.md">Fire and Forget</a> for the publisher, <a href="../02-Integration-Patterns/06-ui-update-based-on-data-changes.md">UI Update Based on Data Changes</a> for the subscriber.
+<strong>Tools</strong>: a <strong>Platform Event</strong> (<code>__e</code>) + Apex <code>EventBus.publish()</code> + an <strong>LWC</strong> using the <strong><code>lightning/empApi</code></strong> module.
+<strong>You will learn</strong>: how to fire an event from Apex and update a UI in <strong>real time</strong> without polling.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem → architecture → setup → build → test → gotchas → extension. Concepts behind this one live in <a href="../06-Event-Driven/02-platform-events.md">Module 06</a> and <a href="../06-Event-Driven/06-publishing-subscribing-and-replay.md">the replay deep-dive</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>An agent dashboard should light up the moment a back-office process finishes, for example <em>"Order ORD-1001 shipped"</em>, without the user refreshing. Polling the database every few seconds is wasteful and laggy.</p>
+<p><strong>Platform Events</strong> decouple the producer from the consumer: Apex publishes an event, and any number of subscribers, including an <strong>LWC</strong> on screen, receive it over the event bus in near real time.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+flowchart LR
+    APX[Apex&lt;br/&gt;EventBus.publish] --&gt; BUS[Event bus&lt;br/&gt;/event/Order_Notification__e]
+    BUS --&gt; EMP[lightning/empApi&lt;br/&gt;subscribe]
+    EMP --&gt; LWC[LWC updates UI]
+
+    style APX fill:#00A1E0,stroke:#032D60,color:#fff
+    style BUS fill:#1B96FF,stroke:#032D60,color:#fff
+    style EMP fill:#0070D2,stroke:#032D60,color:#fff
+    style LWC fill:#16325C,stroke:#032D60,color:#fff
+
+</div>
+<p><code>EventBus.publish()</code> writes to the bus, the channel name is <code>/event/&lt;EventName&gt;__e</code>, and the LWC subscribes to that channel through CometD via the <code>empApi</code> module.</p>
+<hr />
+<h2>3. Setup</h2>
+<p>No external system or Named Credential is needed, this is <strong>entirely inside the platform</strong>. You need:</p>
+<ol>
+<li>Permission to create a <strong>Platform Event</strong> (Customize Application).</li>
+<li>A Lightning page (App, Home, or Record page) where the LWC can be dropped.</li>
+<li><strong>Desktop browser</strong> for testing, <code>empApi</code> does not run in the Salesforce mobile app (see gotchas).</li>
+</ol>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Define the Platform Event.</strong></p>
+<ol>
+<li>Setup → quick find <strong>Platform Events</strong> → <strong>New Platform Event</strong>.</li>
+<li><strong>Label</strong>: <code>Order Notification</code>. The API name becomes <strong><code>Order_Notification__e</code></strong> (the <code>__e</code> suffix marks a Platform Event).</li>
+<li><strong>Publish Behavior</strong>: <em>Publish After Commit</em> (fires only if the transaction commits) or <em>Publish Immediately</em> (fires regardless). Choose <strong>Publish Immediately</strong> so a failed DML still notifies the UI.</li>
+<li>Add custom fields:
+   - <code>Order_Number__c</code> (Text)
+   - <code>Status__c</code> (Text)
+   - <code>Message__c</code> (Text)</li>
+<li>Save.</li>
+</ol>
+<p><strong>Step 2 - Publish from Apex.</strong></p>
+<pre><code class="language-apex">public with sharing class OrderNotifier {
+    public static void notifyShipped(String orderNumber) {
+        Order_Notification__e evt = new Order_Notification__e(
+            Order_Number__c = orderNumber,
+            Status__c       = 'Shipped',
+            Message__c      = 'Order ' + orderNumber + ' has shipped.'
+        );
+
+        Database.SaveResult sr = EventBus.publish(evt);
+
+        if (!sr.isSuccess()) {
+            for (Database.Error err : sr.getErrors()) {
+                System.debug('Publish failed: ' + err.getMessage());
+            }
+        }
+    }
+}
+</code></pre>
+<p><code>EventBus.publish()</code> returns a <code>Database.SaveResult</code>, always check <code>isSuccess()</code>.</p>
+<p><strong>Step 3 - Build the LWC.</strong></p>
+<p><code>orderNotifier.html</code>:</p>
+<pre><code class="language-html">&lt;template&gt;
+    &lt;lightning-card title=&quot;Live Order Notifications&quot; icon-name=&quot;standard:event&quot;&gt;
+        &lt;div class=&quot;slds-p-around_medium&quot;&gt;
+            &lt;template if:true={messages.length}&gt;
+                &lt;ul class=&quot;slds-has-dividers_bottom&quot;&gt;
+                    &lt;template for:each={messages} for:item=&quot;m&quot;&gt;
+                        &lt;li key={m.id} class=&quot;slds-item&quot;&gt;
+                            &lt;strong&gt;{m.order}&lt;/strong&gt; - {m.status}: {m.text}
+                        &lt;/li&gt;
+                    &lt;/template&gt;
+                &lt;/ul&gt;
+            &lt;/template&gt;
+            &lt;template if:false={messages.length}&gt;
+                &lt;p&gt;Waiting for events...&lt;/p&gt;
+            &lt;/template&gt;
+        &lt;/div&gt;
+    &lt;/lightning-card&gt;
+&lt;/template&gt;
+</code></pre>
+<p><code>orderNotifier.js</code>:</p>
+<pre><code class="language-javascript">import { LightningElement } from 'lwc';
+import { subscribe, unsubscribe, onError, isEmpEnabled } from 'lightning/empApi';
+
+export default class OrderNotifier extends LightningElement {
+    channelName = '/event/Order_Notification__e';
+    subscription = {};
+    messages = [];
+
+    async connectedCallback() {
+        // empApi runs only in desktop browsers
+        const enabled = await isEmpEnabled();
+        if (!enabled) {
+            console.warn('EMP API is not available in this environment.');
+            return;
+        }
+
+        onError((error) =&gt; {
+            console.error('empApi error: ', JSON.stringify(error));
+        });
+
+        // -1 = replay only new events from now on
+        this.subscription = await subscribe(this.channelName, -1, (response) =&gt; {
+            const payload = response.data.payload;
+            this.messages = [
+                {
+                    id: response.data.event.replayId,
+                    order: payload.Order_Number__c,
+                    status: payload.Status__c,
+                    text: payload.Message__c
+                },
+                ...this.messages
+            ];
+        });
+    }
+
+    disconnectedCallback() {
+        if (this.subscription &amp;&amp; this.subscription.id) {
+            unsubscribe(this.subscription, () =&gt; {
+                this.subscription = {};
+            });
+        }
+    }
+}
+</code></pre>
+<p><code>orderNotifier.js-meta.xml</code>:</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;LightningComponentBundle xmlns=&quot;http://soap.sforce.com/2006/04/metadata&quot;&gt;
+    &lt;apiVersion&gt;66.0&lt;/apiVersion&gt;
+    &lt;isExposed&gt;true&lt;/isExposed&gt;
+    &lt;targets&gt;
+        &lt;target&gt;lightning__AppPage&lt;/target&gt;
+        &lt;target&gt;lightning__HomePage&lt;/target&gt;
+        &lt;target&gt;lightning__RecordPage&lt;/target&gt;
+    &lt;/targets&gt;
+&lt;/LightningComponentBundle&gt;
+</code></pre>
+<p><strong>Step 4 - Place the component.</strong> Edit a Lightning <strong>App</strong> or <strong>Home</strong> page in the <strong>Lightning App Builder</strong>, drag the <code>orderNotifier</code> component onto it, then <strong>Save</strong> and <strong>Activate</strong>.</p>
+<hr />
+<h2>5. Test</h2>
+<ol>
+<li>Open the Lightning page with the component, it shows <em>"Waiting for events..."</em>.</li>
+<li>In another tab, open <strong>Developer Console → Debug → Open Execute Anonymous</strong> (or <code>sf apex run</code>) and run:</li>
+</ol>
+<pre><code class="language-apex">OrderNotifier.notifyShipped('ORD-1001');
+</code></pre>
+<ol start="3">
+<li>Within a second or two, the LWC list updates with <strong>ORD-1001 - Shipped</strong> with <strong>no page refresh</strong>.</li>
+<li>Publish a few more with different order numbers and watch them stack at the top.</li>
+</ol>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Component never receives events</td>
+<td><code>empApi</code> is supported <strong>only in desktop browsers</strong> with web/shared worker support, it does <strong>not</strong> run in the Salesforce mobile app. Test on desktop.</td>
+</tr>
+<tr>
+<td>Subscribe fails silently</td>
+<td>Check the <strong>channel name</strong> is exactly <code>/event/Order_Notification__e</code> (leading <code>/event/</code>, <code>__e</code> suffix).</td>
+</tr>
+<tr>
+<td>Component must be a top-level window</td>
+<td>You can use <code>empApi</code> only on the <strong>main window</strong>, not in a child/popup window.</td>
+</tr>
+<tr>
+<td>Duplicate or missed processing</td>
+<td>Platform Events are <strong>at-least-once delivery</strong>, design subscribers to be <strong>idempotent</strong>.</td>
+</tr>
+<tr>
+<td>Events fire even on rollback</td>
+<td>That is <strong>Publish Immediately</strong> by design. Use <strong>Publish After Commit</strong> if you only want events when the DML succeeds.</td>
+</tr>
+<tr>
+<td><code>isEmpEnabled</code> returns false in tests</td>
+<td>It is a runtime browser check, guard your <code>subscribe</code> call behind it (as shown) and skip gracefully.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Subscribe with a <strong>replay ID</strong> of <code>-2</code> to receive events from the last 72 hours on load, then study <strong>replay</strong> semantics in <a href="../06-Event-Driven/06-publishing-subscribing-and-replay.md">the replay note</a>.</li>
+<li>Publish the event from a <strong>record-triggered Flow</strong> instead of Apex (the <em>Create Records</em> element on a Platform Event), and confirm the same LWC reacts.</li>
+<li>Add an Apex <strong>trigger on the Platform Event</strong> (<code>Order_Notification__e</code>) that also writes an audit record server-side when each event fires.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This is the modern, decoupled counterpart to <a href="#f08">Project 08</a>: instead of a legacy SOAP push, you <strong>publish to the event bus</strong> with <code>EventBus.publish()</code> and <strong>subscribe in the UI</strong> with <code>lightning/empApi</code>. Be ready to name the constraints, <strong>desktop-only</strong> empApi, the <code>/event/...__e</code> channel, <strong>at-least-once</strong> delivery (so idempotent handlers), and <strong>Publish After Commit vs Immediately</strong>. That shows real-time UI fluency, not just CRUD.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_subscribe_lc.htm">Subscribe to Platform Event Notifications with the empApi Module — Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/component-library/bundle/lightning-emp-api/documentation">Emp API (lightning/empApi) — Lightning Web Components Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_publish_apex.htm">Publish Event Messages with Apex — Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_define_ui.htm">Platform Event Fields and Publish Behavior — Platform Events Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f11">11-cdc-pubsub-listener.md</a> - stream Change Data Capture events to an external Pub/Sub API listener.</em></p>
+</section>
+<section id="f11" class="doc">
+<h1>Project 11 - Change Data Capture Listener via Pub/Sub API</h1>
+<blockquote>
+<p><strong>Pattern</strong>: <a href="../02-Integration-Patterns/06-ui-update-based-on-data-changes.md">UI Update Based on Data Changes</a> / external sync (Salesforce → External, near real-time, event-driven).
+<strong>Tools</strong>: <strong>Change Data Capture</strong> + the <strong>Pub/Sub API</strong> (gRPC + HTTP/2 + Avro) and a small external client.
+<strong>You will learn</strong>: how to enable CDC for an object and have an external service subscribe, decode the Avro payload, and track its place in the stream with a <strong>Replay ID</strong>.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem → architecture → auth → build → test → gotchas → extension. Concepts behind this one live in <a href="../06-Event-Driven/03-change-data-capture.md">Change Data Capture</a> and <a href="../06-Event-Driven/04-pub-sub-api.md">Pub/Sub API</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>An external system (a cache, a search index, a data warehouse) must stay in sync with Salesforce <strong>Account</strong> records in near real-time, without polling. Every time an Account is created, updated, deleted, or undeleted, Salesforce should push the change to the external service. <strong>Change Data Capture</strong> fires the event for free, and the <strong>Pub/Sub API</strong> is the modern gRPC channel an external client uses to receive it.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+flowchart LR
+    U[User edits Account] --&gt; SF[Salesforce platform]
+    SF --&gt;|CDC fires| EB[Event Bus&lt;br/&gt;/data/AccountChangeEvent]
+    EB --&gt;|gRPC Subscribe| CL[External client&lt;br/&gt;Node.js or Python]
+    CL --&gt;|GetSchema once| EB
+    CL --&gt;|decode Avro| STORE[(External store)]
+    style SF fill:#00A1E0,color:#fff
+    style EB fill:#032D60,color:#fff
+    style CL fill:#1B96FF,color:#fff
+    style STORE fill:#747474,color:#fff
+
+</div>
+<p>The client opens one long-lived gRPC stream, requests a batch of events, decodes each Avro payload, persists it, then requests the next batch.</p>
+<hr />
+<h2>3. Auth and setup</h2>
+<p><strong>Enable CDC for Account:</strong></p>
+<ol>
+<li>Setup → quick-find <strong>Change Data Capture</strong>.</li>
+<li>Move <strong>Account</strong> from <strong>Available Entities</strong> to <strong>Selected Entities</strong>.</li>
+<li>Save. Salesforce now publishes to the channel <code>/data/AccountChangeEvent</code>.</li>
+</ol>
+<p><strong>Get an access token (the client needs one before gRPC):</strong></p>
+<p>The Pub/Sub API authenticates with a standard Salesforce OAuth access token plus your org's instance URL and org ID, passed as gRPC metadata on every call. Any OAuth flow works; for a headless service the <strong>Client Credentials flow</strong> is the clean choice (see <a href="#f12">Project 12</a>). You will send three headers: <code>accesstoken</code>, <code>instanceurl</code>, and <code>tenantid</code> (the org ID).</p>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p>The Pub/Sub API endpoint is <strong><code>api.pubsub.salesforce.com:7443</code></strong> (gRPC over HTTP/2). Grab the protobuf definition (<code>pubsub_api.proto</code>) from the official repo to generate your client stubs. The flow is the same in Node.js or Python; pseudo-steps below.</p>
+<p><strong>Step 1 - Authenticate and build gRPC metadata.</strong></p>
+<pre><code class="language-text">token, instanceUrl, orgId = oauthClientCredentials()   // see Project 12
+metadata = {
+  &quot;accesstoken&quot;: token,
+  &quot;instanceurl&quot;: instanceUrl,
+  &quot;tenantid&quot;:    orgId
+}
+</code></pre>
+<p><strong>Step 2 - Open a secure gRPC channel.</strong></p>
+<pre><code class="language-text">channel = grpc.secureChannel(&quot;api.pubsub.salesforce.com:7443&quot;, sslCredentials())
+stub    = PubSubStub(channel)
+</code></pre>
+<p><strong>Step 3 - Fetch and cache the schema (call once).</strong></p>
+<p><code>GetSchema</code> returns the Avro schema as a JSON string, keyed by <code>schema_id</code>. Because the schema rarely changes, call it once and reuse it.</p>
+<pre><code class="language-text">topic     = stub.GetTopic({ topic_name: &quot;/data/AccountChangeEvent&quot; }, metadata)
+schemaRes = stub.GetSchema({ schema_id: topic.schema_id }, metadata)
+avroSchema = parse(schemaRes.schema_json)
+</code></pre>
+<p><strong>Step 4 - Subscribe with a FetchRequest and a replay preset.</strong></p>
+<p><code>Subscribe</code> is a bidirectional stream. The <strong>first</strong> <code>FetchRequest</code> names the topic, the <strong>replay preset</strong>, and <code>num_requested</code> (the flow-control batch size, max <strong>100</strong>). Use <code>LATEST</code> to receive only new events from now on, <code>EARLIEST</code> to read from the start of the 3-day retention window, or <code>CUSTOM</code> with a stored <code>replay_id</code> to resume exactly where you left off.</p>
+<pre><code class="language-text">firstRequest = {
+  topic_name:    &quot;/data/AccountChangeEvent&quot;,
+  replay_preset: LATEST,        // or CUSTOM + replay_id to resume
+  num_requested: 10
+}
+stream = stub.Subscribe(metadata)
+stream.write(firstRequest)
+</code></pre>
+<p><strong>Step 5 - Receive, decode Avro, and re-request to keep the stream flowing.</strong></p>
+<p>Each response carries a list of events. The <code>event.payload</code> is <strong>binary Avro</strong> decoded with the cached schema. Every CDC payload includes a <code>ChangeEventHeader</code> (entity name, change type, changed fields, record IDs). Save the <code>replay_id</code> so you can resume later. When the server has drained your requested batch, it sends an empty keep-alive whose <code>latest_replay_id</code> you store; then send another <code>FetchRequest</code> to ask for more.</p>
+<pre><code class="language-text">for response in stream:
+    for event in response.events:
+        record = avroDecode(event.event.payload, avroSchema)
+        header = record[&quot;ChangeEventHeader&quot;]
+        persist(header.changeType, header.recordIds, record)
+        save(event.replay_id)          // for CUSTOM resume
+    // top up the credit so delivery continues
+    stream.write({ num_requested: 10 })
+</code></pre>
+<hr />
+<h2>5. Test</h2>
+<ol>
+<li>In the org, open any <strong>Account</strong> and change a field (for example, <strong>Phone</strong>), then Save.</li>
+<li>Watch your client log. Within a second or two it should print the decoded event: <code>changeType = UPDATE</code>, the Account's record ID, and the changed-fields list from the <code>ChangeEventHeader</code>.</li>
+<li>Create a new Account and delete one to see <code>CREATE</code> and <code>DELETE</code> change types arrive on the same stream.</li>
+</ol>
+<p>No connected app on the publish side is needed; CDC publishes automatically. If nothing arrives, confirm Account is in <strong>Selected Entities</strong> and that your token's run-as user can see Account records.</p>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Payload looks like garbage bytes</td>
+<td>It is <strong>binary Avro</strong>, not JSON. Decode <code>event.payload</code> with the schema from <code>GetSchema</code>.</td>
+</tr>
+<tr>
+<td>Schema fetched on every event</td>
+<td>Call <code>GetSchema</code> <strong>once</strong> and cache it; the schema ID changes only when the object's fields change.</td>
+</tr>
+<tr>
+<td>Stream goes quiet after the first batch</td>
+<td>This is <strong>flow control</strong>. You must send a new <code>FetchRequest</code> with <code>num_requested</code> to request more; <code>num_requested</code> max is <strong>100</strong>.</td>
+</tr>
+<tr>
+<td>Missed events after downtime</td>
+<td>Events live in the bus for <strong>72 hours (3 days)</strong> only. Persist the <code>replay_id</code> and resubscribe with <code>replay_preset: CUSTOM</code> to backfill within that window.</td>
+</tr>
+<tr>
+<td><code>replay_id</code> reused after retention</td>
+<td>A stored Replay ID older than 72 hours is invalid; you will get an error. Fall back to <code>EARLIEST</code> or <code>LATEST</code>.</td>
+</tr>
+<tr>
+<td>Need the changed fields, not the whole record</td>
+<td>CDC sends only changed fields plus the <code>ChangeEventHeader</code>; read <code>header.changedFields</code> to know what moved.</td>
+</tr>
+<tr>
+<td>Auth errors on the gRPC call</td>
+<td>All three metadata headers are required: <code>accesstoken</code>, <code>instanceurl</code>, <code>tenantid</code> (org ID).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Persist the <code>replay_id</code> to a datastore and restart the client with <code>replay_preset: CUSTOM</code> to prove zero-gap resume.</li>
+<li>Subscribe to a <strong>custom channel</strong> that bundles multiple objects, or to a custom Platform Event, using the same code path.</li>
+<li>Try <strong>Managed Event Subscriptions (Beta)</strong>, where Salesforce tracks the Replay ID server-side so the client carries no replay state.</li>
+<li>Push decoded events into a real sink (a search index or a message queue) instead of logging.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This proves you understand <strong>event-driven sync</strong> end-to-end: CDC publishes for free, the <strong>Pub/Sub API</strong> is the modern gRPC replacement for the CometD Streaming API, payloads are <strong>Avro</strong> (so you decode with a cached schema), and resilience comes from <strong>Replay ID</strong> plus the <strong>72-hour</strong> retention window. Bonus points for explaining <strong>flow control</strong> (<code>num_requested</code>) as back-pressure that stops a client being overwhelmed during a publish spike.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/grpc-api.html">Pub/Sub API as a gRPC API — Get Started</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html">Subscribe RPC Method — Pub/Sub API Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/getschema-rpc.html">GetSchema RPC Method — Pub/Sub API Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/flow-control.html">Pull Subscription and Flow Control</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_subscribe_pubsub_api.htm">Subscribe with Pub/Sub API — Change Data Capture Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f12">12-oauth-client-credentials.md</a> - get a token for a backend integration with no user.</em></p>
+</section>
+<section id="f12" class="doc">
+<h1>Project 12 - OAuth 2.0 Client Credentials Flow</h1>
+<blockquote>
+<p><strong>Pattern</strong>: Server-to-server authentication (external backend → Salesforce, no user present).
+<strong>Tools</strong>: A <strong>Connected App</strong> (or External Client App) with the <strong>Client Credentials Flow</strong> enabled, a <strong>run-as integration user</strong>, and <strong>Postman/cURL</strong>.
+<strong>You will learn</strong>: how a headless backend trades only its client id and secret for an access token, with no login screen and no refresh token.</p>
+</blockquote>
+<p>This is Module 11, hands-on builds. Each project follows the same shape: problem → architecture → auth → build → test → gotchas → extension. The concept behind this one lives in <a href="../03-Authentication/05-client-credentials-flow.md">Client Credentials Flow</a>.</p>
+<hr />
+<h2>1. Business problem</h2>
+<p>A backend service (a nightly job, a middleware connector, a microservice) needs to call the Salesforce API, but <strong>no human is logged in</strong>. You do not want to embed a user's password, and the retiring Username-Password flow is not an option. The <strong>OAuth 2.0 Client Credentials flow</strong> lets the service exchange its <strong>consumer key + consumer secret</strong> for an access token that always runs as one fixed <strong>integration user</strong>.</p>
+<hr />
+<h2>2. Architecture</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant APP as Backend service
+    participant TOK as Token Endpoint
+    participant API as Salesforce REST API
+    APP-&gt;&gt;TOK: POST /services/oauth2/token grant_type=client_credentials
+    TOK--&gt;&gt;APP: access_token (runs as integration user)
+    APP-&gt;&gt;API: GET /services/data/v66.0/... Bearer access_token
+    API--&gt;&gt;APP: 200 OK + JSON
+    Note over APP,TOK: No user login, no refresh token. Re-request when it expires.
+
+</div>
+<hr />
+<h2>3. Auth and setup</h2>
+<p><strong>Prerequisite: My Domain must be deployed.</strong> The Client Credentials flow only works against your <code>https://MyDomainName.my.salesforce.com</code> host, never the generic login URL.</p>
+<p><strong>Create and configure the Connected App:</strong></p>
+<ol>
+<li>Setup → <strong>App Manager</strong> → <strong>New Connected App</strong> (choose the classic Connected App form, or use an <strong>External Client App</strong>).</li>
+<li>Enable <strong>OAuth Settings</strong>. Set any <strong>Callback URL</strong> (it is unused here but required), and add OAuth scopes such as <strong>Manage user data via APIs (api)</strong>.</li>
+<li>Check <strong>Enable Client Credentials Flow</strong> and accept the security warning. Save.</li>
+<li>Reopen the app: <strong>Manage</strong> → <strong>Edit Policies</strong>. Under <strong>Client Credentials Flow</strong>, set <strong>Run As</strong> to a dedicated <strong>integration user</strong> (Salesforce recommends a user with <strong>API Only</strong> access). Save.</li>
+<li>From <strong>Manage Consumer Details</strong>, copy the <strong>Consumer Key</strong> and <strong>Consumer Secret</strong>.</li>
+</ol>
+<p>The run-as user is who the token acts as, so its profile, permission sets, and sharing decide what the integration can read and write. Apply <strong>least privilege</strong>.</p>
+<hr />
+<h2>4. Step-by-step build</h2>
+<p><strong>Step 1 - Request a token.</strong> POST to your My Domain token endpoint with <code>grant_type=client_credentials</code>. You can pass the key/secret either in the body or as HTTP <strong>Basic auth</strong>.</p>
+<p>cURL, credentials in the body:</p>
+<pre><code class="language-bash">curl -X POST \
+  https://MyDomainName.my.salesforce.com/services/oauth2/token \
+  -H &quot;Content-Type: application/x-www-form-urlencoded&quot; \
+  -d &quot;grant_type=client_credentials&quot; \
+  -d &quot;client_id=YOUR_CONSUMER_KEY&quot; \
+  -d &quot;client_secret=YOUR_CONSUMER_SECRET&quot;
+</code></pre>
+<p><strong>Step 2 - Read the response.</strong> You get back an <code>access_token</code> and the <code>instance_url</code>. Note there is <strong>no <code>refresh_token</code></strong> in this flow.</p>
+<pre><code class="language-json">{
+  &quot;access_token&quot;: &quot;00D...!AQ...&quot;,
+  &quot;instance_url&quot;: &quot;https://MyDomainName.my.salesforce.com&quot;,
+  &quot;token_type&quot;: &quot;Bearer&quot;,
+  &quot;issued_at&quot;: &quot;...&quot;,
+  &quot;signature&quot;: &quot;...&quot;
+}
+</code></pre>
+<p><strong>Step 3 - Call an API with the Bearer token.</strong> Use the <code>instance_url</code> from the response as the base, and API version <strong>v66.0</strong>.</p>
+<pre><code class="language-bash">curl https://MyDomainName.my.salesforce.com/services/data/v66.0/query?q=SELECT+Id,Name+FROM+Account+LIMIT+5 \
+  -H &quot;Authorization: Bearer 00D...!AQ...&quot;
+</code></pre>
+<hr />
+<h2>5. Test</h2>
+<p>Do it in <a href="../10-Tools-Middleware/01-postman.md">Postman</a>:</p>
+<ol>
+<li><strong>POST</strong> <code>https://MyDomainName.my.salesforce.com/services/oauth2/token</code>. In <strong>Body → x-www-form-urlencoded</strong> add <code>grant_type=client_credentials</code>, <code>client_id</code>, <code>client_secret</code>. Send and confirm a <code>200</code> with an <code>access_token</code>.
+   - Alternative: leave the body with only <code>grant_type</code>, and put the key/secret under <strong>Authorization → Basic Auth</strong>.</li>
+<li>Copy the <code>access_token</code>. New request: <strong>GET</strong> <code>{{instance_url}}/services/data/v66.0/limits</code>, set <strong>Authorization → Bearer Token</strong>, paste it, send. A <code>200</code> with org limits confirms the token works as the integration user.</li>
+<li>Save the token to a Postman variable so the query request reuses it.</li>
+</ol>
+<hr />
+<h2>6. Common gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Gotcha</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>invalid_client</code> / flow rejected</td>
+<td><strong>My Domain</strong> is required. POST to <code>https://MyDomainName.my.salesforce.com</code>, not <code>login.salesforce.com</code>.</td>
+</tr>
+<tr>
+<td><code>invalid_grant</code> after enabling the app</td>
+<td>You did not set a <strong>Run As</strong> user under Edit Policies → Client Credentials Flow. Assign the integration user.</td>
+</tr>
+<tr>
+<td>Token works but API returns no data / <code>INSUFFICIENT_ACCESS</code></td>
+<td>The <strong>run-as user</strong> lacks object/field perms or a suitable license. Grant via permission sets; consider an <strong>API Only</strong> integration user.</td>
+</tr>
+<tr>
+<td>Looking for a refresh token</td>
+<td>There <strong>is none</strong> in client credentials. When the token expires, just request a new one.</td>
+</tr>
+<tr>
+<td>Secret leaked</td>
+<td>Anyone with the key + secret can mint tokens. <strong>Rotate the consumer secret</strong> and store it in a secret manager, never in code.</td>
+</tr>
+<tr>
+<td>Over-privileged integration</td>
+<td>Apply <strong>least privilege</strong> to the run-as user; do not reuse an admin.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Extension challenge</h2>
+<ul>
+<li>Wrap step 1 in your backend so it <strong>caches the token</strong> and only re-requests on a <code>401</code>/expiry, since there is no refresh token.</li>
+<li>Lock the run-as user down to a single object with a permission set and prove the API can only touch what that user can see.</li>
+<li>Move the same credentials into a Salesforce <strong>Named Credential + External Credential</strong> (Client Credentials type) so Apex callouts reuse them, see <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Named Credentials</a>.</li>
+</ul>
+<hr />
+<h2>Interview angle</h2>
+<p>This proves you can authenticate a <strong>headless server-to-server</strong> integration the modern way: Client Credentials replaces the retiring Username-Password flow, requires <strong>My Domain</strong>, runs as a fixed <strong>integration user</strong> (so security is the user's permissions, not the app's), and issues <strong>no refresh token</strong> (re-request on expiry). The certificate-based alternative is the <strong>JWT Bearer flow</strong>, which signs the request with a private key instead of sending a secret, also issuing no refresh token, and is the better fit when you cannot safely store a shared secret.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_client_credentials_flow.htm&amp;type=5">OAuth 2.0 Client Credentials Flow for Server-to-Server Integration</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.connected_app_client_credentials_setup.htm&amp;type=5">Configure a Connected App for the OAuth 2.0 Client Credentials Flow</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_jwt_flow.htm&amp;type=5">OAuth 2.0 JWT Bearer Flow for Server-to-Server Integration</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2024/02/invoke-rest-apis-with-the-salesforce-integration-user-and-oauth-client-credentials">Invoke REST APIs with the Salesforce Integration User and OAuth Client Credentials — Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#overview">README.md</a> - back to the Module 11 project index.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 11 Hands-On Projects · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

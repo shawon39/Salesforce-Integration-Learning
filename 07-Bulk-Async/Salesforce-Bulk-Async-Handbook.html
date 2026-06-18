@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Bulk &amp; Async Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Bulk &amp; Async</h1>
+  <div class="sub">Move millions of records and run heavy work off-thread: Bulk API, Batch, Queueable, future, Scheduled, and the limits.</div>
+  <div>
+    <span class="pill">Bulk API 2.0</span><span class="pill">Bulk 1.0 &amp; PK chunking</span>
+    <span class="pill">Batch Apex</span><span class="pill">Queueable</span>
+    <span class="pill">future &amp; Scheduled</span><span class="pill">Limits &amp; monitoring</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Bulk API 2.0</a></li>
+<li class=""><a href="#f02">02 - Bulk API 1.0 and PK Chunking</a></li>
+<li class=""><a href="#f03">03 - Batch Apex</a></li>
+<li class=""><a href="#f04">04 - Queueable Apex</a></li>
+<li class=""><a href="#f05">05 - Future Methods (@future)</a></li>
+<li class=""><a href="#f06">06 - Scheduled Apex</a></li>
+<li class=""><a href="#f07">07 - Async Limits, Monitoring & Error Handling</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 07 - Bulk &amp; Async Integration</h1>
+<blockquote>
+<p><strong>Goal</strong>: Move millions of records and run heavy work without hitting governor limits.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>The principle</strong>: large or slow work goes <strong>asynchronous</strong>, in chunks, off the user's thread.</p>
+</blockquote>
+<p>Two related ideas: <strong>Bulk</strong> (large data in/out via the Bulk API) and <strong>Async Apex</strong> (server-side work in the background: Batch, Queueable, <code>@future</code>, Scheduled). Start with <strong><a href="#f01">01-bulk-api-2.md</a></strong>. This module realizes the <a href="../02-Integration-Patterns/03-batch-data-synchronization.md">Batch Data Synchronization pattern</a>.</p>
+<hr />
+<h2>How to use this module</h2>
+<ol>
+<li><strong><a href="#f01">01-bulk-api-2.md</a></strong> for external large-data loads/extracts.</li>
+<li><strong><a href="#f02">02</a></strong> for the legacy batch API and chunking huge queries.</li>
+<li>The async Apex tools: <strong><a href="#f03">Batch</a></strong>, <strong><a href="#f04">Queueable</a></strong>, <strong><a href="#f05">@future</a></strong>, <strong><a href="#f06">Scheduled</a></strong>.</li>
+<li><strong><a href="#f07">07</a></strong> for limits, monitoring, and error handling.</li>
+</ol>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">bulk-api-2</a></td>
+<td>REST async jobs for large data (the default)</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">bulk-api-1-and-pk-chunking</a></td>
+<td>Legacy batch API + PK Chunking for huge queries</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">batch-apex</a></td>
+<td>Process SF's own data in chunks (start/execute/finish)</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">queueable-apex</a></td>
+<td>Chainable async jobs, objects, callouts</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">future-methods</a></td>
+<td>Simple primitive-only async (<code>@future</code>)</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">scheduled-apex</a></td>
+<td>Cron-scheduled Apex</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="#f07">async-limits-monitoring-errors</a></td>
+<td>Limits, <code>AsyncApexJob</code>, retries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which tool? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([Large volume or async work]) --&gt; Q1{Who moves the data?}
+    Q1 --&gt;|External client loads or extracts| Q2{How much / what control?}
+    Q2 --&gt;|2,000+ records, simplest| B2[Bulk API 2.0]
+    Q2 --&gt;|Manual batch control, legacy| B1[Bulk API 1.0]
+    Q1 --&gt;|Apex processes the org's own data| Q3{What shape of work?}
+    Q3 --&gt;|Millions of records in chunks| BATCH[Batch Apex]
+    Q3 --&gt;|Objects, chaining, callouts| QU[Queueable Apex]
+    Q3 --&gt;|Simple primitive async or callout after DML| FUT[at-future method]
+    Q3 --&gt;|Run on a schedule| SCH[Scheduled Apex]
+
+    style B2 fill:#00A1E0,color:#fff
+    style B1 fill:#607D8B,color:#fff
+    style BATCH fill:#9C27B0,color:#fff
+    style QU fill:#4CAF50,color:#fff
+    style FUT fill:#ff9900,color:#fff
+    style SCH fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>Async Apex at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Initiator</th>
+<th>Inputs</th>
+<th style="text-align: center;">Callouts</th>
+<th>Chaining / monitor</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td>External client</td>
+<td>CSV</td>
+<td style="text-align: center;">n/a</td>
+<td>Job status API</td>
+<td>Large data in/out</td>
+</tr>
+<tr>
+<td><strong>Batch Apex</strong></td>
+<td>Apex/Schedule</td>
+<td>QueryLocator/Iterable</td>
+<td style="text-align: center;">Yes (<code>AllowsCallouts</code>)</td>
+<td><code>AsyncApexJob</code></td>
+<td>Millions of records in chunks</td>
+</tr>
+<tr>
+<td><strong>Queueable</strong></td>
+<td>Apex</td>
+<td>sObjects/objects</td>
+<td style="text-align: center;">Yes</td>
+<td>Chainable, <code>AsyncApexJob</code></td>
+<td>Flexible async + chaining</td>
+</tr>
+<tr>
+<td><strong>@future</strong></td>
+<td>Apex</td>
+<td><strong>primitives only</strong></td>
+<td style="text-align: center;">Yes (<code>callout=true</code>)</td>
+<td>No</td>
+<td>Simple fire-and-forget</td>
+</tr>
+<tr>
+<td><strong>Scheduled</strong></td>
+<td>Schedule (cron)</td>
+<td>n/a</td>
+<td style="text-align: center;">No (delegate)</td>
+<td><code>CronTrigger</code></td>
+<td>Time-based runs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Limits cheat sheet (memorize)</h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bulk API 2.0 data per job</td>
+<td><strong>150 MB</strong></td>
+</tr>
+<tr>
+<td>Bulk API 2.0 daily records (24h rolling)</td>
+<td><strong>100 million</strong></td>
+</tr>
+<tr>
+<td>Bulk API 1.0 records per batch</td>
+<td><strong>10,000</strong></td>
+</tr>
+<tr>
+<td>Batch Apex <code>execute</code> scope</td>
+<td>default <strong>200</strong> (max 2,000 for QueryLocator)</td>
+</tr>
+<tr>
+<td>Concurrent batch jobs</td>
+<td><strong>5</strong> running/queued (Flex Queue holds 100)</td>
+</tr>
+<tr>
+<td><code>@future</code> calls per transaction</td>
+<td><strong>50</strong></td>
+</tr>
+<tr>
+<td>Queueable jobs added per sync transaction</td>
+<td><strong>50</strong></td>
+</tr>
+<tr>
+<td>Scheduled Apex jobs</td>
+<td><strong>100</strong> active</td>
+</tr>
+<tr>
+<td>Daily async executions</td>
+<td>greater of <strong>250,000</strong> or <strong>200 × user licenses</strong></td>
+</tr>
+<tr>
+<td>Async heap / CPU</td>
+<td><strong>12 MB</strong> heap, <strong>60,000 ms</strong> CPU</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: Bulk API vs Batch Apex?</strong>
+→ Bulk API = an <strong>external</strong> client moving large data in/out. Batch Apex = <strong>Apex</strong> processing the org's own data in chunks. Different initiator.</p>
+<p><strong>Q: @future vs Queueable?</strong>
+→ Queueable is preferred: it accepts <strong>sObjects/objects</strong>, is <strong>chainable</strong>, and is <strong>monitorable</strong> via <code>AsyncApexJob</code>. <code>@future</code> is primitives-only, no return, no chaining.</p>
+<p><strong>Q: How many @future calls per transaction?</strong>
+→ <strong>50</strong>. (The old "10" figure is outdated.)</p>
+<p><strong>Q: Run a heavy job every night at 2 AM?</strong>
+→ <strong>Scheduled Apex</strong> (cron) that enqueues a <strong>Batch Apex</strong> job. Scheduled Apex can't call out directly.</p>
+<p><strong>Q: Avoid duplicates in a bulk load?</strong>
+→ <strong>Upsert by External Id</strong> (idempotent), then re-load only the <code>failedResults</code>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_intro.htm">Bulk API 2.0 and Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_async_overview.htm">Asynchronous Apex — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm">Limits and Allocations Quick Reference</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Bulk API 2.0</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A REST-based, <strong>asynchronous</strong> API for loading or extracting <strong>large data sets</strong> (think 2,000 to millions of records) without hitting synchronous limits.
+<strong>Direction</strong>: usually External → Salesforce (load) or Salesforce → External (extract). <strong>Timing</strong>: asynchronous, job-based. <strong>Format</strong>: CSV.
+<strong>Use when</strong>: You need to insert, update, upsert, delete, or query <strong>lots</strong> of records efficiently.</p>
+</blockquote>
+<p>This is Module 07, bulk and async. This is the <a href="../02-Integration-Patterns/03-batch-data-synchronization.md">Batch Data Synchronization pattern</a> in practice. For auth, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Bulk API 2.0 is <strong>freight shipping</strong>, not mailing envelopes. If you have two letters, you use the post office (the <a href="../04-Inbound-APIs/01-standard-rest-api.md">REST API</a>, one record per call). If you have two million, you load a shipping container, hand it to the freight company, and they process it in the background while you go do other things. You come back later and pick up two receipts: what shipped successfully and what failed.</p>
+<p>That "hand it off and check back" rhythm is the whole API. You <strong>create a job</strong>, <strong>upload a CSV</strong>, tell Salesforce you're <strong>done uploading</strong>, and Salesforce processes the records <strong>asynchronously</strong> in optimized chunks. You then <strong>poll</strong> for completion and download success and failure results. You never hold a synchronous connection open while millions of rows process.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>2,000+ records</strong> to load or extract.</td>
+<td>A handful of records → <a href="../04-Inbound-APIs/01-standard-rest-api.md">Standard REST API</a>.</td>
+</tr>
+<tr>
+<td>You want Salesforce to <strong>optimize and parallelize</strong> processing.</td>
+<td>A few related records atomically → <a href="../04-Inbound-APIs/05-composite-api.md">Composite API</a>.</td>
+</tr>
+<tr>
+<td>Nightly / scheduled large syncs (ETL).</td>
+<td>Salesforce processing <strong>its own</strong> data → <a href="#f03">Batch Apex</a>.</td>
+</tr>
+<tr>
+<td>Exporting a <strong>huge query</strong> result.</td>
+<td>Real-time, per-record reaction → <a href="../06-Event-Driven/README.md">events</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: an ETL tool loads 2M Accounts from SAP nightly, a migration upserts 500K Contacts by External Id, a warehouse exports all Opportunities via a bulk query.</p>
+<hr />
+<h2>3. How it works (the job lifecycle)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant C as Client / ETL
+    participant SF as Bulk API 2.0&lt;br/&gt;/jobs/ingest
+    C-&gt;&gt;SF: POST /jobs/ingest (object, operation, lineEnding)
+    SF--&gt;&gt;C: jobId + contentUrl, state=Open
+    C-&gt;&gt;SF: PUT contentUrl (CSV data)
+    C-&gt;&gt;SF: PATCH /jobs/ingest/{id} state=UploadComplete
+    Note over SF: Salesforce processes asynchronously&lt;br/&gt;in optimized chunks
+    C-&gt;&gt;SF: GET /jobs/ingest/{id} (poll)
+    SF--&gt;&gt;C: state=JobComplete (or Failed)
+    C-&gt;&gt;SF: GET /jobs/ingest/{id}/successfulResults
+    C-&gt;&gt;SF: GET /jobs/ingest/{id}/failedResults
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<p>1-2. Create the job (object + operation like <code>insert</code>/<code>upsert</code>/<code>update</code>/<code>delete</code>/<code>hardDelete</code>); Salesforce returns a <code>jobId</code> and a <code>contentUrl</code>.
+3. Upload the record data as <strong>CSV</strong> to the content URL.
+4. PATCH the job to <code>UploadComplete</code> to signal you're done.
+5-6. Salesforce processes in the background; you <strong>poll</strong> the job status.
+7-8. Once <code>JobComplete</code>, download <strong>successfulResults</strong> and <strong>failedResults</strong> (and optionally <strong>unprocessedrecords</strong>).</p>
+<hr />
+<h2>4. The actual requests</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/jobs/</code></p>
+<p><strong>Create an ingest job</strong></p>
+<pre><code>POST /services/data/v66.0/jobs/ingest
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{ &quot;object&quot;: &quot;Account&quot;, &quot;operation&quot;: &quot;upsert&quot;, &quot;externalIdFieldName&quot;: &quot;External_Id__c&quot;, &quot;lineEnding&quot;: &quot;LF&quot; }
+</code></pre>
+<p><strong>Upload the CSV</strong> (to the returned <code>contentUrl</code>)</p>
+<pre><code>PUT /services/data/v66.0/jobs/ingest/{jobId}/batches
+Content-Type: text/csv
+
+Name,External_Id__c
+Acme Corp,EXT-001
+Globex,EXT-002
+</code></pre>
+<p><strong>Close the job for processing</strong></p>
+<pre><code>PATCH /services/data/v66.0/jobs/ingest/{jobId}
+{ &quot;state&quot;: &quot;UploadComplete&quot; }
+</code></pre>
+<p>Then <code>GET /jobs/ingest/{jobId}</code> to poll, and <code>GET .../successfulResults</code> and <code>.../failedResults</code> to retrieve outcomes. <strong>Bulk query</strong> works the same way via <code>/jobs/query</code> with a SOQL <code>query</code>, then download the result stream.</p>
+<blockquote>
+<p><strong>Upsert by External Id</strong> is the safe, idempotent way to load: a retried job updates rather than duplicating. This is the backbone of reliable data syncs.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and limits</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Detail</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data per job</strong></td>
+<td>Up to <strong>150 MB</strong> of CSV per job.</td>
+<td>Split very large loads across jobs.</td>
+</tr>
+<tr>
+<td><strong>Daily allocation</strong></td>
+<td>Up to <strong>100 million records per rolling 24 hours</strong> (Bulk API 2.0).</td>
+<td>Plan large migrations within the window.</td>
+</tr>
+<tr>
+<td><strong>Jobs in any state</strong></td>
+<td>Up to <strong>100,000</strong> at once.</td>
+<td>Clean up old jobs.</td>
+</tr>
+<tr>
+<td><strong>Query threshold</strong></td>
+<td>Bulk query is designed for <strong>2,000+</strong> record results.</td>
+<td>Below that, a normal SOQL/REST query is simpler.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>Retries can duplicate inserts.</td>
+<td>Use <strong>upsert by External Id</strong>.</td>
+</tr>
+<tr>
+<td><strong>Record locking</strong></td>
+<td>Parallel processing can cause lock contention (e.g. many children to one parent).</td>
+<td>Order/group data, or process serially if needed.</td>
+</tr>
+<tr>
+<td><strong>Errors</strong></td>
+<td>Failures come back in a <strong>failedResults</strong> CSV.</td>
+<td>Inspect, fix, and re-load only the failures.</td>
+</tr>
+<tr>
+<td><strong>Huge queries</strong></td>
+<td>Very large extracts use <strong>PK Chunking</strong>.</td>
+<td>See <a href="#f02">02-bulk-api-1-and-pk-chunking.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Bulk API 2.0 and when do you use it?</strong>
+A: A REST-based, asynchronous, CSV job API for large data operations (roughly 2,000+ records). You create a job, upload data, mark it complete, and Salesforce processes it in the background while you poll and then download success/failure results.</p>
+<p><strong>Q: Bulk API 2.0 vs the standard REST API?</strong>
+A: REST is synchronous and per-record (great for small operations). Bulk 2.0 is asynchronous and built for volume, with Salesforce optimizing and parallelizing the processing.</p>
+<p><strong>Q: Bulk API 2.0 vs Batch Apex?</strong>
+A: Bulk API is for an <strong>external</strong> client moving large data in or out. Batch Apex is <strong>Apex</strong> processing Salesforce's own data in chunks server-side. Different initiators, different tools.</p>
+<p><strong>Q: How do you avoid duplicates and handle failures in a bulk load?</strong>
+A: Upsert by <strong>External Id</strong> for idempotency, then read the <strong>failedResults</strong> CSV, fix those rows, and re-load only the failures.</p>
+<p><strong>Q: Key Bulk API 2.0 limits?</strong>
+A: About 150 MB per job, up to 100 million records per rolling 24 hours, and up to 100,000 jobs in any state. Bulk query targets result sets of 2,000+ records.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's freight shipping for data. You load a container, hand it off, Salesforce processes it in the background, and you come back for the receipts."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Bulk job, ingest, query job, CSV, upsert, External Id, asynchronous, PK chunking - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0.htm">Bulk API 2.0 — Bulk API 2.0 and Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0_ingest.htm">Bulk API 2.0 Ingest — Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm">Bulk API and Bulk API 2.0 Limits and Allocations</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-bulk-api-1-and-pk-chunking.md</a> - the legacy batch-based API and chunking huge queries.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Bulk API 1.0 and PK Chunking</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The <strong>legacy</strong> batch-based bulk API where <strong>you</strong> create and manage the batches yourself, plus <strong>PK Chunking</strong>, the trick for extracting enormous tables in Id-range slices.
+<strong>Direction</strong>: External ↔ Salesforce, large volumes. <strong>Timing</strong>: asynchronous, job + batch based. <strong>Format</strong>: CSV, XML, or JSON.
+<strong>Use when</strong>: You need fine-grained batch control, a tool that only speaks Bulk 1.0, or you are extracting a multi-million-row object via PK Chunking.</p>
+</blockquote>
+<p>This is Module 07, bulk and async. Bulk API 1.0 is the predecessor to <a href="#f01">Bulk API 2.0</a>. For the <a href="../02-Integration-Patterns/03-batch-data-synchronization.md">Batch Data Synchronization pattern</a> and auth, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>If <a href="#f01">Bulk API 2.0</a> is handing a freight company one big shipping container and letting <strong>them</strong> decide how to pack the trucks, <strong>Bulk API 1.0</strong> is renting the trucks yourself. You open a job, then you personally load each truck (a <strong>batch</strong>), tell the depot how many trucks you sent, and track each one. More work, but you control exactly how the cargo is split.</p>
+<p>That is the core difference. In <strong>Bulk 1.0 you create batches explicitly</strong>. In Bulk 2.0 you just upload one CSV and Salesforce auto-creates the batches for you. Bulk 1.0 is older, SOAP-flavored, and more verbose, but it still wins in two cases: when you need <strong>manual batch control</strong>, and when you turn on <strong>PK Chunking</strong> to extract a giant table.</p>
+<p><strong>PK Chunking</strong> is a separate idea you bolt onto a bulk <strong>query</strong>. Imagine photographing every page of a 50-million-page book. You cannot do it in one shot. So you say "pages 1 to 100,000, then 100,001 to 200,000..." PK Chunking does exactly that automatically, slicing one huge query into chunks by the record's primary key (<strong>Id</strong>) ranges.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use Bulk 1.0 / PK Chunking when</th>
+<th>❌ Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You need <strong>manual control</strong> over batch boundaries.</td>
+<td>A normal large load → <a href="#f01">Bulk API 2.0</a> (auto-batches, simpler).</td>
+</tr>
+<tr>
+<td>A tool or middleware <strong>only supports Bulk 1.0</strong>.</td>
+<td>A handful of records → <a href="../04-Inbound-APIs/01-standard-rest-api.md">Standard REST API</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>XML or JSON</strong> ingest, not just CSV.</td>
+<td>Salesforce processing <strong>its own</strong> data → <a href="#f03">Batch Apex</a>.</td>
+</tr>
+<tr>
+<td>Extracting <strong>millions of rows</strong> from one big object → <strong>PK Chunking</strong>.</td>
+<td>Small query results → plain SOQL / REST query.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a legacy ETL job that was built on Bulk 1.0 and still runs nightly, a data-warehouse export of a <strong>40M-row</strong> Task object using PK Chunking, a migration tool that needs to retry one specific failed batch without re-sending the rest.</p>
+<hr />
+<h2>3. How it works</h2>
+<div class="mermaid">
+flowchart TD
+    A["Create Job&lt;br/&gt;POST /job&lt;br/&gt;object + operation"] --&gt; B["Add Batch 1&lt;br/&gt;POST /job/jobId/batch&lt;br/&gt;up to 10,000 records"]
+    A --&gt; C["Add Batch 2&lt;br/&gt;up to 10,000 records"]
+    A --&gt; D["Add Batch N"]
+    B --&gt; E{Processing mode}
+    C --&gt; E
+    D --&gt; E
+    E --&gt;|Parallel| F["Batches run&lt;br/&gt;at the same time"]
+    E --&gt;|Serial| G["Batches run&lt;br/&gt;one after another"]
+    F --&gt; H["Close Job&lt;br/&gt;state Closed"]
+    G --&gt; H
+    H --&gt; I["Poll each batch&lt;br/&gt;+ get results CSV"]
+
+    style A fill:#00A1E0,color:#fff
+    style B fill:#ff9900,color:#fff
+    style C fill:#ff9900,color:#fff
+    style D fill:#ff9900,color:#fff
+    style E fill:#9C27B0,color:#fff
+    style F fill:#4CAF50,color:#fff
+    style G fill:#607D8B,color:#fff
+    style H fill:#00A1E0,color:#fff
+    style I fill:#4CAF50,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li><strong>Create a job</strong> specifying the object, the operation (<code>insert</code>, <code>update</code>, <code>upsert</code>, <code>delete</code>, <code>hardDelete</code>, <code>query</code>), and the content type.</li>
+<li><strong>Add one or more batches</strong> to that job. Each batch is a file of records you upload yourself, up to <strong>10,000 records per batch</strong>.</li>
+<li>Salesforce processes batches in either <strong>parallel</strong> (default, fastest) or <strong>serial</strong> mode, set by <code>concurrencyMode</code> on the job.</li>
+<li><strong>Close the job</strong> so no more batches can be added.</li>
+<li><strong>Poll each batch</strong> for status and download per-batch result files (success, error).</li>
+</ol>
+<p>The contrast with <a href="#f01">Bulk API 2.0</a>: there you never touch batches. You upload one CSV, PATCH the job to <code>UploadComplete</code>, and Salesforce chunks and parallelizes it internally.</p>
+<hr />
+<h2>4. The actual requests</h2>
+<p>Base: <code>https://MyDomainName.my.salesforce.com/services/async/66.0/</code></p>
+<p><strong>Create a job</strong> (note the older <code>/async/</code> path and XML body)</p>
+<pre><code>POST /services/async/66.0/job
+X-SFDC-Session: 00D...!AQ...
+Content-Type: application/xml
+
+&lt;jobInfo xmlns=&quot;http://www.force.com/2009/06/asyncapi/dataload&quot;&gt;
+  &lt;operation&gt;upsert&lt;/operation&gt;
+  &lt;object&gt;Account&lt;/object&gt;
+  &lt;externalIdFieldName&gt;External_Id__c&lt;/externalIdFieldName&gt;
+  &lt;concurrencyMode&gt;Parallel&lt;/concurrencyMode&gt;
+  &lt;contentType&gt;CSV&lt;/contentType&gt;
+&lt;/jobInfo&gt;
+</code></pre>
+<p><strong>Add a batch</strong> (you do this per chunk of up to 10,000 records)</p>
+<pre><code>POST /services/async/66.0/job/{jobId}/batch
+Content-Type: text/csv
+
+Name,External_Id__c
+Acme Corp,EXT-001
+Globex,EXT-002
+</code></pre>
+<p><strong>Close the job</strong>, then <code>GET /job/{jobId}/batch/{batchId}</code> to poll and <code>GET /job/{jobId}/batch/{batchId}/result</code> to retrieve outcomes.</p>
+<p><strong>PK Chunking</strong> for a huge extract is just a header on a <strong>query</strong> job:</p>
+<pre><code>POST /services/async/66.0/job
+Sforce-Enable-PKChunking: chunkSize=100000
+Content-Type: application/xml
+
+&lt;jobInfo xmlns=&quot;http://www.force.com/2009/06/asyncapi/dataload&quot;&gt;
+  &lt;operation&gt;query&lt;/operation&gt;
+  &lt;object&gt;Task&lt;/object&gt;
+  &lt;contentType&gt;CSV&lt;/contentType&gt;
+&lt;/jobInfo&gt;
+</code></pre>
+<p>Salesforce then <strong>auto-creates batches</strong>, each covering one Id range, and you download each batch's result file. The <strong>default chunk size is 100,000</strong> records and is configurable up to <strong>250,000</strong> via the <code>chunkSize</code> field.</p>
+<hr />
+<h2>5. Bulk 1.0 vs 2.0, and design limits</h2>
+<p><strong>Bulk API 1.0 vs Bulk API 2.0</strong></p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Bulk API 1.0</th>
+<th>Bulk API 2.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protocol</td>
+<td>SOAP-style <code>/async/</code> endpoints</td>
+<td><strong>REST</strong> <code>/jobs/</code> endpoints</td>
+</tr>
+<tr>
+<td>Batch management</td>
+<td><strong>You create batches manually</strong></td>
+<td><strong>Auto-created</strong> by Salesforce</td>
+</tr>
+<tr>
+<td>Records per batch</td>
+<td>Up to <strong>10,000</strong> (you control)</td>
+<td>Salesforce decides internally</td>
+</tr>
+<tr>
+<td>Formats</td>
+<td><strong>CSV, XML, JSON</strong></td>
+<td>CSV only</td>
+</tr>
+<tr>
+<td>Processing mode</td>
+<td><strong>Parallel or serial</strong> (<code>concurrencyMode</code>)</td>
+<td>Salesforce optimizes automatically</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Higher, more moving parts</td>
+<td>Lower, simpler workflow</td>
+</tr>
+<tr>
+<td>Recommendation</td>
+<td>Legacy / special cases</td>
+<td><strong>Default, recommended</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key limits and considerations</strong></p>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Detail</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Records per batch</strong></td>
+<td>Max <strong>10,000</strong> records per batch.</td>
+<td>Split large loads into 10K batches yourself.</td>
+</tr>
+<tr>
+<td><strong>Batch processing mode</strong></td>
+<td><strong>Parallel</strong> (default) is fastest; <strong>serial</strong> avoids lock contention.</td>
+<td>Use serial when many children point to the same parent.</td>
+</tr>
+<tr>
+<td><strong>PK Chunking default</strong></td>
+<td>Chunk size defaults to <strong>100,000</strong>, up to <strong>250,000</strong>.</td>
+<td>Larger chunks = fewer batches but slower each.</td>
+</tr>
+<tr>
+<td><strong>PK Chunking target</strong></td>
+<td>Splits by record <strong>Id</strong> ranges, ideal for big extracts.</td>
+<td>Use on multi-million-row objects only.</td>
+</tr>
+<tr>
+<td><strong>Record locking</strong></td>
+<td>Parallel batches can deadlock on shared parents.</td>
+<td>Group/order data or switch to serial.</td>
+</tr>
+<tr>
+<td><strong>Errors</strong></td>
+<td>Results come back <strong>per batch</strong> as CSV.</td>
+<td>Re-submit only the failed batch.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the difference between Bulk API 1.0 and 2.0?</strong>
+A: Bulk 1.0 is the older SOAP-style API where <strong>you create and manage batches yourself</strong> (up to 10,000 records each) and choose parallel or serial processing. Bulk 2.0 is REST-based, <strong>auto-creates the batches</strong>, supports CSV only, and is simpler. 2.0 is the recommended default; 1.0 is for legacy tools or when you need manual batch control.</p>
+<p><strong>Q: How many records can a Bulk API 1.0 batch hold?</strong>
+A: Up to <strong>10,000 records</strong> per batch, and Bulk 1.0 also accepts XML and JSON, not just CSV.</p>
+<p><strong>Q: What is PK Chunking and when do you use it?</strong>
+A: It is a request header, <code>Sforce-Enable-PKChunking</code>, on a bulk <strong>query</strong> that splits one enormous query into chunks by record <strong>Id</strong> range. Default chunk size is <strong>100,000</strong> (configurable up to 250,000). You use it to extract very large objects, think tens of millions of rows.</p>
+<p><strong>Q: Parallel vs serial mode in Bulk 1.0?</strong>
+A: Parallel runs batches simultaneously for maximum throughput. Serial runs them one at a time, which you choose when parallel processing causes record-lock contention, like many child records updating the same parent.</p>
+<p><strong>Q: Would you ever pick Bulk 1.0 over 2.0 today?</strong>
+A: Only for specific reasons: a middleware tool that only speaks Bulk 1.0, a need for XML/JSON ingest, or a requirement for fine-grained manual batch control. Otherwise Bulk 2.0 is simpler and recommended.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Bulk 2.0 hands the mover one big box and lets them pack the trucks. Bulk 1.0 means you pack each truck yourself. PK Chunking is how you photograph a giant book one hundred-thousand-page chunk at a time."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Job, batch, parallel mode, serial mode, concurrencyMode, PK Chunking, chunkSize, primary key, Id range - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/api_asynch_introduction_bulk_api.htm">Bulk API (1.0) - Bulk API 2.0 and Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_batches_intro.htm">Work with Batches - Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/async_api_headers_enable_pk_chunking.htm">PK Chunking Header - Bulk API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/engineering/2015/03/use-pk-chunking-extract-large-data-sets-salesforce">Use PK Chunking to Extract Large Data Sets - Salesforce Developers Blog</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm">Bulk API and Bulk API 2.0 Limits and Allocations</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-batch-apex.md</a> - processing the org's own large data sets server-side in chunks.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Batch Apex</h1>
+<blockquote>
+<p><strong>One-liner</strong>: An Apex framework for processing <strong>large data sets the org already owns</strong>, split into chunks that each run with a <strong>fresh set of governor limits</strong>.
+<strong>Direction</strong>: Internal to Salesforce (Apex on its own data). <strong>Timing</strong>: asynchronous, job-based. <strong>Scale</strong>: up to <strong>50 million</strong> records.
+<strong>Use when</strong>: You must touch more records than a single synchronous transaction allows, like recalculating or cleaning millions of rows.</p>
+</blockquote>
+<p>This is Module 07, bulk and async. Where <a href="#f01">Bulk API 2.0</a> is an <strong>external</strong> client moving data, Batch Apex is <strong>Salesforce processing its own data</strong>. Compare with <a href="#f04">Queueable Apex</a> for chained jobs.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine you must repaint every room in a 50-story hotel, but you can only carry enough paint for <strong>one floor at a time</strong>. So you do floor 1, refill your supplies completely, do floor 2, refill again, and so on. Each floor is a fresh start with a full bucket.</p>
+<p>That is Batch Apex. Salesforce caps how much one transaction can do (the <strong>governor limits</strong>). If you need to update millions of records, you cannot do it in one go. Batch Apex slices the work into <strong>chunks</strong> (default <strong>200 records</strong> each) and runs each chunk as its <strong>own transaction with its own limits reset</strong>. So a job that would blow past limits in one shot quietly grinds through millions of records, chunk by chunk.</p>
+<p>You write a class with three methods: <strong><code>start</code></strong> decides what to process, <strong><code>execute</code></strong> does the work on one chunk, and <strong><code>finish</code></strong> wraps up. Salesforce calls them in that order and manages the chunking for you.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use Batch Apex when</th>
+<th>❌ Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Processing <strong>the org's own</strong> large data set (thousands to millions).</td>
+<td>Loading data <strong>from outside</strong> → <a href="#f01">Bulk API 2.0</a>.</td>
+</tr>
+<tr>
+<td>The work exceeds a single transaction's governor limits.</td>
+<td>Small async task, maybe one callout → <a href="#f04">Queueable Apex</a>.</td>
+</tr>
+<tr>
+<td>Nightly cleanup, recalculation, or mass update.</td>
+<td>A quick fire-and-forget call → <a href="#f05">@future</a>.</td>
+</tr>
+<tr>
+<td>You need <strong>scheduled</strong> large jobs (pair with Scheduled Apex).</td>
+<td>Real-time per-record reaction → <a href="../06-Event-Driven/README.md">triggers / events</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: recalculating a rollup on <strong>5M</strong> Opportunities nightly, anonymizing 2M old Leads for GDPR, reassigning ownership across the whole Account base, archiving stale records in chunks.</p>
+<hr />
+<h2>3. How it works (start, execute, finish)</h2>
+<div class="mermaid">
+flowchart TD
+    A["Database.executeBatch&lt;br/&gt;new MyBatch, scopeSize"] --&gt; B["start&lt;br/&gt;returns QueryLocator&lt;br/&gt;up to 50 million records"]
+    B --&gt; C["Salesforce splits into chunks&lt;br/&gt;default 200 records each"]
+    C --&gt; D["execute chunk 1&lt;br/&gt;fresh governor limits"]
+    C --&gt; E["execute chunk 2&lt;br/&gt;fresh governor limits"]
+    C --&gt; F["execute chunk N"]
+    D --&gt; G["finish&lt;br/&gt;runs once after all chunks&lt;br/&gt;send email, chain next job"]
+    E --&gt; G
+    F --&gt; G
+
+    style A fill:#00A1E0,color:#fff
+    style B fill:#ff9900,color:#fff
+    style C fill:#9C27B0,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style E fill:#4CAF50,color:#fff
+    style F fill:#4CAF50,color:#fff
+    style G fill:#607D8B,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>You kick off the job with <code>Database.executeBatch(new MyBatch(), scopeSize)</code>.</li>
+<li><strong><code>start()</code></strong> returns a <code>Database.QueryLocator</code> (a query that can stream up to <strong>50 million</strong> records) or an <code>Iterable</code>.</li>
+<li>Salesforce splits those records into chunks, <strong>default 200</strong> per chunk (configurable <strong>1 to 2,000</strong> for a QueryLocator).</li>
+<li><strong><code>execute()</code></strong> runs once per chunk. Each run is a <strong>separate transaction with governor limits reset</strong>, so the job survives volume.</li>
+<li><strong><code>finish()</code></strong> runs once, after all chunks complete. Good for a summary email or chaining the next job.</li>
+</ol>
+<p>Two add-on interfaces matter: <strong><code>Database.Stateful</code></strong> preserves instance variables across chunks (otherwise state resets each <code>execute</code>), and <strong><code>Database.AllowsCallouts</code></strong> lets <code>execute</code> make HTTP callouts.</p>
+<hr />
+<h2>4. The actual code</h2>
+<pre><code class="language-apex">public class AccountCleanupBatch
+        implements Database.Batchable&lt;sObject&gt;, Database.Stateful, Database.AllowsCallouts {
+
+    // Database.Stateful keeps this value alive across all chunks.
+    public Integer recordsProcessed = 0;
+
+    // 1) start: define the scope. QueryLocator handles up to 50M records.
+    public Database.QueryLocator start(Database.BatchableContext bc) {
+        return Database.getQueryLocator(
+            'SELECT Id, Name, Industry FROM Account WHERE Industry = null'
+        );
+    }
+
+    // 2) execute: runs per chunk (default 200 records), fresh limits each time.
+    public void execute(Database.BatchableContext bc, List&lt;Account&gt; scope) {
+        for (Account a : scope) {
+            a.Industry = 'Unspecified';
+        }
+        update scope;
+        recordsProcessed += scope.size();
+    }
+
+    // 3) finish: runs once after all chunks finish.
+    public void finish(Database.BatchableContext bc) {
+        System.debug('Done. Total processed: ' + recordsProcessed);
+        // Could send an email or chain another batch / Queueable here.
+    }
+}
+</code></pre>
+<p><strong>Invoke it</strong> (second argument is the chunk size, here 200):</p>
+<pre><code class="language-apex">// Default scope of 200:
+Database.executeBatch(new AccountCleanupBatch());
+
+// Explicit smaller scope when execute does heavy work per record:
+Database.executeBatch(new AccountCleanupBatch(), 200);
+</code></pre>
+<blockquote>
+<p><strong>Tip</strong>: Shrink the scope (e.g. 50) when each record triggers a lot of downstream automation or a callout, so each chunk stays under limits.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and limits</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Detail</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>start() capacity</strong></td>
+<td>A <code>QueryLocator</code> can return up to <strong>50 million</strong> records.</td>
+<td>Use QueryLocator for large queries; it bypasses the SOQL row limit.</td>
+</tr>
+<tr>
+<td><strong>Default scope</strong></td>
+<td><code>execute()</code> processes <strong>200</strong> records by default.</td>
+<td>Override with the <code>scopeSize</code> argument when needed.</td>
+</tr>
+<tr>
+<td><strong>Max scope (QueryLocator)</strong></td>
+<td>Up to <strong>2,000</strong> records per chunk.</td>
+<td>Higher values are chunked down to 2,000.</td>
+</tr>
+<tr>
+<td><strong>Concurrent jobs</strong></td>
+<td>Only <strong>5</strong> batch jobs can be <strong>running or queued</strong> at once.</td>
+<td>Extra jobs go to the <strong>Apex flex queue</strong>.</td>
+</tr>
+<tr>
+<td><strong>Flex queue</strong></td>
+<td>Holds up to <strong>100</strong> queued (Holding) jobs.</td>
+<td>Beyond that, <code>executeBatch</code> throws a <code>LimitException</code>.</td>
+</tr>
+<tr>
+<td><strong>State across chunks</strong></td>
+<td>Variables reset each <code>execute</code> unless <strong><code>Database.Stateful</code></strong>.</td>
+<td>Implement <code>Database.Stateful</code> to accumulate totals.</td>
+</tr>
+<tr>
+<td><strong>Callouts</strong></td>
+<td>Not allowed unless <strong><code>Database.AllowsCallouts</code></strong>.</td>
+<td>Implement the interface and keep callouts within limits.</td>
+</tr>
+<tr>
+<td><strong>Limits reset per chunk</strong></td>
+<td>Each <code>execute</code> is its own transaction.</td>
+<td>This is the whole point. Lean on it for volume.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Batch Apex and why use it?</strong>
+A: An Apex framework for processing large data sets the org already owns. It splits the work into chunks (default 200), and each chunk runs as a separate transaction with <strong>fresh governor limits</strong>, so you can process millions of records without hitting per-transaction limits.</p>
+<p><strong>Q: Walk me through the three methods.</strong>
+A: <strong><code>start()</code></strong> returns a <code>QueryLocator</code> (or Iterable) defining the records, up to <strong>50 million</strong>. <strong><code>execute()</code></strong> runs once per chunk and does the work. <strong><code>finish()</code></strong> runs once at the end for cleanup, email, or chaining.</p>
+<p><strong>Q: What are <code>Database.Stateful</code> and <code>Database.AllowsCallouts</code>?</strong>
+A: By default instance variables reset between chunks. <code>Database.Stateful</code> preserves them across <code>execute</code> calls so you can accumulate counts or results. <code>Database.AllowsCallouts</code> lets <code>execute</code> make HTTP callouts.</p>
+<p><strong>Q: How many batch jobs can run at once, and what is the scope limit?</strong>
+A: Up to <strong>5</strong> batch jobs running or queued concurrently; extras wait in the <strong>Apex flex queue</strong> (up to <strong>100</strong>). Scope defaults to <strong>200</strong> and can be set <strong>1 to 2,000</strong> when <code>start</code> returns a QueryLocator.</p>
+<p><strong>Q: Batch Apex vs Bulk API 2.0?</strong>
+A: Bulk API is an <strong>external</strong> client loading or extracting data. Batch Apex is <strong>Apex processing the org's own data</strong> in chunks. Different initiators, different tools.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It is repainting a 50-story hotel one floor at a time, refilling your paint completely on every floor. Each chunk starts fresh, so you never run out mid-job."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Batchable, start, execute, finish, QueryLocator, scope, Database.Stateful, Database.AllowsCallouts, flex queue, governor limits - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_batch_interface.htm">Using Batch Apex - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_interface_database_batchable.htm">Database.Batchable Interface - Apex Reference Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_FlexQueue.htm">FlexQueue Class - Apex Reference Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-queueable-apex.md</a> - flexible, chainable async jobs that accept objects and allow callouts.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - Queueable Apex</h1>
+<blockquote>
+<p><strong>One-liner</strong>: A flexible asynchronous Apex job that accepts <strong>real objects</strong>, can be <strong>chained</strong>, can make <strong>callouts</strong>, and hands you a <strong>job Id you can monitor</strong>.
+<strong>Direction</strong>: Internal to Salesforce, async work. <strong>Timing</strong>: runs in the background after enqueue. <strong>Returns</strong>: an <code>AsyncApexJob</code> Id.
+<strong>Use when</strong>: You need async work that carries complex data, chains into follow-up jobs, or makes callouts.</p>
+</blockquote>
+<p>This is Module 07, bulk and async. Queueable is the modern replacement for <a href="#f05">@future methods</a>, and a lighter sibling of <a href="#f03">Batch Apex</a> for non-bulk async work.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think of Queueable as <strong>dropping a task into your team's work queue with a tracking number</strong>. You hand off the job, you get a <strong>ticket number</strong> so you can check its status later, and the job runs in the background. If that job needs to kick off a follow-up task when it finishes, it can simply <strong>add the next ticket to the queue</strong> itself. That hand-off-and-chain rhythm is the whole feature.</p>
+<p>It exists because the old way, <strong><code>@future</code> methods</strong>, was too limited. <code>@future</code> can only take <strong>primitive arguments</strong> (no sObjects, no objects), gives you <strong>no job Id</strong> to track, and <strong>cannot chain</strong>. Queueable fixes all three: it accepts <strong>sObjects and complex objects</strong>, returns a <strong>monitorable Id</strong>, and is <strong>chainable</strong>. Salesforce now recommends Queueable over <code>@future</code>.</p>
+<p>You implement one method, <strong><code>execute(QueueableContext)</code></strong>, and submit the job with <strong><code>System.enqueueJob()</code></strong>.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use Queueable when</th>
+<th>❌ Use something else when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Async work that needs <strong>sObjects or complex objects</strong>.</td>
+<td>You must process <strong>millions</strong> of records → <a href="#f03">Batch Apex</a>.</td>
+</tr>
+<tr>
+<td>You want to <strong>chain</strong> a follow-up job.</td>
+<td>Simple async with <strong>only primitives</strong> → <a href="#f05">@future</a> (but Queueable is still preferred).</td>
+</tr>
+<tr>
+<td>The job makes a <strong>callout</strong> and you want to monitor it.</td>
+<td>Loading data from <strong>outside</strong> Salesforce → <a href="#f01">Bulk API 2.0</a>.</td>
+</tr>
+<tr>
+<td>You need the <strong>job Id</strong> to track status.</td>
+<td>Real-time synchronous response → <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: enrich an Account via a callout then chain a job to update related Contacts, process a complex in-memory object a trigger could not handle synchronously, run a moderate async update that you want to monitor in <strong>Setup → Apex Jobs</strong>.</p>
+<hr />
+<h2>3. How it works (enqueue, execute, chain)</h2>
+<div class="mermaid">
+flowchart TD
+    A["Trigger / Apex&lt;br/&gt;System.enqueueJob&lt;br/&gt;new MyQueueable"] --&gt; B["Returns AsyncApexJob Id&lt;br/&gt;you can monitor"]
+    A --&gt; C["Job waits in queue"]
+    C --&gt; D["execute QueueableContext&lt;br/&gt;runs in background&lt;br/&gt;accepts sObjects + objects"]
+    D --&gt; E{Need a follow-up?}
+    E --&gt;|Yes| F["System.enqueueJob&lt;br/&gt;next Queueable&lt;br/&gt;chaining"]
+    E --&gt;|No| G["Done"]
+    F --&gt; H["Next job runs&lt;br/&gt;fresh limits"]
+
+    style A fill:#00A1E0,color:#fff
+    style B fill:#4CAF50,color:#fff
+    style C fill:#607D8B,color:#fff
+    style D fill:#ff9900,color:#fff
+    style E fill:#9C27B0,color:#fff
+    style F fill:#00A1E0,color:#fff
+    style G fill:#4CAF50,color:#fff
+    style H fill:#ff9900,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>From a trigger or Apex, call <code>System.enqueueJob(new MyQueueable(...))</code>. You can pass it sObjects and other objects directly.</li>
+<li>It returns an <strong><code>AsyncApexJob</code> Id</strong>, which you can query or watch in Setup to monitor status.</li>
+<li>The job sits in the queue, then <strong><code>execute(QueueableContext)</code></strong> runs in the background with a fresh set of governor limits.</li>
+<li>Inside <code>execute</code>, you can <strong>enqueue another Queueable</strong> to chain follow-up work. The chained job runs after this one completes, with its own fresh limits.</li>
+<li>For HTTP callouts, the class implements <strong><code>Database.AllowsCallouts</code></strong>.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<pre><code class="language-apex">public class AccountEnrichJob
+        implements Queueable, Database.AllowsCallouts {
+
+    // Queueable accepts sObjects and complex objects (unlike @future).
+    private List&lt;Account&gt; accounts;
+
+    public AccountEnrichJob(List&lt;Account&gt; accounts) {
+        this.accounts = accounts;
+    }
+
+    public void execute(QueueableContext ctx) {
+        // Make a callout (allowed via Database.AllowsCallouts).
+        for (Account a : accounts) {
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('callout:Enrichment_Service/lookup?name=' + a.Name);
+            req.setMethod('GET');
+            HttpResponse res = new Http().send(req);
+            if (res.getStatusCode() == 200) {
+                a.Description = res.getBody();
+            }
+        }
+        update accounts;
+
+        // Chaining: enqueue a follow-up job from inside execute.
+        if (!Test.isRunningTest()) {
+            System.enqueueJob(new ContactSyncJob(accounts));
+        }
+    }
+}
+</code></pre>
+<p><strong>Enqueue it and capture the monitorable Id:</strong></p>
+<pre><code class="language-apex">List&lt;Account&gt; toEnrich = [SELECT Id, Name FROM Account WHERE Description = null LIMIT 100];
+Id jobId = System.enqueueJob(new AccountEnrichJob(toEnrich));
+
+// Monitor it:
+AsyncApexJob job = [
+    SELECT Id, Status, NumberOfErrors
+    FROM AsyncApexJob
+    WHERE Id = :jobId
+];
+</code></pre>
+<blockquote>
+<p><strong>Chaining caveat</strong>: you can chain Queueables, but a job that makes callouts can only chain into a limited callout depth. Keep callout chains short.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and limits</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Detail</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Jobs per transaction</strong></td>
+<td>Up to <strong>50</strong> jobs added via <code>enqueueJob</code> per <strong>synchronous</strong> transaction.</td>
+<td>Batch your enqueues; do not loop one per record blindly.</td>
+</tr>
+<tr>
+<td><strong>Enqueue from async</strong></td>
+<td>From within an async job you can enqueue only <strong>1</strong> child (to chain).</td>
+<td>Use chaining, one job hands off to the next.</td>
+</tr>
+<tr>
+<td><strong>Chain depth (Dev/Trial)</strong></td>
+<td>Max stack depth of <strong>5</strong> in Developer Edition and Trial orgs.</td>
+<td>Production editions allow deeper chaining.</td>
+</tr>
+<tr>
+<td><strong>Accepts</strong></td>
+<td><strong>sObjects and complex objects</strong> (member variables).</td>
+<td>This is the big win over <code>@future</code>.</td>
+</tr>
+<tr>
+<td><strong>Monitorable</strong></td>
+<td>Returns an <strong><code>AsyncApexJob</code> Id</strong>.</td>
+<td>Query <code>AsyncApexJob</code> or watch Setup → Apex Jobs.</td>
+</tr>
+<tr>
+<td><strong>Callouts</strong></td>
+<td>Need <strong><code>Database.AllowsCallouts</code></strong>.</td>
+<td>Implement it; keep callout chains short.</td>
+</tr>
+<tr>
+<td><strong>Callout chain depth</strong></td>
+<td>Only a limited number of chained jobs may make callouts.</td>
+<td>Avoid long chains of callout jobs.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is Queueable Apex and how do you start one?</strong>
+A: A flexible async Apex job. You implement <code>execute(QueueableContext)</code> and submit it with <code>System.enqueueJob()</code>, which returns an <strong><code>AsyncApexJob</code> Id</strong> you can monitor. The job runs in the background with fresh governor limits.</p>
+<p><strong>Q: Why is Queueable preferred over <code>@future</code>?</strong>
+A: Three reasons. It accepts <strong>sObjects and complex objects</strong> (<code>@future</code> only takes primitives), it is <strong>chainable</strong> (you can enqueue a follow-up from inside <code>execute</code>), and it is <strong>monitorable</strong> via the returned job Id. Salesforce recommends Queueable over <code>@future</code>.</p>
+<p><strong>Q: What is chaining and how deep can it go?</strong>
+A: From inside a running Queueable you can enqueue <strong>one</strong> more Queueable, which runs after the current one finishes with fresh limits. Production orgs allow deep chaining; <strong>Developer Edition and Trial</strong> orgs cap the stack depth at <strong>5</strong>.</p>
+<p><strong>Q: How do you make a callout from a Queueable?</strong>
+A: Implement <strong><code>Database.AllowsCallouts</code></strong> on the class. Note that the number of chained jobs that make callouts is limited, so keep callout chains short.</p>
+<p><strong>Q: What is the enqueue limit?</strong>
+A: Up to <strong>50</strong> jobs can be added with <code>System.enqueueJob</code> in a single <strong>synchronous</strong> transaction. From within an async context you can only enqueue <strong>one</strong> child job, which is what enables chaining.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It is dropping a task in the work queue with a tracking number. You hand it off, you can check its status, and when it finishes it can drop the next task in the queue itself."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Queueable, QueueableContext, System.enqueueJob, AsyncApexJob, chaining, stack depth, Database.AllowsCallouts, @future - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_queueing_jobs.htm">Queueable Apex - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_Queueable.htm">Queueable Interface - Apex Reference Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_invoking_future_methods.htm">Future Methods - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_asyncapexjob.htm">AsyncApexJob - Object Reference for the Salesforce Platform</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-future-methods.md</a> - the original lightweight async annotation, and why Queueable usually wins.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Future Methods (@future)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The simplest form of asynchronous Apex. Annotate a <strong>static void</strong> method with <strong><code>@future</code></strong> and Salesforce runs it <strong>later</strong>, on its own, in a separate transaction with its own governor limits.
+<strong>Direction</strong>: internal Apex (Salesforce processing its own work off the main thread). <strong>Timing</strong>: asynchronous, fire-and-forget. <strong>Trigger</strong>: just call the method.
+<strong>Use when</strong>: You need a quick, primitive-only async job, or you must make a <strong>callout after DML</strong> from a trigger.</p>
+</blockquote>
+<p>This is Module 07, bulk and async. Future methods are the entry-level async tool. For the richer, generally-preferred alternative, see <a href="#f04">Queueable Apex</a>. For the full async reference, see <a href="#f07">07-async-limits-monitoring-errors.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A future method is <strong>dropping a note in the office mailroom</strong> instead of walking the message over yourself. You write down what you need done, hand it off, and immediately get back to your own work. Sometime soon, someone in the mailroom picks up the note and does the task. You do not wait. You do not get a reply. You just trust it gets done.</p>
+<p>That "hand it off and walk away" behaviour is called <strong>fire-and-forget</strong>. When your Apex calls a <code>@future</code> method, Salesforce does not run it right then. It <strong>queues</strong> the work and finishes your current transaction first. The future method runs <strong>later</strong>, in its <strong>own transaction</strong>, with a <strong>fresh set of governor limits</strong> (and the higher <em>async</em> limits at that). The catch: because you walked away, you get <strong>no return value</strong>, you cannot easily <strong>chain</strong> another job after it, and it is <strong>hard to monitor</strong>.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You need a <strong>callout after DML</strong> from a trigger.</td>
+<td>You need to pass <strong>sObjects</strong> or complex types → <a href="#f04">Queueable</a>.</td>
+</tr>
+<tr>
+<td>The work is <strong>quick and primitive-only</strong> (Ids, Strings, numbers).</td>
+<td>You need to <strong>chain</strong> jobs or <strong>monitor</strong> them → <a href="#f04">Queueable</a>.</td>
+</tr>
+<tr>
+<td>You want to move slow logic <strong>off the main transaction</strong>.</td>
+<td>You need to process <strong>large data volumes</strong> in chunks → <a href="#f03">Batch Apex</a>.</td>
+</tr>
+<tr>
+<td>Fire-and-forget is genuinely fine (no result needed).</td>
+<td>You need it to run <strong>on a schedule</strong> → <a href="#f06">Scheduled Apex</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The classic fix</strong>: a trigger does DML, then needs to call an external API. A synchronous callout after DML throws <strong>"You have uncommitted work pending."</strong> Move the callout into a <code>@future(callout=true)</code> method and the problem disappears. The future method runs in a new transaction <em>after</em> the DML has committed.</p>
+<p><strong>Rule of thumb</strong>: <strong><a href="#f04">Queueable</a> is generally preferred.</strong> It does everything <code>@future</code> does, plus accepts objects, supports chaining, and returns a job Id you can monitor. Reach for <code>@future</code> only when the job is simple, quick, primitive-only, or when you are patching the trigger-callout case quickly.</p>
+<hr />
+<h2>3. How it works (the hand-off)</h2>
+<div class="mermaid">
+flowchart TD
+    A["Trigger or Apex&lt;br/&gt;main transaction"] --&gt; B["DML commits records"]
+    B --&gt; C["Call @future method&lt;br/&gt;just a method call"]
+    C --&gt; D["Salesforce queues the job&lt;br/&gt;main transaction ends"]
+    D --&gt; E["Later: future runs in&lt;br/&gt;NEW transaction"]
+    E --&gt; F["Fresh + higher async limits&lt;br/&gt;callout allowed if callout=true"]
+    F --&gt; G["Work done. No return value.&lt;br/&gt;Fire-and-forget."]
+
+    style A fill:#00A1E0,color:#fff
+    style B fill:#607D8B,color:#fff
+    style C fill:#ff9900,color:#fff
+    style D fill:#9C27B0,color:#fff
+    style E fill:#9C27B0,color:#fff
+    style F fill:#4CAF50,color:#fff
+    style G fill:#4CAF50,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>Your main transaction (often a trigger) runs and commits its DML.</li>
+<li>You call the <code>@future</code> method. To Apex this looks like an ordinary method call, but nothing executes yet.</li>
+<li>Salesforce <strong>queues</strong> the request and lets your original transaction finish.</li>
+<li>Sometime soon, the platform runs the future method in a <strong>separate transaction</strong> with a <strong>fresh, higher (async) set of limits</strong>.</li>
+<li>If declared <code>@future(callout=true)</code>, it may make HTTP callouts. When it finishes, there is no callback and no return value.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<p>A future method must be <strong><code>static</code></strong>, return <strong><code>void</code></strong>, and accept <strong>only primitives</strong> (and arrays/collections of primitives). You <strong>cannot pass sObjects</strong> — pass record <strong>Ids</strong> instead and re-query inside.</p>
+<pre><code class="language-apex">public class AccountSyncService {
+
+    @future(callout=true)               // callout=true allows HTTP callouts
+    public static void syncAccounts(Set&lt;Id&gt; accountIds) {
+        // Re-query: we received Ids, not sObjects (primitives only)
+        List&lt;Account&gt; accounts = [
+            SELECT Id, Name, Industry FROM Account WHERE Id IN :accountIds
+        ];
+
+        for (Account a : accounts) {
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('callout:ERP_System/accounts'); // Named Credential
+            req.setMethod('POST');
+            req.setHeader('Content-Type', 'application/json');
+            req.setBody(JSON.serialize(a));
+            try {
+                HttpResponse res = new Http().send(req);
+                // log/handle res.getStatusCode()
+            } catch (Exception e) {
+                // no caller to bubble up to: log it (see Module 07 error handling)
+                System.debug(LoggingLevel.ERROR, e.getMessage());
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>Calling it from a trigger</strong> (the after-DML callout fix):</p>
+<pre><code class="language-apex">trigger AccountTrigger on Account (after insert, after update) {
+    // DML has happened; a synchronous callout here would throw
+    // &quot;You have uncommitted work pending.&quot; So hand off to @future:
+    AccountSyncService.syncAccounts(Trigger.newMap.keySet());
+}
+</code></pre>
+<blockquote>
+<p><strong>Why a <code>Set&lt;Id&gt;</code>, not one Id?</strong> Triggers fire in <strong>bulk</strong>. Pass the whole set so the future method runs <strong>once</strong> for all records, not once per record. Calling <code>@future</code> inside a <code>for</code> loop over records will blow the per-transaction cap fast.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and limits</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Detail</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Invocations per transaction</strong></td>
+<td>Up to <strong>50</strong> <code>@future</code> calls per Apex transaction.</td>
+<td>Pass a collection and call <strong>once</strong>, never in a loop.</td>
+</tr>
+<tr>
+<td><strong>No sObjects</strong></td>
+<td>Parameters must be <strong>primitives</strong>, arrays of primitives, or collections of primitives.</td>
+<td>Pass <strong>Ids</strong> and re-query inside the method.</td>
+</tr>
+<tr>
+<td><strong>No return value</strong></td>
+<td>Methods are <strong><code>void</code></strong>. You cannot read a result.</td>
+<td>If you need a result or callback, use <a href="#f04">Queueable</a>.</td>
+</tr>
+<tr>
+<td><strong>Hard to chain</strong></td>
+<td>A future method <strong>cannot reliably call another future</strong> method.</td>
+<td>Use <a href="#f04">Queueable chaining</a> for sequences.</td>
+</tr>
+<tr>
+<td><strong>Hard to monitor</strong></td>
+<td>You get <strong>no job Id</strong> back from the call itself.</td>
+<td>Query <a href="#f07">AsyncApexJob</a> by method name, or use Queueable.</td>
+</tr>
+<tr>
+<td><strong>Callouts</strong></td>
+<td>Only allowed with <strong><code>@future(callout=true)</code></strong>.</td>
+<td>Annotate explicitly when calling external services.</td>
+</tr>
+<tr>
+<td><strong>Counts toward daily async</strong></td>
+<td>Shares the org's daily async execution limit.</td>
+<td>See <a href="#f07">07-async-limits-monitoring-errors.md</a>.</td>
+</tr>
+<tr>
+<td><strong>No guaranteed order/timing</strong></td>
+<td>Runs "soon," not instantly, and not in any set order.</td>
+<td>Never depend on timing or ordering between future calls.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is a future method and how do you declare one?</strong>
+A: It is the simplest async Apex. Annotate a method with <code>@future</code>; it must be <code>static</code>, return <code>void</code>, and take only primitives (or collections of primitives). Calling it queues the work to run later in its own transaction with fresh, higher async limits. Add <code>@future(callout=true)</code> to allow HTTP callouts.</p>
+<p><strong>Q: Why can't a future method take sObjects?</strong>
+A: The record could change between when you queue the job and when it runs, so Salesforce only allows primitives. The pattern is to pass record <strong>Ids</strong> and re-query the latest data inside the method.</p>
+<p><strong>Q: How do future methods fix the "uncommitted work pending" error?</strong>
+A: A synchronous callout after DML in the same transaction throws that error. Moving the callout into <code>@future(callout=true)</code> runs it in a <strong>new</strong> transaction after the DML commits, so there is no pending work.</p>
+<p><strong>Q: When would you choose @future over Queueable?</strong>
+A: Rarely. Queueable is generally preferred because it accepts objects, supports chaining, and returns a monitorable job Id. Use <code>@future</code> only for simple, quick, primitive-only work, or as a fast patch for the trigger-callout case.</p>
+<p><strong>Q: What is the limit on future invocations?</strong>
+A: Up to <strong>50</strong> <code>@future</code> calls per Apex transaction. Because of that, you bulkify: pass a collection of Ids and invoke the method once rather than once per record.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It is dropping a note in the mailroom. You hand off the task and walk away — no waiting, no reply. The platform does it later on its own."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Future method, asynchronous, fire-and-forget, callout=true, primitive, governor limits, AsyncApexJob - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_invoking_future_methods.htm">Future Methods — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_apexgov.htm">Apex Governor Limits — Limits and Allocations Quick Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits — Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-scheduled-apex.md</a> - running Apex automatically on a schedule with the Schedulable interface and CRON.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - Scheduled Apex</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Apex that runs <strong>automatically on a schedule</strong> (e.g. nightly at 2 AM). You implement the <strong><code>Schedulable</code></strong> interface and register the class with a <strong>CRON expression</strong>.
+<strong>Direction</strong>: internal Apex, time-triggered. <strong>Timing</strong>: asynchronous, on a recurring clock. <strong>Trigger</strong>: the platform scheduler, not user code.
+<strong>Use when</strong>: A job must run at set times — nightly syncs, weekly cleanups, periodic kick-offs of <a href="#f03">Batch Apex</a>.</p>
+</blockquote>
+<p>This is Module 07, bulk and async. Scheduled Apex is the "alarm clock" of the async family. It often <strong>kicks off a Batch Apex</strong> job. For the full async reference and monitoring, see <a href="#f07">07-async-limits-monitoring-errors.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Scheduled Apex is an <strong>alarm clock for your code</strong>. You set the time once, and from then on Salesforce wakes your class up and runs it — at 2 AM every day, every Monday morning, the first of every month, whatever you specify. You are not standing there pressing a button; the platform's scheduler does it for you, forever, until you cancel it.</p>
+<p>The clock itself is a <strong>CRON expression</strong>: a compact string that says "at these seconds, minutes, hours, on these days." You write a class that implements the <strong><code>Schedulable</code></strong> interface — which just means it has one method, <strong><code>execute</code></strong> — and then you <strong>register</strong> it with a name and a CRON string. After that it is hands-off.</p>
+<p>One important boundary: a scheduled job is a quiet alarm, not a phone. It <strong>cannot make callouts directly</strong>. If the scheduled work needs to call an external system, it hands that part off to a <a href="#f04">Queueable</a> or <a href="#f05">@future</a> method.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work must run at <strong>specific times</strong> (nightly, weekly).</td>
+<td>Work should run <strong>immediately</strong> after an event → <a href="#f04">Queueable</a> / <a href="#f05">@future</a>.</td>
+</tr>
+<tr>
+<td>You want to <strong>kick off a Batch Apex</strong> job on a clock.</td>
+<td>You just need a one-off async task now → <a href="#f04">Queueable</a>.</td>
+</tr>
+<tr>
+<td>Recurring maintenance: cleanup, recalculation, reminders.</td>
+<td>The scheduled code itself must <strong>call out</strong> → delegate to async.</td>
+</tr>
+<tr>
+<td>Periodic data sync windows (ETL-style).</td>
+<td>High-frequency, sub-minute triggers → not what the scheduler is for.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: every night at 2 AM, start a batch that recalculates account health scores; every Monday at 6 AM, expire stale leads; on the 1st of each month, roll up invoices and enqueue a Queueable to push totals to an ERP.</p>
+<hr />
+<h2>3. How it works (the scheduler clock)</h2>
+<div class="mermaid">
+flowchart TD
+    A["You register the job once&lt;br/&gt;System.schedule or Setup UI"] --&gt; B["CRON expression&lt;br/&gt;defines the times"]
+    B --&gt; C{"Is it the&lt;br/&gt;scheduled time?"}
+    C -- "no" --&gt; C
+    C -- "yes" --&gt; D["Platform calls&lt;br/&gt;execute(SchedulableContext)"]
+    D --&gt; E["Your logic runs&lt;br/&gt;NO direct callouts"]
+    E --&gt; F["Commonly:&lt;br/&gt;Database.executeBatch(...)"]
+    F --&gt; G["Batch job processes&lt;br/&gt;records in chunks"]
+    E --&gt; H["Or enqueue Queueable&lt;br/&gt;for any callouts"]
+
+    style A fill:#00A1E0,color:#fff
+    style B fill:#607D8B,color:#fff
+    style C fill:#ff9900,color:#fff
+    style D fill:#9C27B0,color:#fff
+    style E fill:#9C27B0,color:#fff
+    style F fill:#4CAF50,color:#fff
+    style G fill:#4CAF50,color:#fff
+    style H fill:#4CAF50,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>You register the class <strong>once</strong> — via <code>System.schedule()</code> in Apex or through the Setup UI.</li>
+<li>The <strong>CRON expression</strong> tells the scheduler exactly when to fire.</li>
+<li>The platform watches the clock and does nothing until the scheduled moment arrives.</li>
+<li>At that moment it calls your <strong><code>execute(SchedulableContext sc)</code></strong> method.</li>
+<li>Your logic runs. It <strong>cannot make a callout directly</strong>. Most often it calls <strong><code>Database.executeBatch()</code></strong> to start a <a href="#f03">Batch Apex</a> job, or enqueues a <a href="#f04">Queueable</a> for any external calls.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<p>Implement <strong><code>Schedulable</code></strong> and its single <strong><code>execute</code></strong> method. The usual job is to start a batch.</p>
+<pre><code class="language-apex">public class NightlyAccountScoreScheduler implements Schedulable {
+
+    public void execute(SchedulableContext sc) {
+        // Scheduled Apex cannot call out directly.
+        // Typical pattern: kick off a Batch Apex job.
+        AccountScoreBatch batch = new AccountScoreBatch();
+        Database.executeBatch(batch, 200);   // 200 = scope (records per chunk)
+
+        // If you needed a callout instead, you would enqueue a Queueable:
+        // System.enqueueJob(new SyncQueueable());
+    }
+}
+</code></pre>
+<p><strong>Schedule it from Anonymous Apex</strong> with a CRON string:</p>
+<pre><code class="language-apex">// CRON: Seconds Minutes Hours Day-of-month Month Day-of-week [Year]
+// Every day at 2:00:00 AM:
+String cron = '0 0 2 * * ?';
+String jobId = System.schedule(
+    'Nightly Account Score',   // unique job name
+    cron,                      // CRON expression
+    new NightlyAccountScoreScheduler()  // an instance of the class
+);
+</code></pre>
+<p><strong>Reading the CRON expression</strong> <code>0 0 2 * * ?</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Seconds</td>
+<td><code>0</code></td>
+<td>at second 0</td>
+</tr>
+<tr>
+<td>Minutes</td>
+<td><code>0</code></td>
+<td>at minute 0</td>
+</tr>
+<tr>
+<td>Hours</td>
+<td><code>2</code></td>
+<td>at 2 AM (24-hour)</td>
+</tr>
+<tr>
+<td>Day-of-month</td>
+<td><code>*</code></td>
+<td>every day of the month</td>
+</tr>
+<tr>
+<td>Month</td>
+<td><code>*</code></td>
+<td>every month</td>
+</tr>
+<tr>
+<td>Day-of-week</td>
+<td><code>?</code></td>
+<td>no specific day (use <code>?</code> when day-of-month is set)</td>
+</tr>
+</tbody>
+</table>
+<p>More examples: <code>0 0 6 ? * MON</code> = every Monday at 6 AM. <code>0 0 0 1 * ?</code> = midnight on the 1st of each month. <code>0 30 13 * * ?</code> = every day at 1:30 PM.</p>
+<blockquote>
+<p><strong><code>?</code> vs <code>*</code> gotcha</strong>: day-of-month and day-of-week conflict, so you specify one and put <strong><code>?</code></strong> ("no value") in the other. Salesforce requires this; using <code>*</code> in both is invalid.</p>
+</blockquote>
+<p>You can also schedule <strong>without code</strong>: Setup → <strong>Apex Classes</strong> → <strong>Schedule Apex</strong>, pick the class, set frequency and time. That UI is convenient but offers only preset frequencies; <code>System.schedule()</code> with CRON gives full control.</p>
+<hr />
+<h2>5. Design considerations and limits</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Detail</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scheduled jobs at once</strong></td>
+<td>Up to <strong>100</strong> scheduled Apex jobs can be active at one time.</td>
+<td>Consolidate jobs; cancel ones you no longer need.</td>
+</tr>
+<tr>
+<td><strong>No direct callouts</strong></td>
+<td>Scheduled Apex <strong>cannot</strong> make HTTP callouts directly.</td>
+<td>Delegate to a <a href="#f04">Queueable</a> or <a href="#f05">@future(callout=true)</a>.</td>
+</tr>
+<tr>
+<td><strong>Unique job name</strong></td>
+<td><code>System.schedule</code> name must be unique among active jobs.</td>
+<td>Use clear, descriptive names; you cannot reschedule a duplicate name.</td>
+</tr>
+<tr>
+<td><strong>Kicks off batch</strong></td>
+<td>A common, recommended pattern is scheduler → <code>Database.executeBatch</code>.</td>
+<td>Keep <code>execute()</code> thin; do the heavy lifting in the <a href="#f03">batch</a>.</td>
+</tr>
+<tr>
+<td><strong>Editing a scheduled class</strong></td>
+<td>You cannot save changes to a class that is currently scheduled.</td>
+<td>Cancel the job in <strong>Scheduled Jobs</strong>, deploy, then reschedule.</td>
+</tr>
+<tr>
+<td><strong>CRON format</strong></td>
+<td><code>Seconds Minutes Hours Day-of-month Month Day-of-week [Year]</code>.</td>
+<td>Put <code>?</code> in whichever of day-of-month / day-of-week you are not using.</td>
+</tr>
+<tr>
+<td><strong>Counts toward daily async</strong></td>
+<td>Each run consumes the org's daily async execution allowance.</td>
+<td>See <a href="#f07">07-async-limits-monitoring-errors.md</a>.</td>
+</tr>
+<tr>
+<td><strong>Timing is approximate</strong></td>
+<td>Jobs start at or shortly after the scheduled time, resources permitting.</td>
+<td>Do not assume to-the-second precision.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you make Apex run on a schedule?</strong>
+A: Implement the <code>Schedulable</code> interface (one method, <code>execute(SchedulableContext sc)</code>), then register the class with <code>System.schedule(name, cronExpression, instance)</code> or through Setup → Schedule Apex. The platform's scheduler calls <code>execute</code> at the times the CRON expression defines.</p>
+<p><strong>Q: What does a CRON expression look like in Salesforce?</strong>
+A: Seven fields: Seconds Minutes Hours Day-of-month Month Day-of-week and an optional Year. For example <code>0 0 2 * * ?</code> runs every day at 2 AM. You put <code>?</code> in either day-of-month or day-of-week (you cannot constrain both).</p>
+<p><strong>Q: Can scheduled Apex make a callout?</strong>
+A: Not directly. If the scheduled work needs an external call, it delegates to a Queueable or an <code>@future(callout=true)</code> method, which run in a context where callouts are allowed.</p>
+<p><strong>Q: What is the most common pattern with scheduled Apex?</strong>
+A: Scheduler kicks off Batch Apex. The <code>execute</code> method stays thin and just calls <code>Database.executeBatch(...)</code>, letting the batch do the heavy, chunked processing.</p>
+<p><strong>Q: How many scheduled jobs can you have, and what trips people up when editing?</strong>
+A: Up to <strong>100</strong> active scheduled Apex jobs. A frequent gotcha: you cannot save changes to a class while it is scheduled — you must cancel the scheduled job, deploy the change, then reschedule.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It is an alarm clock for code. You set the time once, and Salesforce wakes the job up and runs it automatically, again and again."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Schedulable, execute, SchedulableContext, System.schedule, CRON expression, Scheduled Jobs, Batch Apex - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_scheduler.htm">Apex Scheduler — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_interface_system_schedulable.htm">Schedulable Interface — Apex Reference Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_apexgov.htm">Apex Governor Limits — Limits and Allocations Quick Reference</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f07">07-async-limits-monitoring-errors.md</a> - the async reference table, limits, monitoring, and error handling.</em></p>
+</section>
+<section id="f07" class="doc">
+<h1>07 - Async Limits, Monitoring &amp; Error Handling</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The reference page for the whole async family. Which tool to pick, the <strong>limits</strong> they share, how to <strong>monitor</strong> running jobs, and how to make them <strong>reliable</strong> with retries and idempotency.
+<strong>Direction</strong>: internal Apex (off-thread processing). <strong>Timing</strong>: asynchronous. <strong>Scope</strong>: @future, Queueable, Batch, Scheduled, plus Bulk API job monitoring.
+<strong>Use when</strong>: You are choosing an async tool, watching a job in production, or designing for failure.</p>
+</blockquote>
+<p>This is Module 07, bulk and async, and the <strong>final file</strong> in the module. It ties together <a href="#f05">@future</a>, <a href="#f04">Queueable</a>, <a href="#f03">Batch Apex</a>, <a href="#f06">Scheduled Apex</a>, and <a href="#f01">Bulk API 2.0</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Async Apex is a <strong>back-office team</strong> working behind the storefront. The customer-facing transaction (the user clicking Save) stays fast because the slow work is handed to the back office to finish later. But a back office needs three things to be trustworthy: the <strong>right worker for the job</strong>, <strong>rules so no one team hogs the building</strong>, and a <strong>way to check whether the work actually got done</strong>.</p>
+<p>This page covers all three. First a <strong>comparison table</strong> so you pick the right async worker. Then the <strong>limits</strong> that keep one tenant from starving the others (you are on shared infrastructure, so async gets <em>higher</em> governor limits but a <em>daily cap</em> on how much you can run). Then <strong>monitoring</strong> — the <code>AsyncApexJob</code> object and the Setup pages that show you what is queued, running, or failed. Finally <strong>error handling</strong>, because a fire-and-forget job that silently fails is worse than no job at all.</p>
+<hr />
+<h2>2. Choosing the tool: the async comparison</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>@future</strong></th>
+<th><strong>Queueable</strong></th>
+<th><strong>Batch Apex</strong></th>
+<th><strong>Scheduled Apex</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Interface / syntax</strong></td>
+<td><code>@future</code> annotation</td>
+<td><code>Queueable</code> interface</td>
+<td><code>Database.Batchable</code></td>
+<td><code>Schedulable</code> interface</td>
+</tr>
+<tr>
+<td><strong>Input types</strong></td>
+<td><strong>Primitives only</strong></td>
+<td><strong>Any</strong> (objects, sObjects)</td>
+<td>Query/iterable scope</td>
+<td>None (clock-driven)</td>
+</tr>
+<tr>
+<td><strong>Chaining</strong></td>
+<td>No (cannot chain)</td>
+<td><strong>Yes</strong> (enqueue from <code>execute</code>)</td>
+<td>Yes (chain in <code>finish</code>)</td>
+<td>Indirect (starts batch)</td>
+</tr>
+<tr>
+<td><strong>Callouts</strong></td>
+<td>Yes, with <code>callout=true</code></td>
+<td><strong>Yes</strong> (implement <code>Database.AllowsCallouts</code>)</td>
+<td>Yes (<code>Database.AllowsCallouts</code>)</td>
+<td><strong>No</strong> (delegate to async)</td>
+</tr>
+<tr>
+<td><strong>Returns a job Id</strong></td>
+<td>No</td>
+<td><strong>Yes</strong> (<code>System.enqueueJob</code>)</td>
+<td><strong>Yes</strong> (<code>Database.executeBatch</code>)</td>
+<td>Yes (<code>System.schedule</code>)</td>
+</tr>
+<tr>
+<td><strong>Monitoring</strong></td>
+<td>Hard (no Id from call)</td>
+<td>Easy (job Id)</td>
+<td>Easy (job Id + Apex Jobs)</td>
+<td>Easy (Scheduled Jobs)</td>
+</tr>
+<tr>
+<td><strong>Processes in chunks</strong></td>
+<td>No</td>
+<td>No</td>
+<td><strong>Yes</strong> (200 default)</td>
+<td>No (but starts a batch)</td>
+</tr>
+<tr>
+<td><strong>Typical use</strong></td>
+<td>Quick primitive task; callout after DML</td>
+<td>Most async work; chained callouts</td>
+<td><strong>Large data volumes</strong></td>
+<td>Run on a clock; kick off batch</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The short version</strong>: default to <strong>Queueable</strong> for general async work. Use <strong>Batch</strong> when the data set is too big for one transaction. Use <strong>Scheduled</strong> to run on a clock (usually to start a batch). Use <strong>@future</strong> only for simple primitive-only cases or the trigger-callout patch.</p>
+<hr />
+<h2>3. The shared limits</h2>
+<p>All four tools draw from the <strong>same async governor pool</strong> and a <strong>shared daily allowance</strong>. The good news: async transactions get <strong>higher</strong> limits than synchronous ones.</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Synchronous</th>
+<th><strong>Asynchronous</strong></th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Heap size</strong></td>
+<td>6 MB</td>
+<td><strong>12 MB</strong></td>
+<td>Async doubles your in-memory budget.</td>
+</tr>
+<tr>
+<td><strong>CPU time</strong></td>
+<td>10,000 ms</td>
+<td><strong>60,000 ms</strong></td>
+<td>Async gets 6× the CPU per transaction.</td>
+</tr>
+<tr>
+<td><strong>SOQL queries</strong></td>
+<td>100</td>
+<td>100</td>
+<td>Same per-transaction query limit.</td>
+</tr>
+<tr>
+<td><strong>Daily async executions</strong></td>
+<td>—</td>
+<td><strong>greater of 250,000 or 200 × user licenses</strong></td>
+<td>Shared across @future, Queueable, Batch, Scheduled per rolling 24h.</td>
+</tr>
+<tr>
+<td><strong>Concurrent batch jobs</strong></td>
+<td>—</td>
+<td><strong>5</strong></td>
+<td>Active/processing batch jobs at once.</td>
+</tr>
+<tr>
+<td><strong>Batch holding queue</strong></td>
+<td>—</td>
+<td><strong>100</strong></td>
+<td>Flex Queue holds up to 100 jobs waiting to run.</td>
+</tr>
+<tr>
+<td><strong>Scheduled jobs</strong></td>
+<td>—</td>
+<td><strong>100</strong></td>
+<td>Active scheduled Apex jobs at once.</td>
+</tr>
+<tr>
+<td><strong>@future per transaction</strong></td>
+<td>—</td>
+<td><strong>50</strong></td>
+<td>Invocations allowed in one Apex transaction.</td>
+</tr>
+<tr>
+<td><strong>Queueable depth</strong></td>
+<td>—</td>
+<td>chainable</td>
+<td>One job enqueued per <code>execute</code> (chaining); platform guards runaway loops.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The daily async formula in plain terms</strong>: take <strong>200 × (number of user licenses in the org)</strong>, compare it to <strong>250,000</strong>, and your daily ceiling is <strong>whichever is larger</strong>. A small org gets the 250,000 floor; a large org gets more. This pool is consumed by <em>all</em> async Apex combined.</p>
+<blockquote>
+<p><strong>Why async gets more room</strong>: it runs off the user's thread, so a longer or heavier job does not freeze anyone's screen. That is exactly why you move slow callouts and big data jobs to async in the first place.</p>
+</blockquote>
+<hr />
+<h2>4. Monitoring async jobs</h2>
+<div class="mermaid">
+flowchart TD
+    A["Async job enqueued"] --&gt; B["Row created in&lt;br/&gt;AsyncApexJob"]
+    B --&gt; C{"Where to watch?"}
+    C --&gt; D["SOQL on AsyncApexJob&lt;br/&gt;Status, NumberOfErrors"]
+    C --&gt; E["Setup: Apex Jobs&lt;br/&gt;batch + queueable history"]
+    C --&gt; F["Setup: Apex Flex Queue&lt;br/&gt;holding batch jobs, reorder"]
+    C --&gt; G["Setup: Scheduled Jobs&lt;br/&gt;cancel / inspect schedules"]
+    C --&gt; H["Setup: Bulk Data Load Jobs&lt;br/&gt;Bulk API ingest + query"]
+
+    style A fill:#00A1E0,color:#fff
+    style B fill:#9C27B0,color:#fff
+    style C fill:#ff9900,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style E fill:#607D8B,color:#fff
+    style F fill:#607D8B,color:#fff
+    style G fill:#607D8B,color:#fff
+    style H fill:#607D8B,color:#fff
+
+</div>
+<p><strong><code>AsyncApexJob</code></strong> is the object that backs nearly every async job — a <code>@future</code> call, a Queueable, a Batch, or a Scheduled job. Query it to check status programmatically:</p>
+<pre><code class="language-apex">List&lt;AsyncApexJob&gt; jobs = [
+    SELECT Id, JobType, Status, NumberOfErrors,
+           JobItemsProcessed, TotalJobItems, MethodName, CreatedDate
+    FROM AsyncApexJob
+    WHERE Status IN ('Queued', 'Processing', 'Failed')
+    ORDER BY CreatedDate DESC
+];
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>What it shows</th>
+<th>Covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>AsyncApexJob</code></strong> (SOQL)</td>
+<td>Status, error count, items processed vs total.</td>
+<td>All async Apex.</td>
+</tr>
+<tr>
+<td><strong>Setup → Apex Jobs</strong></td>
+<td>History and status of batch and queueable jobs.</td>
+<td>Batch, Queueable, @future.</td>
+</tr>
+<tr>
+<td><strong>Setup → Apex Flex Queue</strong></td>
+<td>Batch jobs <strong>holding</strong> (beyond the 5 running); reorder them.</td>
+<td>Batch Apex.</td>
+</tr>
+<tr>
+<td><strong>Setup → Scheduled Jobs</strong></td>
+<td>Active schedules; cancel or inspect.</td>
+<td>Scheduled Apex.</td>
+</tr>
+<tr>
+<td><strong>Setup → Bulk Data Load Jobs</strong></td>
+<td>Bulk API <strong>ingest</strong> and <strong>query</strong> job progress.</td>
+<td><a href="#f01">Bulk API 2.0</a>.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key distinction</strong>: Apex async jobs show under <strong>Apex Jobs / Flex Queue / Scheduled Jobs</strong>. The external <strong>Bulk API</strong> has its own page, <strong>Bulk Data Load Jobs</strong>. Different engines, different monitors.</p>
+</blockquote>
+<hr />
+<h2>5. Error handling and reliability</h2>
+<p>Async work has <strong>no user watching the screen</strong>, so failures are silent unless you design for them. Four patterns:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>What it means</th>
+<th>How to apply</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>Running the job twice produces the same result, not duplicates.</td>
+<td><strong>Upsert by External Id</strong>; check state before acting; design for safe re-runs.</td>
+</tr>
+<tr>
+<td><strong>Retry</strong></td>
+<td>Transient failures (a 503, a lock) get tried again.</td>
+<td>Re-enqueue with a bounded <strong>attempt counter</strong>; <strong>stop after N</strong> so you do not loop forever.</td>
+</tr>
+<tr>
+<td><strong>Catch and log</strong></td>
+<td>Errors are recorded, not swallowed.</td>
+<td><code>try/catch</code>, write a custom <strong>error log object</strong> or Platform Event with the record Id and message.</td>
+</tr>
+<tr>
+<td><strong>Dead-letter</strong></td>
+<td>Records that keep failing are parked, not lost.</td>
+<td>After max retries, write the failed payload to a <strong>dead-letter</strong> record/object for manual review.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>A Queueable with bounded retry and logging</strong>:</p>
+<pre><code class="language-apex">public class SyncQueueable implements Queueable, Database.AllowsCallouts {
+    private Set&lt;Id&gt; recordIds;
+    private Integer attempt;
+
+    public SyncQueueable(Set&lt;Id&gt; recordIds, Integer attempt) {
+        this.recordIds = recordIds;
+        this.attempt = attempt;
+    }
+
+    public void execute(QueueableContext qc) {
+        try {
+            // ... do the callout / DML work (idempotent: upsert by External Id) ...
+        } catch (Exception e) {
+            if (attempt &lt; 3) {
+                // Retry: re-enqueue with a higher attempt count
+                System.enqueueJob(new SyncQueueable(recordIds, attempt + 1));
+            } else {
+                // Dead-letter: park the failure for review (don't lose it)
+                insert new Integration_Error__c(
+                    Payload__c = String.join(new List&lt;Id&gt;(recordIds), ','),
+                    Message__c = e.getMessage(),
+                    Source__c  = 'SyncQueueable'
+                );
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>For Batch Apex</strong>, errors are per-chunk: a failing scope rolls back only that chunk, and you can implement <code>Database.RaisesPlatformEvents</code> (or capture errors in <code>execute</code>) and summarise in <code>finish</code>. <strong>For Bulk API</strong>, failures come back in a <strong>failedResults</strong> CSV you re-load after fixing — see <a href="#f01">Bulk API 2.0</a>.</p>
+<blockquote>
+<p><strong>Golden rule</strong>: assume any async job can run <strong>twice</strong> (retries, replays). If a double-run would corrupt data, you have an idempotency bug, not a retry strategy.</p>
+</blockquote>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you choose between @future, Queueable, Batch, and Scheduled Apex?</strong>
+A: Default to <strong>Queueable</strong> for general async (objects, chaining, callouts, a job Id). Use <strong>Batch</strong> for large data volumes that need chunking. Use <strong>Scheduled</strong> to run on a clock, usually to kick off a batch. Use <strong>@future</strong> only for simple primitive-only work or the callout-after-DML trigger fix.</p>
+<p><strong>Q: What is the daily limit on asynchronous Apex executions?</strong>
+A: The greater of <strong>250,000</strong> or <strong>200 × the number of user licenses</strong> in the org, per rolling 24 hours. It is shared across all async Apex — @future, Queueable, Batch, and Scheduled combined.</p>
+<p><strong>Q: How do async governor limits differ from synchronous?</strong>
+A: Async transactions get more room: <strong>12 MB heap</strong> (vs 6 MB sync) and <strong>60,000 ms CPU</strong> (vs 10,000 ms sync). That is the whole point of going async — heavier work without freezing the user.</p>
+<p><strong>Q: How do you monitor async jobs?</strong>
+A: Query the <strong><code>AsyncApexJob</code></strong> object for status and error counts, and use Setup pages: <strong>Apex Jobs</strong> (batch/queueable history), <strong>Apex Flex Queue</strong> (holding batch jobs), <strong>Scheduled Jobs</strong> (schedules), and <strong>Bulk Data Load Jobs</strong> for the Bulk API.</p>
+<p><strong>Q: How do you make async jobs reliable?</strong>
+A: Design for <strong>idempotency</strong> (upsert by External Id, safe re-runs), add <strong>bounded retries</strong> with an attempt counter, <strong>catch and log</strong> errors to a custom object or Platform Event, and <strong>dead-letter</strong> records that exhaust retries so nothing is silently lost. Assume every job can run twice.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Async is the back office behind the counter. It gets more room to work, but there is a daily limit on how much it can do, dashboards to watch it, and a rule that any task might get done twice — so it must be safe to repeat."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>AsyncApexJob, async governor limits, daily async limit, Apex Flex Queue, Scheduled Jobs, Bulk Data Load Jobs, idempotency, retry, dead-letter - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_apexgov.htm">Apex Governor Limits — Limits and Allocations Quick Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_asyncapexjob.htm">AsyncApexJob — Object Reference for the Salesforce Platform</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_async_overview.htm">Asynchronous Apex — Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">Module 07 README</a> for the full bulk-and-async map. Then continue to </em><em>Module 08 - Modern APIs</em><em> (GraphQL, Connect, UI APIs) and </em><em>Module 09 - Security &amp; Limits</em><em> for governance across every integration.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 07 Bulk &amp; Async · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Patterns Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Patterns</h1>
+  <div class="sub">The 6 official integration patterns: what each is, when to use it, and the Salesforce tech that implements it.</div>
+  <div>
+    <span class="pill">Request &amp; Reply</span><span class="pill">Fire &amp; Forget</span>
+    <span class="pill">Batch Data Sync</span><span class="pill">Remote Call-In</span>
+    <span class="pill">Data Virtualization</span><span class="pill">UI Update on Change</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Request and Reply</a></li>
+<li class=""><a href="#f02">02 - Fire and Forget</a></li>
+<li class=""><a href="#f03">03 - Batch Data Synchronization</a></li>
+<li class=""><a href="#f04">04 - Remote Call-In</a></li>
+<li class=""><a href="#f05">05 - Data Virtualization</a></li>
+<li class=""><a href="#f06">06 - UI Update Based on Data Changes</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 02 - Integration Patterns</h1>
+<blockquote>
+<p><strong>Goal</strong>: Memorize the <strong>6 official Salesforce integration patterns</strong> and know exactly <em>when</em> to use which.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>Outcome</strong>: given any integration requirement, point at one pattern and justify it in a sentence.</p>
+</blockquote>
+<p>A <strong>pattern</strong> is a named, reusable answer to a recurring integration problem. Salesforce's official <em>Integration Patterns and Practices</em> guide defines six. Master these and you can scope any integration before touching code. New to the vocabulary (sync/async, inbound/outbound, push/pull)? Read <a href="../01-Fundamentals/README.md">Module 01</a> first.</p>
+<hr />
+<h2>How to use this module</h2>
+<ol>
+<li>Read the patterns in order (01 → 06). Each is short and built the same way.</li>
+<li>Use the <strong>decision tree</strong> and <strong>comparison table</strong> below as your interview cram sheet.</li>
+<li>For the auth behind any callout or inbound call, see <a href="../03-Authentication/README.md">Module 03 - Authentication</a>.</li>
+</ol>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Pattern</th>
+<th>Direction</th>
+<th>Timing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">request-and-reply</a></td>
+<td>Salesforce → External</td>
+<td>Synchronous</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">fire-and-forget</a></td>
+<td>Salesforce → External</td>
+<td>Asynchronous</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">batch-data-synchronization</a></td>
+<td>Both ways</td>
+<td>Scheduled / async</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">remote-call-in</a></td>
+<td>External → Salesforce</td>
+<td>Sync or async</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">data-virtualization</a></td>
+<td>Salesforce reads External</td>
+<td>Real-time read</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">ui-update-based-on-data-changes</a></td>
+<td>Salesforce → subscribers</td>
+<td>Async push</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which pattern? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([New integration requirement]) --&gt; Dir{Who initiates,&lt;br/&gt;and what's needed?}
+    Dir --&gt;|External system calls Salesforce| RCI[Remote Call-In&lt;br/&gt;REST / SOAP / Apex REST]
+    Dir --&gt;|Show external data without storing it| DV[Data Virtualization&lt;br/&gt;Salesforce Connect]
+    Dir --&gt;|UI must refresh when data changes| UI[UI Update on Change&lt;br/&gt;CDC / Pub-Sub API]
+    Dir --&gt;|Salesforce calls out| Vol{Volume and&lt;br/&gt;response need?}
+    Vol --&gt;|High volume, scheduled| BATCH[Batch Data Sync&lt;br/&gt;Bulk API 2.0 / ETL]
+    Vol --&gt;|Real-time, need the answer| RR[Request and Reply&lt;br/&gt;HTTP callout]
+    Vol --&gt;|Real-time, no answer needed| FF[Fire and Forget&lt;br/&gt;Platform Events]
+
+    style RCI fill:#9C27B0,color:#fff
+    style DV fill:#4CAF50,color:#fff
+    style UI fill:#ff9900,color:#fff
+    style BATCH fill:#9C27B0,color:#fff
+    style RR fill:#00A1E0,color:#fff
+    style FF fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>The master comparison table (memorize this)</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Direction</th>
+<th>Timing</th>
+<th>Volume</th>
+<th>Salesforce tech</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Request &amp; Reply</strong> (01)</td>
+<td>SF → External</td>
+<td>Sync</td>
+<td>Low</td>
+<td>HTTP callout, External Services</td>
+<td>You need the answer <strong>now</strong> to continue.</td>
+</tr>
+<tr>
+<td><strong>Fire &amp; Forget</strong> (02)</td>
+<td>SF → External</td>
+<td>Async</td>
+<td>Low-Med</td>
+<td>Platform Events, Outbound Messages</td>
+<td>You announce an event and <strong>don't wait</strong>.</td>
+</tr>
+<tr>
+<td><strong>Batch Data Sync</strong> (03)</td>
+<td>Both ways</td>
+<td>Scheduled</td>
+<td>High</td>
+<td>Bulk API 2.0, ETL/MuleSoft</td>
+<td><strong>Large</strong> volumes on a schedule.</td>
+</tr>
+<tr>
+<td><strong>Remote Call-In</strong> (04)</td>
+<td>External → SF</td>
+<td>Sync/Async</td>
+<td>Any</td>
+<td>REST/SOAP API, Apex REST</td>
+<td>An <strong>external system</strong> drives the CRUD.</td>
+</tr>
+<tr>
+<td><strong>Data Virtualization</strong> (05)</td>
+<td>SF reads External</td>
+<td>Real-time read</td>
+<td>Low-Med</td>
+<td>Salesforce Connect (OData)</td>
+<td><strong>View</strong> external data without copying it.</td>
+</tr>
+<tr>
+<td><strong>UI Update on Change</strong> (06)</td>
+<td>SF → subscribers</td>
+<td>Async push</td>
+<td>Med</td>
+<td>CDC, Pub/Sub API, empApi</td>
+<td>UI must <strong>auto-refresh</strong> on a change.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Scenario → pattern (quick mapping)</h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Check a credit score before saving the loan."</td>
+<td><strong>Request &amp; Reply</strong></td>
+</tr>
+<tr>
+<td>"Tell the ERP an order shipped."</td>
+<td><strong>Fire &amp; Forget</strong></td>
+</tr>
+<tr>
+<td>"Sync 2M accounts from SAP every night."</td>
+<td><strong>Batch Data Sync</strong></td>
+</tr>
+<tr>
+<td>"Our website must create Leads in Salesforce."</td>
+<td><strong>Remote Call-In</strong></td>
+</tr>
+<tr>
+<td>"Show SAP invoices on the Account, don't store them."</td>
+<td><strong>Data Virtualization</strong></td>
+</tr>
+<tr>
+<td>"The agent console must update the moment a case changes."</td>
+<td><strong>UI Update on Change</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: Request &amp; Reply vs Fire &amp; Forget?</strong>
+→ Reply <strong>waits</strong> for and uses the response (sync). Forget sends and <strong>moves on</strong> (async). Choose by whether the result drives the next step.</p>
+<p><strong>Q: A partner wants to push orders into Salesforce. Which pattern and tech?</strong>
+→ <strong>Remote Call-In</strong> via the REST API (or Apex REST for custom logic), authenticated with a Connected App / External Client App + OAuth.</p>
+<p><strong>Q: 5 million records nightly. Which pattern?</strong>
+→ <strong>Batch Data Sync</strong> with <strong>Bulk API 2.0</strong>, upserting by External ID, scheduled off-peak. Never loop synchronous callouts.</p>
+<p><strong>Q: Show live external data without storing it?</strong>
+→ <strong>Data Virtualization</strong> with <strong>Salesforce Connect</strong> (External Objects over OData). Each view triggers a callout, so mind performance.</p>
+<p><strong>Q: Make an LWC refresh instantly when a record changes?</strong>
+→ <strong>UI Update on Change</strong> using <strong>Change Data Capture</strong> / <strong>Pub/Sub API</strong>, with the LWC subscribing via <code>lightning/empApi</code>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_intro_overview.htm">Integration Patterns and Practices (v66.0, Spring '26) — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_selection_guide.htm">Pattern Selection Guide — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_pat_summary.htm">Pattern Summary — Salesforce Developers</a></li>
+</ul>
+<p><em>Each pattern file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Request and Reply</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Salesforce calls an external system, <strong>waits</strong> for the answer, and uses it right away.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Timing</strong>: Synchronous. <strong>Volume</strong>: Low, one record/transaction at a time.
+<strong>Use when</strong>: A user or process needs an <strong>immediate response</strong> before continuing.</p>
+</blockquote>
+<p>This is Module 02, the integration patterns. New to the vocabulary (sync/async, inbound/outbound)? See <a href="../01-Fundamentals/README.md">Module 01</a>. For the auth behind callouts, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Request and Reply is a <strong>phone call</strong>. You dial, you ask your question, and you <strong>stay on the line</strong> until the other person answers. You cannot continue your day until you hear back. If they do not pick up, or take too long, your whole call fails.</p>
+<p>In Salesforce terms: Apex (or Flow) makes an <strong>HTTP callout</strong> to an external service, the user or transaction <strong>blocks</strong> until the response arrives, and the result is shown or saved immediately. Think of a rep clicking "Check Credit Score" and seeing the score appear two seconds later. That round-trip, in-the-moment answer is the whole pattern.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You need the response <strong>right now</strong> to continue (validate, enrich, display).</td>
+<td>You do not need an answer back → <a href="#f02">02-fire-and-forget.md</a>.</td>
+</tr>
+<tr>
+<td>The work is <strong>one record / small</strong> and the external system is <strong>fast</strong>.</td>
+<td>High volume or bulk loads → <a href="#f03">03-batch-data-synchronization.md</a>.</td>
+</tr>
+<tr>
+<td>A <strong>user is waiting</strong> at the screen, or a process must branch on the result.</td>
+<td>The external call is <strong>slow/long-running</strong> (risk of timeout).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: real-time <strong>credit check</strong> during loan creation, <strong>address validation</strong> on a form, fetching live <strong>inventory/price</strong> before quoting, a <strong>payment authorization</strong> call.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as User / Process
+    participant SF as Salesforce&lt;br/&gt;(Apex / Flow)
+    participant EXT as External System
+    U-&gt;&gt;SF: Trigger action (e.g. Save / button)
+    SF-&gt;&gt;EXT: HTTP request via Named Credential&lt;br/&gt;(callout)
+    Note over SF,EXT: Salesforce BLOCKS and waits
+    EXT--&gt;&gt;SF: Response (200 + data)
+    SF-&gt;&gt;SF: Parse, store, or branch on result
+    SF--&gt;&gt;U: Show result / continue
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A user action or process kicks off the transaction.</li>
+<li>Apex or Flow makes an outbound <strong>HTTP callout</strong> (through a Named Credential, so no hardcoded secrets).</li>
+<li>Salesforce <strong>waits synchronously</strong> for the reply. The transaction is paused.</li>
+<li>The external system returns data.</li>
+<li>Salesforce parses it and acts (saves a field, makes a decision).</li>
+<li>Control returns to the user with the result.</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce (the tech)</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Apex HTTP callout</strong></td>
+<td><code>HttpRequest</code>/<code>Http</code> classes calling a REST endpoint via <code>callout:NamedCredential</code>.</td>
+<td>Custom logic, full control over request/response.</td>
+</tr>
+<tr>
+<td><strong>External Services</strong></td>
+<td>Declarative import of an OpenAPI spec; generates invocable actions for Flow.</td>
+<td>Low-code request/reply from Flow, no Apex.</td>
+</tr>
+<tr>
+<td><strong>Flow HTTP Callout</strong></td>
+<td>Declarative callout action configured in Flow.</td>
+<td>Admin-built real-time calls.</td>
+</tr>
+<tr>
+<td><strong>Apex SOAP callout</strong></td>
+<td>Generated stub from a WSDL.</td>
+<td>Legacy SOAP services.</td>
+</tr>
+</tbody>
+</table>
+<p>Minimal Apex shape (note the <strong>Named Credential</strong>, never a hardcoded URL or token):</p>
+<pre><code class="language-apex">HttpRequest req = new HttpRequest();
+req.setEndpoint('callout:Credit_Service/score?ssn=' + ssn);
+req.setMethod('GET');
+req.setTimeout(120000); // max 120s
+HttpResponse res = new Http().send(req);
+if (res.getStatusCode() == 200) {
+    Map&lt;String,Object&gt; body = (Map&lt;String,Object&gt;) JSON.deserializeUntyped(res.getBody());
+    // use body, save to record
+}
+</code></pre>
+<blockquote>
+<p><strong>Auth</strong>: outbound callouts authenticate with a <strong>Named Credential + External Credential</strong>. See <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 - Named Credentials</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Callout timeout</strong></td>
+<td>Max <strong>120 seconds</strong> per callout; default 10s. A slow service kills the transaction.</td>
+<td>Keep services fast. Set a sensible <code>setTimeout</code>. If slow, switch to async.</td>
+</tr>
+<tr>
+<td><strong>Callouts per transaction</strong></td>
+<td>Max <strong>100</strong> callouts per Apex transaction.</td>
+<td>Batch logic; do not loop callouts per record.</td>
+</tr>
+<tr>
+<td><strong>No callouts after DML (uncommitted)</strong></td>
+<td>You cannot call out after a pending DML in the same transaction.</td>
+<td>Call out first, or use async (<code>@future(callout=true)</code>, Queueable).</td>
+</tr>
+<tr>
+<td><strong>User is blocked</strong></td>
+<td>Synchronous means the user waits.</td>
+<td>Only use for genuinely fast calls.</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>The external system may be down or slow.</td>
+<td>Handle non-200 codes, timeouts, and retries gracefully.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>A retry could double-charge or double-create.</td>
+<td>Make requests safe to repeat where possible.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Request and Reply pattern?</strong>
+A: Salesforce calls an external system synchronously and waits for the response before continuing. It is for real-time, low-volume calls where you need the answer immediately, like a credit check at the point of sale.</p>
+<p><strong>Q: How do you implement it in Salesforce?</strong>
+A: An Apex HTTP callout (or Flow HTTP Callout / External Services for low-code), authenticated through a Named Credential. The transaction blocks until the response returns.</p>
+<p><strong>Q: What are the main limits to watch?</strong>
+A: 120-second max callout timeout, 100 callouts per transaction, and you cannot make a callout after uncommitted DML. If the service is slow or volume is high, move to async or batch instead.</p>
+<p><strong>Q: How is this different from Fire and Forget?</strong>
+A: Request and Reply <strong>waits</strong> for and uses the response. Fire and Forget sends a message and moves on without waiting. Use Reply when the result drives the next step, Forget when it does not.</p>
+<p><strong>Q: The external API takes 5 minutes. Now what?</strong>
+A: Do not hold a synchronous transaction. Switch to an asynchronous approach: queue the work (Queueable/<code>@future</code>) or redesign as Fire and Forget with a callback, so the user is not blocked and you avoid the timeout.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a phone call. You ask, you wait on the line, you get your answer, then you act on it."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>HTTP callout, Named Credential, synchronous, timeout, idempotency, External Services - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_request_and_reply.htm">Request and Reply - Integration Patterns and Practices (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_selection_guide.htm">Pattern Selection Guide - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts.htm">Apex Callouts - Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-fire-and-forget.md</a> - when Salesforce sends a message and does not wait for a reply.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Fire and Forget</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Salesforce announces that something happened and <strong>moves on</strong>. It does not wait for a reply.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Timing</strong>: Asynchronous. <strong>Volume</strong>: Many small events, near real time.
+<strong>Use when</strong>: You need to <strong>broadcast a business event</strong> ("OrderShipped") and you do not need an answer back.</p>
+</blockquote>
+<p>This is Module 02, the integration patterns. New to the vocabulary (sync/async, inbound/outbound, pub/sub)? See <a href="../01-Fundamentals/README.md">Module 01</a>. For the auth behind callouts and event subscribers, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Fire and Forget is <strong>posting a letter</strong>. You write it, drop it in the mailbox, and walk away. You trust the postal service to deliver it. You do <strong>not</strong> stand at the box waiting for the recipient to read it and reply. Your day continues immediately.</p>
+<p>In Salesforce terms: a process <strong>publishes an event</strong> (or sends a one-way message) describing something that just happened, then the transaction continues without blocking. One or more external subscribers pick the message up <strong>later</strong> and do their own work. The publisher and subscriber are <strong>loosely coupled</strong> — neither has to be online at the same time, and the publisher does not care who is listening or what they do with it.</p>
+<p>Contrast this with <a href="#f01">Request and Reply</a>, which is a phone call you stay on the line for. Here, you hang up before anyone answers.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You are <strong>announcing a fact</strong> ("Order shipped", "Case closed") and need no answer.</td>
+<td>You need the response to continue → <a href="#f01">01-request-and-reply.md</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>loose coupling</strong> — the subscriber can be down and catch up later.</td>
+<td>You are moving <strong>large data sets</strong> on a schedule → <a href="#f03">03-batch-data-synchronization.md</a>.</td>
+</tr>
+<tr>
+<td><strong>Multiple</strong> systems may want the same event (fan-out to many subscribers).</td>
+<td>You need a <strong>guaranteed, transactional</strong> round-trip with rollback.</td>
+</tr>
+<tr>
+<td>The receiving system handles its own queuing, retry, and errors.</td>
+<td>The user is waiting at the screen for a result.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: publish <strong>OrderShipped</strong> so a logistics app and a notification service both react; emit <strong>LeadConverted</strong> for a marketing platform; send a legacy ERP a one-way <strong>AccountUpdated</strong> notice via Outbound Message; fan a <strong>PaymentReceived</strong> event out to several downstream systems.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as User / Process
+    participant SF as Salesforce&lt;br/&gt;(Apex / Flow)
+    participant BUS as Event Bus&lt;br/&gt;(Salesforce)
+    participant SUB as External Subscriber
+    U-&gt;&gt;SF: Trigger action (e.g. Order saved)
+    SF-&gt;&gt;BUS: Publish event (e.g. OrderShipped__e)
+    Note over SF,U: Salesforce does NOT wait. Transaction continues.
+    SF--&gt;&gt;U: Done (control returns immediately)
+    BUS--&gt;&gt;SUB: Deliver event later (Pub/Sub API or CometD)
+    SUB-&gt;&gt;SUB: Process at its own pace
+    Note over BUS,SUB: Missed it? Replay by Replay ID (72h window)
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A user action or backend process completes some work.</li>
+<li>Salesforce <strong>publishes a platform event</strong> to the event bus (or sends a one-way Outbound Message).</li>
+<li>Salesforce <strong>does not block</strong> — control returns to the user/process right away.</li>
+<li>The transaction finishes normally.</li>
+<li>The event bus delivers the message to each external subscriber <strong>asynchronously</strong>, on their schedule.</li>
+<li>Each subscriber processes independently and owns its own error handling.</li>
+<li>If a subscriber was offline, it can <strong>replay</strong> missed events by Replay ID within the retention window.</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce (the tech)</h2>
+<p>The official guide gives Fire and Forget <strong>two main implementation options</strong>: the modern event-driven approach (<strong>Platform Events</strong>) and the legacy declarative approach (<strong>Outbound Messages</strong>).</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Platform Events</strong> (recommended)</td>
+<td>Publish/subscribe events on the Salesforce event bus. Publish from Apex, Flow, or API. Subscribe via <strong>Pub/Sub API</strong> (gRPC/HTTP/2, Avro) or <strong>CometD</strong>.</td>
+<td>The modern, loosely-coupled, fan-out approach. Multiple subscribers, replay support.</td>
+</tr>
+<tr>
+<td><strong>Outbound Messages</strong> (legacy)</td>
+<td>A declarative <strong>SOAP</strong> message sent to a fixed endpoint, fired from Flow (or legacy Workflow). Salesforce auto-<strong>retries</strong> on failure.</td>
+<td>Simple point-to-point notify to one endpoint, no code. Older orgs/integrations.</td>
+</tr>
+<tr>
+<td><strong>Change Data Capture (CDC)</strong></td>
+<td>A built-in stream of record-change events (create/update/delete/undelete) on the same bus.</td>
+<td>Broadcasting <strong>data changes</strong> without defining custom events.</td>
+</tr>
+<tr>
+<td><strong>Apex callout (async)</strong></td>
+<td>A one-way <code>@future(callout=true)</code> or Queueable callout via <code>callout:NamedCredential</code>.</td>
+<td>Fire-and-forget HTTP notify where an event channel is overkill.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Publish a Platform Event from Apex</strong> (no hardcoded endpoint — subscribers connect to the bus):</p>
+<pre><code class="language-apex">// OrderShipped__e is a Platform Event with custom fields
+OrderShipped__e evt = new OrderShipped__e(
+    OrderId__c   = order.Id,
+    TrackingNo__c = trackingNumber,
+    ShippedAt__c = System.now()
+);
+Database.SaveResult sr = EventBus.publish(evt);
+if (!sr.isSuccess()) {
+    for (Database.Error err : sr.getErrors()) {
+        System.debug('Publish failed: ' + err.getMessage());
+    }
+}
+</code></pre>
+<p>For an <strong>async one-way HTTP notify</strong> instead of an event, the outbound callout still goes through a Named Credential — never a hardcoded URL or secret:</p>
+<pre><code class="language-apex">@future(callout=true)
+public static void notifyExternal(Id orderId) {
+    HttpRequest req = new HttpRequest();
+    req.setEndpoint('callout:Logistics_API/v1/shipped');
+    req.setMethod('POST');
+    req.setHeader('Content-Type', 'application/json');
+    req.setBody(JSON.serialize(new Map&lt;String,Object&gt;{ 'orderId' =&gt; orderId }));
+    new Http().send(req); // fire it; we do not act on the response
+}
+</code></pre>
+<blockquote>
+<p><strong>Auth</strong>: Outbound callouts use a <strong>Named Credential + External Credential</strong>. External subscribers to events authenticate to the Pub/Sub/Streaming API via OAuth. See <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 - Named Credentials</a> and <a href="../03-Authentication/README.md">Module 03 README</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No immediate response</strong></td>
+<td>You give up the answer by design. The publisher learns nothing about downstream success.</td>
+<td>Only use when you truly do not need the result. Add an optional <strong>callback</strong> if the remote must report back.</td>
+</tr>
+<tr>
+<td><strong>Delivery guarantees differ</strong></td>
+<td><strong>Platform Events</strong> publish to the bus <strong>once</strong> with <strong>no Salesforce-side retry</strong> — the subscriber must replay. <strong>Outbound Messages</strong> <strong>auto-retry</strong> with backoff for up to ~24h.</td>
+<td>Pick the option that matches your durability need. For events, build replay-by-Replay-ID into the subscriber.</td>
+</tr>
+<tr>
+<td><strong>Events are not transactional on delivery</strong></td>
+<td>A published platform event <strong>cannot be rolled back</strong> within the transaction once committed.</td>
+<td>Publish <strong>after</strong> your DML succeeds. Do not assume publish = subscriber processed.</td>
+</tr>
+<tr>
+<td><strong>Replay window</strong></td>
+<td>High-volume event messages are retained <strong>72 hours (3 days)</strong>. Miss it and it is gone.</td>
+<td>Subscribers must track the <strong>Replay ID</strong> of the last processed event and resume from it.</td>
+</tr>
+<tr>
+<td><strong>Publishing / delivery limits</strong></td>
+<td>Orgs have <strong>hourly publishing</strong> and <strong>daily event delivery</strong> allocations (by license). A fan-out to many subscribers multiplies the delivery count.</td>
+<td>Watch the allocations in the Platform Events Developer Guide. Avoid needless fan-out.</td>
+</tr>
+<tr>
+<td><strong>Outbound Message expiry</strong></td>
+<td>An unacknowledged Outbound Message is retried then <strong>expires</strong> (kept ~24h, failed list cleared after 7 days).</td>
+<td>Make the endpoint highly available and acknowledge promptly. Monitor the failed-messages list.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>Retries and replays can deliver the <strong>same event more than once</strong> (at-least-once semantics).</td>
+<td>Subscribers must <strong>dedupe</strong> using the Replay ID or a business key. Make processing safe to repeat.</td>
+</tr>
+<tr>
+<td><strong>Eventual consistency</strong></td>
+<td>Subscribers process later, so the two systems are briefly out of sync.</td>
+<td>Design downstream logic to tolerate a short lag. Do not expect instant consistency.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Fire and Forget pattern?</strong>
+A: Salesforce publishes a message or event about something that happened and continues without waiting for a reply. It is asynchronous, loosely coupled, and used to broadcast business events like "OrderShipped" where you do not need an answer back.</p>
+<p><strong>Q: What are the two main ways to implement it in Salesforce?</strong>
+A: The modern, recommended way is <strong>Platform Events</strong> — publish from Apex/Flow/API and let external subscribers consume via the Pub/Sub API or CometD. The legacy way is <strong>Outbound Messages</strong> — a declarative SOAP message sent from Flow to a fixed endpoint, with automatic retry.</p>
+<p><strong>Q: How is delivery guaranteed for each?</strong>
+A: They differ. Outbound Messages <strong>retry automatically</strong> with backoff for about 24 hours until acknowledged. Platform Events publish to the bus <strong>once with no Salesforce-side retry</strong>; durability comes from the <strong>72-hour replay window</strong> — the subscriber resumes from its last Replay ID. Both are effectively <strong>at-least-once</strong>, so subscribers must be idempotent.</p>
+<p><strong>Q: How does this differ from Request and Reply?</strong>
+A: Request and Reply is synchronous — Salesforce waits for and uses the response. Fire and Forget sends and moves on. Use Reply when the result drives the next step; use Forget when announcing a fact to one or many systems.</p>
+<p><strong>Q: A subscriber was down for an hour. Did it lose the events?</strong>
+A: Not if it acts within the retention window. Platform Events keep high-volume messages for <strong>72 hours</strong>; the subscriber replays from the <strong>Replay ID</strong> of the last event it processed. Outbound Messages retry until acknowledged or until they expire (~24h).</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's posting a letter. You drop it in the box and walk away — you trust it gets there, you don't wait for a reply."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Platform Events, event bus, Pub/Sub API, CometD, Replay ID, Outbound Message, Change Data Capture, idempotency, eventual consistency, at-least-once delivery - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. Deeper dive in <a href="../06-Event-Driven/README.md">Module 06 - Event-Driven</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_remote_process_invocation_fire_forget.htm">Remote Process Invocation - Fire and Forget (Integration Patterns, v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_intro.htm">Platform Events Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_event_limits.htm">Platform Event Allocations</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.workflow_om_considerations.htm&amp;type=5">Considerations for Outbound Messages - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Pub/Sub API - Event Message Durability</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-batch-data-synchronization.md</a> - moving large data sets on a schedule, both directions, off-peak.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - Batch Data Synchronization</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Move <strong>large volumes</strong> of data between Salesforce and another system on a <strong>schedule</strong>, usually overnight.
+<strong>Direction</strong>: Both ways (Salesforce → External and External → Salesforce). <strong>Timing</strong>: Scheduled / batch. <strong>Volume</strong>: HIGH, off-peak.
+<strong>Use when</strong>: You need a <strong>nightly sync</strong> of big datasets between Salesforce and an ERP or data warehouse.</p>
+</blockquote>
+<p>This is Module 02, the integration patterns. New to the vocabulary (sync/async, ETL, upsert, External ID)? See <a href="../01-Fundamentals/README.md">Module 01</a>. For the auth a middleware tool uses to reach Salesforce, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Batch Data Synchronization is the <strong>overnight delivery truck</strong>. You do not send a courier for every single parcel (that would be one-at-a-time Request and Reply). Instead, you let parcels pile up all day, then a big truck runs <strong>once at night</strong> when the roads are empty and hauls everything in one trip. It is slow per parcel but extremely efficient for <strong>volume</strong>.</p>
+<p>In Salesforce terms: a <strong>scheduled job</strong> extracts or loads <strong>thousands to millions of records</strong> in batches, typically during <strong>off-peak hours</strong> so it does not compete with daytime users or burn the daily API budget. The goal is to keep two systems <strong>in agreement</strong> — Salesforce and an ERP, a data warehouse, or a billing platform — without hammering them in real time.</p>
+<p>Contrast this with <a href="#f02">Fire and Forget</a> (one small event at a time) and <a href="#f01">Request and Reply</a> (one synchronous round-trip). Batch is the heavyweight for <strong>bulk</strong>.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You sync <strong>large datasets</strong> (tens of thousands+ records) on a recurring schedule.</td>
+<td>You need <strong>real-time</strong> freshness within seconds → events or <a href="#f01">01-request-and-reply.md</a>.</td>
+</tr>
+<tr>
+<td><strong>Latency is acceptable</strong> — nightly or hourly is fine.</td>
+<td>A single record must update the instant it changes → <a href="#f02">02-fire-and-forget.md</a> / CDC.</td>
+</tr>
+<tr>
+<td>You can run <strong>off-peak</strong> to protect daytime performance and API limits.</td>
+<td>The volume is tiny (a handful of records) — batch is overkill.</td>
+</tr>
+<tr>
+<td>Source and target each have a <strong>stable unique key</strong> (External ID) to match on.</td>
+<td>There is no reliable key to dedupe against — fix that first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: nightly <strong>ERP → Salesforce</strong> product/price catalog refresh; hourly <strong>Salesforce → data warehouse</strong> export of closed opportunities for BI; daily <strong>account/contact reconciliation</strong> with a master data system; bulk <strong>migration</strong> during a go-live.</p>
+<hr />
+<h2>3. How it works (flowchart)</h2>
+<div class="mermaid">
+flowchart TD
+    A[Scheduler fires off-peak&lt;br/&gt;cron / middleware trigger] --&gt; B{Extract delta only&lt;br/&gt;changed since last run}
+    B --&gt; C[Transform / map fields&lt;br/&gt;middleware or ETL]
+    C --&gt; D[Load in batches via&lt;br/&gt;Bulk API 2.0 - upsert]
+    D --&gt; E{Match on&lt;br/&gt;External ID}
+    E --&gt;|Found| F[Update existing record]
+    E --&gt;|Not found| G[Insert new record]
+    F --&gt; H[Per-batch result&lt;br/&gt;success and error files]
+    G --&gt; H
+    H --&gt; I{Errors?}
+    I --&gt;|Yes| J[Log, alert, retry failed rows]
+    I --&gt;|No| K[Record high-water mark&lt;br/&gt;for next delta]
+    style A fill:#607D8B,color:#fff
+    style C fill:#9C27B0,color:#fff
+    style D fill:#00A1E0,color:#fff
+    style J fill:#F44336,color:#fff
+    style K fill:#4CAF50,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A scheduler (cron, middleware, or a Salesforce scheduled job) kicks off the run <strong>during off-peak hours</strong>.</li>
+<li><strong>Delta sync</strong>: extract only records that <strong>changed since the last run</strong> (using a timestamp or high-water mark), not the whole table.</li>
+<li>A middleware/ETL layer <strong>transforms and maps</strong> fields between the two data models.</li>
+<li>The data is loaded asynchronously in <strong>batches via Bulk API 2.0</strong>.</li>
+<li>The load uses <strong>upsert keyed on an External ID</strong> so each row either updates a match or inserts a new record.</li>
+<li>Bulk API returns <strong>per-batch success and error</strong> results.</li>
+<li>Failed rows are <strong>logged, alerted on, and retried</strong>; the run records a new <strong>high-water mark</strong> for the next delta.</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce (the tech)</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td>REST-based async API to insert/upsert/update/delete/query <strong>large</strong> datasets. Salesforce chunks the job into batches for you.</td>
+<td>The core engine for high-volume load and extract.</td>
+</tr>
+<tr>
+<td><strong>ETL / middleware</strong></td>
+<td>MuleSoft, Informatica, Talend, Jitterbit, etc. Handle scheduling, transformation, connectivity, retries.</td>
+<td>Orchestrating the sync, mapping data models, error handling.</td>
+</tr>
+<tr>
+<td><strong>Scheduled Apex / Flow</strong></td>
+<td><code>Schedulable</code> Apex or a scheduled Flow inside Salesforce.</td>
+<td>Triggering exports/processing from the Salesforce side.</td>
+</tr>
+<tr>
+<td><strong>Bulk API 2.0 Query</strong></td>
+<td>Async extract of large query results.</td>
+<td>Pulling big result sets <strong>out</strong> of Salesforce to a warehouse.</td>
+</tr>
+<tr>
+<td><strong>Data Loader / SF CLI</strong></td>
+<td>Command-line / desktop tools that sit on Bulk API.</td>
+<td>Scriptable scheduled loads, admin one-offs.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Upsert by External ID</strong> is the heart of safe batch sync. The External ID column lets the same job both match-and-update and insert, with no duplicates. A Bulk API 2.0 ingest job specifies it like this:</p>
+<pre><code class="language-json">POST /services/data/v66.0/jobs/ingest
+{
+  &quot;object&quot;: &quot;Account&quot;,
+  &quot;operation&quot;: &quot;upsert&quot;,
+  &quot;externalIdFieldName&quot;: &quot;ERP_Id__c&quot;,
+  &quot;contentType&quot;: &quot;CSV&quot;
+}
+</code></pre>
+<p>Then upload the CSV (keep each file within Salesforce's recommended size), close the job, and poll for results. Conceptually:</p>
+<pre><code class="language-bash"># 1. Create the job (above)  -&gt;  returns a jobId and contentUrl
+# 2. PUT the CSV data to the contentUrl
+# 3. PATCH the job state to &quot;UploadComplete&quot;
+# 4. GET .../jobs/ingest/{jobId}            -&gt; watch state = JobComplete
+# 5. GET .../successfulResults  and  .../failedResults
+</code></pre>
+<p>A scheduled Apex job to <strong>trigger</strong> an export or downstream processing (the callout itself uses a Named Credential, never a hardcoded secret):</p>
+<pre><code class="language-apex">global class NightlySyncJob implements Schedulable {
+    global void execute(SchedulableContext ctx) {
+        // enqueue work; outbound calls go through callout:Warehouse_API
+        System.enqueueJob(new ExportClosedOppsQueueable());
+    }
+}
+// Schedule: System.schedule('Nightly Sync', '0 0 2 * * ?', new NightlySyncJob());
+</code></pre>
+<blockquote>
+<p><strong>Auth</strong>: A middleware tool authenticates to Salesforce as a system integration user, typically via <strong>OAuth 2.0 JWT Bearer</strong> or <strong>Client Credentials</strong> (no interactive login). See <a href="../03-Authentication/04-jwt-bearer-flow.md">Module 03 - JWT Bearer</a> and the <a href="../03-Authentication/README.md">Module 03 README</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Off-peak scheduling</strong></td>
+<td>Daytime batch loads slow users and chew the <strong>24-hour API allocation</strong> (Enterprise starts at 100,000 requests/24h and scales with licenses).</td>
+<td>Run at night/low-traffic windows. Stagger jobs so they do not overlap.</td>
+</tr>
+<tr>
+<td><strong>Delta sync, not full sync</strong></td>
+<td>Re-syncing every row nightly wastes API capacity and processing time.</td>
+<td>Extract only records changed since the last run using a <strong>timestamp / high-water mark</strong>.</td>
+</tr>
+<tr>
+<td><strong>Upsert with External ID</strong></td>
+<td>Without a stable key you create <strong>duplicates</strong> and break cross-system links.</td>
+<td>Define an indexed, unique <strong>External ID</strong> on the object and upsert on it.</td>
+</tr>
+<tr>
+<td><strong>Per-batch error handling</strong></td>
+<td>A bad row should not fail the whole load. Bulk API isolates failures per batch.</td>
+<td>Read <strong>success and error result files</strong>, log failures, retry only failed rows.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>A re-run after a partial failure must not double-insert.</td>
+<td>Upsert (not insert) + External ID makes re-runs <strong>safe to repeat</strong>.</td>
+</tr>
+<tr>
+<td><strong>Bulk vs governor limits</strong></td>
+<td>Bulk API is async and high-throughput, but triggers/flows on the records still run and hit Apex governor limits per batch.</td>
+<td>Bulkify all automation. Consider disabling heavy triggers during migration loads.</td>
+</tr>
+<tr>
+<td><strong>Ordering and dependencies</strong></td>
+<td>Loading children before parents (lookups) fails.</td>
+<td>Load in dependency order (parents first), or use External IDs on lookups so order matters less.</td>
+</tr>
+<tr>
+<td><strong>Monitoring &amp; alerting</strong></td>
+<td>A silent overnight failure is discovered too late.</td>
+<td>Alert on job failure and on error-row thresholds. Track run duration and record counts.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Batch Data Synchronization pattern?</strong>
+A: Moving large volumes of data between Salesforce and another system on a schedule, usually overnight, to keep them in agreement. It is asynchronous, high-volume, and latency-tolerant — the opposite of a real-time call.</p>
+<p><strong>Q: Which Salesforce technology do you use, and why?</strong>
+A: <strong>Bulk API 2.0</strong>, because it is built for asynchronous high-volume load and extract and chunks the work into batches automatically. Usually orchestrated by <strong>ETL/middleware</strong> (MuleSoft, Informatica) that handles scheduling, transformation, and retries.</p>
+<p><strong>Q: How do you avoid creating duplicates?</strong>
+A: <strong>Upsert keyed on an External ID</strong> — a stable, unique key shared with the source system. Each row updates a match or inserts if none exists. This also makes the job idempotent, so a re-run after a partial failure is safe.</p>
+<p><strong>Q: What is delta sync and why does it matter?</strong>
+A: Only extracting and loading records that <strong>changed since the last run</strong>, tracked with a timestamp or high-water mark, instead of the whole dataset. It dramatically cuts API usage, runtime, and load on both systems.</p>
+<p><strong>Q: Why run off-peak, and what limit are you protecting?</strong>
+A: To avoid slowing daytime users and to protect the <strong>24-hour rolling API request allocation</strong> (Enterprise Edition starts around 100,000 and scales with licenses). Off-peak windows leave headroom and reduce contention.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's the overnight delivery truck. Parcels pile up all day, then one big truck hauls them all at night when the roads are empty."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Bulk API 2.0, ETL, middleware, upsert, External ID, delta sync, high-water mark, idempotency, off-peak, API allocation - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. Deeper dive in <a href="../07-Bulk-Async/README.md">Module 07 - Bulk and Async</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_batch_data_synchronization.htm">Batch Data Synchronization (Integration Patterns, v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0.htm">Bulk API 2.0 - Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0_upsert.htm">Upsert Records (Bulk API 2.0, External ID)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm">API Request Limits and Allocations - Quick Reference</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-remote-call-in.md</a> - when an external system calls into Salesforce to create, read, or update data.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - Remote Call-In</h1>
+<blockquote>
+<p><strong>One-liner</strong>: An <strong>external system calls into Salesforce</strong> to create, read, update, or delete data. Salesforce is the listener.
+<strong>Direction</strong>: External → Salesforce (inbound). <strong>Timing</strong>: Synchronous or asynchronous. <strong>Volume</strong>: One record to bulk.
+<strong>Use when</strong>: A website creates a Lead in Salesforce, or an ERP pushes order updates into Salesforce.</p>
+</blockquote>
+<p>This is Module 02, the integration patterns. New to the vocabulary (inbound/outbound, REST/SOAP, idempotency)? See <a href="../01-Fundamentals/README.md">Module 01</a>. The external app must <strong>authenticate first</strong> — see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Remote Call-In flips the direction. In the earlier patterns <strong>Salesforce</strong> picked up the phone and dialed out. Here, Salesforce is the <strong>shop with a front counter</strong>, and an <strong>outside customer walks in</strong> to do business. The external system is the caller; Salesforce exposes a <strong>counter (an API)</strong> and serves the request — looking up a record, creating one, updating one.</p>
+<p>In Salesforce terms: an external app sends an <strong>HTTP/SOAP request</strong> to a Salesforce API endpoint to perform CRUD on records. Salesforce authenticates the caller, runs the operation <strong>under that caller's permissions and sharing</strong>, and returns a response. This is the backbone of "a form on our website creates a Lead" or "our ERP keeps Orders in sync by pushing changes."</p>
+<p>Because someone else is calling <strong>you</strong>, the two big themes are <strong>security</strong> (who is allowed in, and to do what) and <strong>resilience</strong> (handling retries without creating duplicates).</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An <strong>external system needs to push or pull</strong> Salesforce data on its own schedule.</td>
+<td>Salesforce needs to call out and use a reply → <a href="#f01">01-request-and-reply.md</a>.</td>
+</tr>
+<tr>
+<td>The caller drives the timing (a web form submit, an ERP event).</td>
+<td>Salesforce announces an event outward → <a href="#f02">02-fire-and-forget.md</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>standard CRUD</strong> (REST/SOAP) or a <strong>custom contract</strong> (Apex REST).</td>
+<td>Massive scheduled loads you control → <a href="#f03">03-batch-data-synchronization.md</a> (Bulk API).</td>
+</tr>
+<tr>
+<td>You need <strong>multi-object</strong> or transactional inbound logic.</td>
+<td>The external data should stay external and be read live → <a href="#f05">05-data-virtualization.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a marketing <strong>website form creates a Lead</strong>; an <strong>ERP updates Orders</strong> in Salesforce when they ship; a partner portal <strong>reads Account status</strong> via REST; a mobile app does CRUD through a custom <strong>Apex REST</strong> endpoint; a billing system <strong>bulk-loads invoices</strong> via Bulk API.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant EXT as External System
+    participant OAUTH as Salesforce OAuth&lt;br/&gt;(/services/oauth2/token)
+    participant API as Salesforce API&lt;br/&gt;(REST / SOAP / Apex REST)
+    participant DB as Salesforce Records
+    EXT-&gt;&gt;OAUTH: Authenticate (OAuth via Connected App / ECA)
+    OAUTH--&gt;&gt;EXT: access_token + instance_url
+    EXT-&gt;&gt;API: HTTP request + Bearer token&lt;br/&gt;(e.g. POST a Lead)
+    API-&gt;&gt;API: Enforce auth, sharing, validation
+    API-&gt;&gt;DB: Create / Read / Update / Delete
+    DB--&gt;&gt;API: Result
+    API--&gt;&gt;EXT: HTTP status + body (e.g. 201 + new Id)
+    Note over EXT,API: Use upsert by External ID so retries do not duplicate
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The external app <strong>authenticates</strong> to Salesforce with OAuth, using credentials from a <strong>Connected App / External Client App</strong>.</li>
+<li>Salesforce returns an <strong>access token</strong> and the <strong>instance URL</strong> to call.</li>
+<li>The app sends the actual request (e.g. create a Lead) with <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+<li>Salesforce enforces <strong>authentication, the user's sharing/permissions, and validation rules</strong>.</li>
+<li>The CRUD operation runs against the database.</li>
+<li>Salesforce returns the result.</li>
+<li>The app receives an HTTP <strong>status code and body</strong> (e.g. <code>201 Created</code> with the new record Id). Using <strong>upsert by External ID</strong> keeps retries from creating duplicates.</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce (the tech)</h2>
+<p>Inbound calls use either a <strong>standard API</strong> (no code) or a <strong>custom endpoint</strong> (Apex). Pick the simplest that meets the contract.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td>Standard RESTful CRUD over JSON/XML on sObjects.</td>
+<td>Most modern inbound integrations. Single-record CRUD, queries.</td>
+</tr>
+<tr>
+<td><strong>SOAP API</strong></td>
+<td>Standard XML/WSDL CRUD. <strong>Synchronous</strong>.</td>
+<td>SOAP-based callers, legacy enterprise systems.</td>
+</tr>
+<tr>
+<td><strong>Apex REST</strong></td>
+<td>Custom endpoint via <code>@RestResource(urlMapping=...)</code> at <code>/services/apexrest/</code>.</td>
+<td>Custom request/response shape, multi-object or pre/post logic.</td>
+</tr>
+<tr>
+<td><strong>Apex SOAP web service</strong></td>
+<td>Custom SOAP service via the <code>webservice</code> keyword.</td>
+<td>Custom SOAP contract for legacy callers.</td>
+</tr>
+<tr>
+<td><strong>Composite API</strong></td>
+<td>Bundle several REST calls (or related records) into one request.</td>
+<td>Reduce round-trips, multi-step inbound operations.</td>
+</tr>
+<tr>
+<td><strong>Bulk API (2.0)</strong></td>
+<td>Async high-volume inbound load.</td>
+<td>Large inbound data sets (see <a href="#f03">03-batch-data-synchronization.md</a>).</td>
+</tr>
+</tbody>
+</table>
+<p>A custom inbound endpoint with <strong>Apex REST</strong>. Note the <strong>upsert by External ID</strong> for idempotency and the explicit <strong>status code</strong>:</p>
+<pre><code class="language-apex">@RestResource(urlMapping='/v1/orders/*')
+global with sharing class OrderInboundService {
+
+    @HttpPost
+    global static String upsertOrder(String externalId, Decimal amount) {
+        RestResponse res = RestContext.response;
+        try {
+            Order__c o = new Order__c(ERP_Id__c = externalId, Amount__c = amount);
+            // Upsert on the External ID field -&gt; safe to retry, no duplicates
+            upsert o ERP_Id__c;
+            res.statusCode = 200;            // 201 if you detect a fresh insert
+            return o.Id;
+        } catch (Exception e) {
+            res.statusCode = 400;            // return a meaningful error code
+            return 'ERROR: ' + e.getMessage();
+        }
+    }
+}
+</code></pre>
+<p>The classic <strong>Apex SOAP web service</strong> equivalent uses the <code>webservice</code> keyword:</p>
+<pre><code class="language-apex">global with sharing class OrderSoapService {
+    webservice static Id upsertOrder(String externalId, Decimal amount) {
+        Order__c o = new Order__c(ERP_Id__c = externalId, Amount__c = amount);
+        upsert o ERP_Id__c;
+        return o.Id;
+    }
+}
+</code></pre>
+<blockquote>
+<p><strong>Auth (read this)</strong>: the external caller authenticates with a <strong>Connected App / External Client App + OAuth</strong>. For server-to-server use <strong>JWT Bearer</strong> or <strong>Client Credentials</strong>; for user context use the <strong>Web Server flow</strong>. Salesforce runs the operation under that user's profile, permission sets, and sharing rules — so grant <strong>least privilege</strong>. Full detail in <a href="../03-Authentication/README.md">Module 03 README</a>.</p>
+<p><strong>Heads up - SOAP <code>login()</code> retirement</strong>: the legacy SOAP API <code>login()</code> call (API versions 31.0-64.0) is being <strong>retired in Summer '27</strong>. Inbound auth is moving to OAuth (Web Server, JWT Bearer, or Client Credentials). From Summer '26, new orgs also require a <strong>Use Any API Auth</strong> permission to use SOAP <code>login()</code>. Plan inbound integrations on <strong>OAuth</strong>, not <code>login()</code>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API request limits</strong></td>
+<td>Inbound calls count against the org's <strong>24-hour rolling allocation</strong> (Enterprise starts ~100,000 and scales with licenses), shared with all other API traffic.</td>
+<td>Use <strong>Composite/Bulk</strong> to reduce call count. Monitor usage. Rate-limit chatty callers.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>The caller may retry on timeout and create <strong>duplicates</strong>.</td>
+<td>Expose <strong>upsert by External ID</strong>, or dedupe on a business key. Make endpoints safe to call twice.</td>
+</tr>
+<tr>
+<td><strong>Security &amp; least privilege</strong></td>
+<td>Operations run as the <strong>integration user</strong> with that user's sharing and permissions. Over-permissioned users are a breach risk.</td>
+<td>Use a dedicated integration user with <strong>minimum</strong> profile/permission sets. Restrict object/field access.</td>
+</tr>
+<tr>
+<td><strong>Authentication method</strong></td>
+<td>Username-password and SOAP <code>login()</code> are legacy and <strong>being retired</strong>.</td>
+<td>Use <strong>OAuth</strong> (JWT Bearer / Client Credentials for system, Web Server for user). See Module 03.</td>
+</tr>
+<tr>
+<td><strong>Bulkification</strong></td>
+<td>A loop doing one DML per record blows Apex governor limits under load.</td>
+<td>Bulkify Apex REST logic. Accept and process <strong>collections</strong>, not one record per call.</td>
+</tr>
+<tr>
+<td><strong>Proper status codes</strong></td>
+<td>Callers branch on HTTP status; returning 200 for an error breaks their retry logic.</td>
+<td>Return correct codes: <strong>201</strong> create, <strong>200</strong> update, <strong>400</strong> bad input, <strong>401</strong> auth, <strong>409</strong> conflict.</td>
+</tr>
+<tr>
+<td><strong>Validation &amp; automation</strong></td>
+<td>Inbound writes still fire validation rules, triggers, and flows.</td>
+<td>Account for them. Return clear errors when a validation rule blocks the write.</td>
+</tr>
+<tr>
+<td><strong>Sync vs async</strong></td>
+<td>SOAP API and Apex SOAP services are <strong>synchronous</strong>; long work blocks the caller.</td>
+<td>For heavy work, accept the request fast and process async (Queueable / Platform Event), or use Bulk API.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Remote Call-In pattern?</strong>
+A: An external system calls <strong>into</strong> Salesforce to create, read, update, or delete data. Salesforce is the listener exposing an API. It is inbound — the opposite of Request and Reply, where Salesforce calls out.</p>
+<p><strong>Q: What are the main technologies for inbound calls?</strong>
+A: Standard <strong>REST API</strong> and <strong>SOAP API</strong> for CRUD, <strong>Apex REST</strong> (<code>@RestResource</code>) and <strong>Apex SOAP web services</strong> (<code>webservice</code> keyword) for custom endpoints, <strong>Composite API</strong> to bundle calls, and <strong>Bulk API</strong> for high volume.</p>
+<p><strong>Q: How does the external app authenticate?</strong>
+A: Through a <strong>Connected App / External Client App</strong> using <strong>OAuth</strong> — JWT Bearer or Client Credentials for server-to-server, Web Server flow for user context. Salesforce then runs the operation under that user's permissions and sharing. Grant least privilege. (The old SOAP <code>login()</code> is retiring in Summer '27.)</p>
+<p><strong>Q: How do you stop a retried call from creating duplicates?</strong>
+A: Make the endpoint <strong>idempotent</strong> — expose <strong>upsert keyed on an External ID</strong> instead of insert, or dedupe on a business key. A repeated call then updates the same record rather than creating a second one.</p>
+<p><strong>Q: REST API vs Apex REST — when do you build a custom endpoint?</strong>
+A: Use the <strong>standard REST API</strong> when plain sObject CRUD is enough — no code. Build <strong>Apex REST</strong> when you need a custom request/response shape, multi-object or transactional logic, or pre/post processing the standard API cannot express.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a shop counter. Outside customers walk in to our store (Salesforce) and do business — we check who they are, serve the request, and hand back a receipt."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>REST API, SOAP API, Apex REST, <code>@RestResource</code>, <code>webservice</code> keyword, Composite API, Bulk API, Connected App, External Client App, OAuth, idempotency, least privilege, status codes - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. Deeper dive in <a href="../04-Inbound-APIs/README.md">Module 04 - Inbound APIs</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_remote_call_in.htm">Remote Call-In (Integration Patterns, v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest.htm">Exposing Apex Classes as REST Web Services</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=005132110&amp;type=1">Platform SOAP API login() Retirement (Summer '27) - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm">API Request Limits and Allocations - Quick Reference</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-data-virtualization.md</a> - reading and writing external data live, without copying it into Salesforce.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Data Virtualization</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Salesforce reads external data <strong>live, on demand</strong>, and never stores a copy.
+<strong>Direction</strong>: Salesforce → External (outbound, read at view time). <strong>Timing</strong>: Synchronous, per view. <strong>Volume</strong>: One list/record at a time, but it can front a huge external store.
+<strong>Use when</strong>: You need to <strong>see</strong> external data inside Salesforce without <strong>copying</strong> it.</p>
+</blockquote>
+<p>This is Module 02, the integration patterns. New to the vocabulary (sync/async, callout)? See <a href="../01-Fundamentals/README.md">Module 01</a>. For the auth behind the callout, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Data Virtualization is a <strong>window</strong>, not a <strong>warehouse</strong>. Instead of trucking boxes of data into your house and stacking them in the garage, you cut a window in the wall and look at the warehouse next door. The goods stay where they are. You just see them when you glance through the glass.</p>
+<p>In Salesforce terms: you define an <strong>External Object</strong> that looks and feels like a normal object (records, list views, detail pages, even some relationships), but the rows live in <strong>SAP, an Oracle archive, or another Salesforce org</strong>. When a user opens the list view, Salesforce makes a <strong>live callout</strong> to the source, fetches the rows for that screen, and shows them. Close the tab and nothing is stored. This is the opposite of <a href="#f03">Batch Data Synchronization</a>, which <strong>copies</strong> data on a schedule.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data must stay in the <strong>system of record</strong> (compliance, size, licensing).</td>
+<td>You need it offline, in reports at scale, or in heavy automation → copy it via <a href="#f03">03-batch-data-synchronization.md</a>.</td>
+</tr>
+<tr>
+<td>The dataset is <strong>huge</strong> or rarely viewed. Copying it is wasteful.</td>
+<td>You need fast, complex SOQL, roll-ups, or triggers on the data.</td>
+</tr>
+<tr>
+<td>Users need a <strong>real-time view</strong> but Salesforce is not the owner.</td>
+<td>The source is <strong>slow or often down</strong>. Every view becomes a failed callout.</td>
+</tr>
+<tr>
+<td>You want a record <strong>detail page</strong> that stitches Salesforce + external fields.</td>
+<td>You only need one value once → just do a <a href="#f01">01-request-and-reply.md</a> callout.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: show <strong>SAP invoices</strong> on the Account page, browse a <strong>billions-of-rows order archive</strong> that was offloaded from the production DB, surface <strong>inventory</strong> from an ERP, or read records from <strong>another Salesforce org</strong> without an ETL job.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant SF as Salesforce&lt;br/&gt;(External Object __x)
+    participant SC as Salesforce Connect&lt;br/&gt;(Adapter)
+    participant EXT as External Store&lt;br/&gt;(SAP / Oracle / Org)
+    U-&gt;&gt;SF: Open list view or record (Invoice__x)
+    SF-&gt;&gt;SC: Need rows for this screen
+    SC-&gt;&gt;EXT: Live callout (OData query / REST)
+    Note over SC,EXT: No data stored. Fetched at view time.
+    EXT--&gt;&gt;SC: Rows for this page only
+    SC--&gt;&gt;SF: Map fields to the External Object
+    SF--&gt;&gt;U: Render records live
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A user opens an External Object list view, report, or detail page.</li>
+<li>Salesforce hands the request to <strong>Salesforce Connect</strong> and the configured <strong>adapter</strong>.</li>
+<li>The adapter issues a <strong>live callout</strong> to the source (an <strong>OData query</strong> for the OData adapter, a REST call for cross-org/Apex).</li>
+<li>The source returns <strong>only the rows for that screen</strong> (paged).</li>
+<li>Salesforce maps the response onto the External Object's fields.</li>
+<li>The records render. Nothing is persisted. The next view triggers a <strong>fresh callout</strong>.</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce (the tech)</h2>
+<p>External data is exposed through <strong>Salesforce Connect</strong> plus an <strong>External Data Source</strong> and its <strong>External Objects</strong> (API names end in <strong><code>__x</code></strong>, vs <code>__c</code> for custom objects). You pick an <strong>adapter</strong> based on the source.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OData 2.0 / 4.0 / 4.01 adapter</strong></td>
+<td>Salesforce Connect speaks the <strong>OData</strong> REST protocol to any OData-compliant endpoint.</td>
+<td>SAP, Microsoft, and middleware that publish an OData service.</td>
+</tr>
+<tr>
+<td><strong>Cross-Org adapter</strong></td>
+<td>Connects to <strong>another Salesforce org</strong> via the Lightning Platform REST API.</td>
+<td>Org-to-org data sharing, point and click.</td>
+</tr>
+<tr>
+<td><strong>Apex Connector Framework</strong></td>
+<td>Custom adapter you write in Apex by extending <code>DataSource.Connection</code> and <code>DataSource.Provider</code>.</td>
+<td>Any non-OData source (legacy DB, custom REST, web service).</td>
+</tr>
+<tr>
+<td><strong>External Object (<code>__x</code>)</strong></td>
+<td>The metadata shell. Fields, page layouts, list views, search.</td>
+<td>The thing users actually see and click.</td>
+</tr>
+</tbody>
+</table>
+<p>Shape of a <strong>custom adapter</strong> (the framework calls <code>query</code> when a user views records):</p>
+<pre><code class="language-apex">global class ArchiveProvider extends DataSource.Provider {
+    override global List&lt;DataSource.Capability&gt; getCapabilities() {
+        return new List&lt;DataSource.Capability&gt;{ DataSource.Capability.ROW_QUERY };
+    }
+    override global List&lt;DataSource.AuthenticationCapability&gt; getAuthenticationCapabilities() {
+        return new List&lt;DataSource.AuthenticationCapability&gt;{
+            DataSource.AuthenticationCapability.ANONYMOUS
+        };
+    }
+    override global DataSource.Connection getConnection(DataSource.ConnectionParams p) {
+        return new ArchiveConnection(); // extends DataSource.Connection, implements query()
+    }
+}
+</code></pre>
+<blockquote>
+<p><strong>Auth</strong>: the OData and cross-org adapters authenticate with a <strong>Named Credential + External Credential</strong>, the same plumbing as any callout. See <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 - Named Credentials</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Every view is a callout</strong></td>
+<td>A list view, report, or detail page each triggers a live request. Slow source = slow page.</td>
+<td>Keep the source fast. Page results. Don't put External Objects on hot, high-traffic screens.</td>
+</tr>
+<tr>
+<td><strong>Callout limits</strong></td>
+<td>OData callouts are capped (about <strong>10,000 per hour</strong> on Enterprise/Performance/Unlimited; higher on premium).</td>
+<td>Watch volume. Aggressive list views or reports burn the allowance.</td>
+</tr>
+<tr>
+<td><strong>No triggers on <code>__x</code></strong></td>
+<td>External Objects <strong>do not support standard Apex triggers</strong>, so you cannot react to a change in the source object directly.</td>
+<td>For change reactions, use the push pattern → <a href="#f06">06-ui-update-based-on-data-changes.md</a>.</td>
+</tr>
+<tr>
+<td><strong>Limited feature set</strong></td>
+<td><strong>No formula fields, no roll-up summaries.</strong> Reporting and relationships are limited (only <strong>indirect</strong> and <strong>external lookups</strong>).</td>
+<td>Confirm each feature before you design. Treat External Objects as a read-mostly view, not a full object.</td>
+</tr>
+<tr>
+<td><strong>Availability depends on the source</strong></td>
+<td>If the external system is down, the records simply do not load.</td>
+<td>Plan for graceful failure. The source's uptime becomes your uptime.</td>
+</tr>
+<tr>
+<td><strong>OData requirement</strong></td>
+<td>The OData adapter needs an <strong>OData 2.0 / 4.0 / 4.01</strong> compliant endpoint.</td>
+<td>If the source is not OData, use the <strong>Apex Connector Framework</strong> instead.</td>
+</tr>
+<tr>
+<td><strong>Writes are limited</strong></td>
+<td>Some adapters support writable External Objects, many do not.</td>
+<td>Verify create/update support per adapter before promising edits.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Data Virtualization pattern?</strong>
+A: Salesforce displays external data <strong>live</strong> without storing a copy. You define an External Object backed by Salesforce Connect, and Salesforce queries the source on demand when a user views a record or list. It is a window onto the data, not a warehouse copy.</p>
+<p><strong>Q: How do you implement it in Salesforce?</strong>
+A: <strong>Salesforce Connect</strong> with an <strong>External Data Source</strong> and <strong>External Objects</strong> (<code>__x</code>). Choose an adapter: the <strong>OData adapter</strong> for OData endpoints, the <strong>Cross-Org adapter</strong> for another Salesforce org, or a custom adapter via the <strong>Apex Connector Framework</strong> for anything else.</p>
+<p><strong>Q: When would you copy the data instead (Batch Sync) rather than virtualize it?</strong>
+A: When you need it offline, in large-scale reports, in heavy automation, or with fast complex SOQL and roll-ups. Virtualize when the data must stay in the source, is huge, or is rarely viewed. Copy when Salesforce needs to own and work it.</p>
+<p><strong>Q: What are the main limitations of External Objects?</strong>
+A: No standard triggers, no formula fields, no roll-up summaries, limited reporting, and only indirect or external lookup relationships. Each view is a callout subject to limits, and availability tracks the source system's uptime.</p>
+<p><strong>Q: The source is slow and the Account page now takes 8 seconds. What do you do?</strong>
+A: Don't virtualize on a hot page. Move the External Object off the critical path (a related list users open deliberately, or a separate tab), page the results, cache where allowed, or switch to a scheduled <strong>Batch Sync</strong> copy if the page must be fast.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a window into the warehouse next door. You see the goods live through the glass, but you never haul them into your own garage."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Salesforce Connect, External Object (<code>__x</code>), External Data Source, OData, Cross-Org adapter, Apex Connector Framework, callout - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_data_virtualization.htm">Data Virtualization - Integration Patterns and Practices (v66.0, Spring '26)</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.odata_adapter_about.htm&amp;type=5">OData Adapters for Salesforce Connect - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_connector_start.htm">Get Started with the Apex Connector Framework - Apex Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.platform_connect_considerations.htm&amp;type=5">Salesforce Platform Features Supported by Salesforce Connect - Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.platform_connect_general_limits.htm&amp;type=5">General Limits for Salesforce Connect - Salesforce Help</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-ui-update-based-on-data-changes.md</a> - when the UI must refresh the instant data changes.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - UI Update Based on Data Changes</h1>
+<blockquote>
+<p><strong>One-liner</strong>: When data changes, an <strong>event is pushed</strong> so the Salesforce UI refreshes <strong>the instant</strong> it happens.
+<strong>Direction</strong>: Bidirectional (change inside or outside Salesforce → UI). <strong>Timing</strong>: Asynchronous push, near real-time. <strong>Volume</strong>: Stream of small events over an event bus.
+<strong>Use when</strong>: A dashboard or LWC must <strong>auto-refresh</strong> the moment a record changes, with no polling.</p>
+</blockquote>
+<p>This is Module 02, the final integration pattern. New to the vocabulary (async, event bus, push)? See <a href="../01-Fundamentals/README.md">Module 01</a>. For the auth behind external subscribers, see <a href="../03-Authentication/README.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Old way: you keep <strong>refreshing your inbox</strong> to see if mail arrived. That is <strong>polling</strong>. Wasteful, slow, and you still miss things between refreshes.</p>
+<p>New way: a <strong>notification pops</strong> the second the mail lands. You did nothing. The mail came to you.</p>
+<p>That is this pattern. Instead of a component asking "anything new?" every few seconds, the data change <strong>publishes an event</strong> to a shared <strong>event bus</strong>, and any <strong>subscriber</strong> that cares gets pushed the news immediately. In Salesforce, a Lightning Web Component sitting in the browser subscribes to that stream and updates the screen the moment an event arrives. The change can originate <strong>inside</strong> Salesforce (a record edit) or <strong>outside</strong> it (an external system publishes an event), and the UI reacts either way.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A screen must reflect a change <strong>as it happens</strong> (live dashboard, agent console).</td>
+<td>You need the answer <strong>right now in the same transaction</strong> → <a href="#f01">01-request-and-reply.md</a>.</td>
+</tr>
+<tr>
+<td>You want to <strong>stop polling</strong> the server on a timer.</td>
+<td>You only need a one-off send with no listener → <a href="#f02">02-fire-and-forget.md</a>.</td>
+</tr>
+<tr>
+<td>Many subscribers care about <strong>the same change</strong> (fan-out).</td>
+<td>You need guaranteed in-order, transactional delivery into a single system.</td>
+</tr>
+<tr>
+<td>The trigger lives <strong>outside</strong> Salesforce and must reach the UI.</td>
+<td>The data lives elsewhere and you only need to <strong>view</strong> it → <a href="#f05">05-data-virtualization.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a <strong>support console</strong> that flashes when a case is reassigned, a <strong>sales dashboard</strong> that updates as opportunities close, an <strong>order tracker</strong> that moves when a warehouse system publishes a shipment event, a <strong>bid screen</strong> in an auction app.</p>
+<hr />
+<h2>3. How it works (flowchart)</h2>
+<div class="mermaid">
+flowchart LR
+    A["Data changes&lt;br/&gt;record edit or external publish"] --&gt; B["Event published&lt;br/&gt;CDC or Platform Event"]
+    B --&gt; C["Event Bus&lt;br/&gt;stores + sequences + replay IDs"]
+    C --&gt; D["Subscriber: LWC in browser&lt;br/&gt;via lightning/empApi over CometD"]
+    C --&gt; E["Subscriber: external app&lt;br/&gt;via Pub/Sub API over gRPC"]
+    D --&gt; F["UI updates instantly"]
+
+    style A fill:#ff9900,color:#fff
+    style B fill:#00A1E0,color:#fff
+    style C fill:#9C27B0,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style E fill:#607D8B,color:#fff
+    style F fill:#4CAF50,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>A record changes in Salesforce, or an external system decides something happened.</li>
+<li>An event is <strong>published</strong>. Use <strong>Change Data Capture (CDC)</strong> for record changes, or a custom <strong>Platform Event</strong> for business signals.</li>
+<li>The event lands on the <strong>event bus</strong>, which stores and sequences it and tags each with a <strong>replay ID</strong>.</li>
+<li>Subscribers receive a <strong>push</strong>. Inside the Salesforce UI, an <strong>LWC</strong> subscribes via <strong><code>lightning/empApi</code></strong> over <strong>CometD</strong>. Outside Salesforce, services subscribe via the <strong>Pub/Sub API</strong>.</li>
+<li>The LWC handler updates component state and the <strong>screen refreshes</strong> with no user action.</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce (the tech)</h2>
+<p>Two halves: <strong>publish</strong> the change as an event, then <strong>subscribe</strong> to it. The subscriber differs depending on whether it is the <strong>Salesforce UI</strong> or an <strong>external system</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it is</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Change Data Capture (CDC)</strong></td>
+<td>Salesforce auto-publishes a change event when a record is created, updated, deleted, or undeleted.</td>
+<td>"React when this record changes." No code to publish.</td>
+</tr>
+<tr>
+<td><strong>Platform Events</strong></td>
+<td>Custom, schema-defined events you publish from Apex, Flow, or an API.</td>
+<td>Custom business signals, "OrderShipped," "BidPlaced."</td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>The <strong>modern</strong> unified interface. <strong>gRPC + HTTP/2</strong>, payloads in <strong>Apache Avro</strong>. Subscribe to Platform Events, CDC, and monitoring events through one API.</td>
+<td><strong>External</strong> subscribers and publishers. The preferred choice today.</td>
+</tr>
+<tr>
+<td><strong><code>lightning/empApi</code></strong></td>
+<td>LWC module to subscribe <strong>inside the browser</strong> over a shared <strong>CometD</strong> connection.</td>
+<td>A component in the <strong>Salesforce UI</strong> that must live-update.</td>
+</tr>
+<tr>
+<td><strong>Streaming API (legacy)</strong></td>
+<td><strong>PushTopic</strong> and <strong>generic events</strong> over CometD. Salesforce no longer enhances these.</td>
+<td>Older integrations only. Prefer Pub/Sub API / Platform Events.</td>
+</tr>
+</tbody>
+</table>
+<p>Minimal LWC subscriber (note <code>empApi</code> is <strong>desktop-only</strong>, <strong>API 44.0+</strong>, and works on the <strong>main window</strong> only):</p>
+<pre><code class="language-javascript">import { subscribe, unsubscribe, onError } from 'lightning/empApi';
+
+const CHANNEL = '/data/CaseChangeEvent'; // CDC channel for Case
+
+connectedCallback() {
+    subscribe(CHANNEL, -1, (event) =&gt; {
+        // event.data.payload holds the change. Refresh the UI.
+        this.refreshFromEvent(event);
+    }).then((sub) =&gt; { this.subscription = sub; });
+
+    onError((err) =&gt; console.error('Streaming error', err));
+}
+
+disconnectedCallback() {
+    unsubscribe(this.subscription, () =&gt; {});
+}
+</code></pre>
+<p>The <code>-1</code> is a <strong>replay option</strong>: <code>-1</code> = only new events from now, <code>-2</code> = all events still in the retention window, or a specific <strong>replay ID</strong> to resume exactly where you left off after a disconnect.</p>
+<blockquote>
+<p><strong>Auth</strong>: external subscribers using the <strong>Pub/Sub API</strong> authenticate with OAuth (e.g. the JWT Bearer or Client Credentials flow). See <a href="../03-Authentication/README.md">Module 03</a>. The in-browser <code>empApi</code> rides the logged-in user's session, so no extra auth.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>It is async push, not request/reply</strong></td>
+<td>The UI reacts <strong>after</strong> the fact. There is no return value to the caller.</td>
+<td>Use it to <strong>notify</strong>, not to fetch a value you need synchronously.</td>
+</tr>
+<tr>
+<td><strong>The client must subscribe</strong></td>
+<td>No subscriber means the event is delivered to no one. Events are not stored forever.</td>
+<td>Subscribe on component load. Reconnect and <strong>replay</strong> on disconnect.</td>
+</tr>
+<tr>
+<td><strong>Retention / replay window</strong></td>
+<td>Standard-volume events are retained about <strong>24 hours</strong>; high-volume events and the <strong>Pub/Sub API</strong> stream about <strong>72 hours</strong>.</td>
+<td>Persist the last <strong>replay ID</strong> and resume from it. Past the window, events are gone.</td>
+</tr>
+<tr>
+<td><strong>Delivery limits</strong></td>
+<td>There are caps on event publishing and delivery (per the org's allocation).</td>
+<td>Don't fire an event per row in a tight loop. Design coarse-grained events.</td>
+</tr>
+<tr>
+<td><strong><code>empApi</code> is UI-side only</strong></td>
+<td>Desktop browsers, main window, API 44.0+. Not for server-to-server.</td>
+<td>Use the <strong>Pub/Sub API</strong> for external/back-end subscribers.</td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API for external, empApi for internal</strong></td>
+<td>They solve different ends of the same bus.</td>
+<td>External app or middleware → <strong>Pub/Sub API</strong>. Component in the Salesforce UI → <strong><code>lightning/empApi</code></strong>.</td>
+</tr>
+<tr>
+<td><strong>CDC object enablement</strong></td>
+<td>CDC must be <strong>enabled per object</strong>, and orgs have a base allocation of selectable objects.</td>
+<td>Enable only the objects you need. Buy more allocation if required.</td>
+</tr>
+<tr>
+<td><strong>Ordering and duplicates</strong></td>
+<td>Events can in rare cases be redelivered.</td>
+<td>Make handlers <strong>idempotent</strong> and use the replay ID / event UUID to dedupe.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is the UI Update Based on Data Changes pattern?</strong>
+A: When data changes, an event is <strong>pushed</strong> over an event bus and subscribers react in near real time, so the UI refreshes the instant the change happens instead of polling on a timer. The change can come from inside Salesforce (CDC) or outside it (a Platform Event published by another system).</p>
+<p><strong>Q: How does a Lightning Web Component get live updates?</strong>
+A: It imports the <strong><code>lightning/empApi</code></strong> module and calls <code>subscribe</code> on a streaming channel (a Platform Event or a CDC channel) over a shared <strong>CometD</strong> connection. When an event arrives, the callback fires and the component updates its state. It is desktop-only, API 44.0+, main window only.</p>
+<p><strong>Q: Pub/Sub API vs the legacy Streaming API. Why does the modern one win?</strong>
+A: Pub/Sub API is <strong>gRPC over HTTP/2</strong> with <strong>Avro</strong> binary payloads and <strong>one unified interface</strong> to publish and subscribe across Platform Events, CDC, and monitoring events, with flow control and a 72-hour replay window. The legacy Streaming API (PushTopic, generic events over CometD) is no longer enhanced. Use Pub/Sub API for external clients, <code>empApi</code> inside the UI.</p>
+<p><strong>Q: What is a replay ID and why does it matter?</strong>
+A: Every event on the bus gets a <strong>replay ID</strong> marking its position in the stream. If a subscriber disconnects, it reconnects and asks to <strong>replay from the last ID it saw</strong>, so it catches the events it missed instead of losing them, as long as they are still inside the retention window (about 24 to 72 hours).</p>
+<p><strong>Q: CDC or Platform Events? When do you choose which?</strong>
+A: <strong>CDC</strong> when you want to react to <strong>record changes</strong> with no publishing code, it auto-fires on create/update/delete/undelete. <strong>Platform Events</strong> when you need a <strong>custom business signal</strong> with your own schema, published deliberately from Apex, Flow, or an external system.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Stop hitting refresh on your inbox. This is the notification that pops the second mail arrives. The change comes to you."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Change Data Capture, Platform Event, event bus, Pub/Sub API, <code>lightning/empApi</code>, CometD, replay ID, retention window - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_ui_update_data_changes.htm">UI Update Based on Data Changes - Integration Patterns and Practices (v66.0, Spring '26)</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/intro.html">Pub/Sub API - Get Started - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/component-library/bundle/lightning-emp-api/documentation">lightning/empApi - Lightning Component Library</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_intro.htm">Change Data Capture Developer Guide - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_streaming.meta/api_streaming/using_streaming_api_durability.htm">Message Durability - Streaming API Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README.md</a> for the full pattern map. From here, continue to <a href="../03-Authentication/README.md">Module 03 - Authentication</a> (already built, the auth behind every callout and external subscriber) and then Module 04 to keep going.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 02 Patterns · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

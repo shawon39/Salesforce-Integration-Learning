@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Outbound Callouts Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Outbound Callouts</h1>
+  <div class="sub">How Salesforce securely calls external systems: HTTP, Named Credentials, External Services, async, Continuation, and limits.</div>
+  <div>
+    <span class="pill">HTTP callouts</span><span class="pill">External Services</span>
+    <span class="pill">Named Credentials</span><span class="pill">SOAP / WSDL2Apex</span>
+    <span class="pill">Async callouts</span><span class="pill">Continuation &amp; limits</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - HTTP Callouts (Apex)</a></li>
+<li class=""><a href="#f02">02 - Named Credentials for Callouts</a></li>
+<li class=""><a href="#f03">03 - External Services (Low-Code Callouts from Flow)</a></li>
+<li class=""><a href="#f04">04 - SOAP Callouts (WSDL2Apex)</a></li>
+<li class=""><a href="#f05">05 - Asynchronous Callouts</a></li>
+<li class=""><a href="#f06">06 - Continuation Pattern</a></li>
+<li class=""><a href="#f07">07 - Callout Limits and Testing</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 05 - Outbound Callouts (Salesforce → External)</h1>
+<blockquote>
+<p><strong>Goal</strong>: Make Salesforce talk OUT to other systems, securely and within limits.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>The one rule</strong>: authenticate every callout with a <strong>Named Credential</strong>. Never hardcode a URL or secret.</p>
+</blockquote>
+<p>Outbound means <strong>Salesforce initiates</strong> the call. This is the <a href="../02-Integration-Patterns/01-request-and-reply.md">Request and Reply</a> (and sometimes Fire and Forget) pattern in practice. This module covers how to make the call, secure it, do it from low-code, handle SOAP, go asynchronous, and stay inside the governor limits.</p>
+<hr />
+<h2>How to use this module</h2>
+<ol>
+<li>Start with <strong><a href="#f01">01-http-callouts.md</a></strong>, the core Apex callout.</li>
+<li>Lock in <strong><a href="#f02">02-named-credentials-for-callouts.md</a></strong>, the secure way to authenticate.</li>
+<li>Learn when to go <strong>async</strong> (<a href="#f05">05</a>) or use a <strong>Continuation</strong> (<a href="#f06">06</a>).</li>
+<li>Keep <strong><a href="#f07">07-callout-limits-and-testing.md</a></strong> open as your reference.</li>
+</ol>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">http-callouts</a></td>
+<td><code>Http</code> / <code>HttpRequest</code> / <code>HttpResponse</code> in Apex</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">named-credentials-for-callouts</a></td>
+<td>Secure auth, no hardcoding, vs Remote Site Settings</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">external-services</a></td>
+<td>Low-code callouts from Flow via OpenAPI</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">soap-callouts-wsdl2apex</a></td>
+<td>Outbound SOAP from generated Apex stubs</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">asynchronous-callouts</a></td>
+<td><code>@future</code>, Queueable, Batch Apex</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">continuation-pattern</a></td>
+<td>Long-running callouts from the UI, non-blocking</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="#f07">callout-limits-and-testing</a></td>
+<td>Limits + <code>HttpCalloutMock</code> testing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Which callout approach? (decision tree)</h2>
+<div class="mermaid">
+flowchart TD
+    Start([Salesforce needs to call out]) --&gt; Q1{Code or low-code?}
+    Q1 --&gt;|Low-code / Flow| ES[External Services]
+    Q1 --&gt;|Apex| Q2{REST or SOAP target?}
+    Q2 --&gt;|SOAP / WSDL| WSDL[WSDL2Apex stub]
+    Q2 --&gt;|REST| Q3{Execution context?}
+    Q3 --&gt;|Sync and fast| HTTP[HTTP callout]
+    Q3 --&gt;|From a Lightning page, slow API| CONT[Continuation]
+    Q3 --&gt;|After DML, from trigger, or long| ASYNC[Async: future / Queueable / Batch]
+
+    style HTTP fill:#00A1E0,color:#fff
+    style ES fill:#4CAF50,color:#fff
+    style CONT fill:#ff9900,color:#fff
+    style ASYNC fill:#ff9900,color:#fff
+    style WSDL fill:#9C27B0,color:#fff
+
+</div>
+<blockquote>
+<p><strong>Always</strong> route auth through a <strong>Named Credential</strong> (<code>callout:Name/path</code>), whichever approach you pick.</p>
+</blockquote>
+<hr />
+<h2>Callout limits cheat sheet (memorize)</h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Callouts per transaction</td>
+<td><strong>100</strong></td>
+</tr>
+<tr>
+<td>Request + response size</td>
+<td><strong>6 MB</strong> sync, <strong>12 MB</strong> async</td>
+</tr>
+<tr>
+<td>Timeout per callout</td>
+<td>default 10s, <strong>max 120s</strong></td>
+</tr>
+<tr>
+<td>Total callout time per transaction</td>
+<td><strong>120s</strong></td>
+</tr>
+<tr>
+<td>Callout after uncommitted DML</td>
+<td><strong>Not allowed</strong> (move async or call out first)</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>up to <strong>3</strong> parallel callouts, <strong>120s</strong> each</td>
+</tr>
+<tr>
+<td>Concurrent long-running sync requests (&gt;5s)</td>
+<td><strong>10</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Interview rapid-fire</h2>
+<p><strong>Q: How do you authenticate an outbound callout?</strong>
+→ A <strong>Named Credential</strong> (with an External Credential). The endpoint is <code>callout:Name/path</code>, and Salesforce injects the auth header. No hardcoded secrets, no Remote Site Setting needed.</p>
+<p><strong>Q: "You have uncommitted work pending" — why?</strong>
+→ A callout after a DML in the same transaction. Call out <strong>before</strong> DML, or move it to an async context.</p>
+<p><strong>Q: @future vs Queueable?</strong>
+→ Queueable (<code>Database.AllowsCallouts</code>) is preferred: it accepts objects/sObjects, is chainable, and is monitorable. <code>@future(callout=true)</code> is the simpler fire-and-forget (primitives only, no return).</p>
+<p><strong>Q: A Lightning page calls a slow API. How to avoid blocking?</strong>
+→ The <strong>Continuation</strong> pattern: the callout runs async, the server thread is released, and a callback handles the response. Up to 3 parallel callouts, 120s each.</p>
+<p><strong>Q: How do you test callouts?</strong>
+→ Implement <strong><code>HttpCalloutMock</code></strong> (or <code>WebServiceMock</code>), register with <code>Test.setMock</code>, and wrap async in <code>Test.startTest()/stopTest()</code>. Live callouts aren't allowed in tests.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts.htm">Invoking Callouts Using Apex — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations — Apex Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.nc_named_credentials.htm&amp;type=5">Named Credentials — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_continuations.htm">Continuations — Apex Developer Guide</a></li>
+</ul>
+<p><em>Each file has its own Sources section with the specific official doc.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - HTTP Callouts (Apex)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Apex sends an HTTP request <strong>out</strong> to an external REST service and reads the response, using the <code>Http</code>, <code>HttpRequest</code>, and <code>HttpResponse</code> classes.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Auth</strong>: a <strong>Named Credential</strong> (never a hardcoded URL or secret).
+<strong>Use when</strong>: Salesforce code needs to call an external REST API.</p>
+</blockquote>
+<p>This is Module 05, outbound callouts (Salesforce calling external systems). For the auth object behind every callout, see <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 - Named Credentials</a>. For the design pattern, see <a href="../02-Integration-Patterns/01-request-and-reply.md">Module 02 - Request and Reply</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A callout is Salesforce <strong>placing the phone call</strong> instead of answering one. Your Apex builds a request (method, URL path, headers, body), hands it to the <code>Http</code> class, and gets back an <code>HttpResponse</code> with a status code and body. The golden rule: the <strong>address and credentials live in a Named Credential</strong>, so your code says <code>callout:My_API/users/42</code>, never a raw URL with a token glued on.</p>
+<p>That one habit, using <code>callout:</code>, is what separates a clean integration from a security incident. Secrets stay in Salesforce's encrypted store and rotate centrally. Your code stays portable across sandboxes and production.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apex needs to call an external <strong>REST</strong> endpoint.</td>
+<td>Low-code team wants it in Flow → <a href="#f03">03-external-services.md</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>full control</strong> over request/response.</td>
+<td>External service is <strong>SOAP/WSDL</strong> → <a href="#f04">04-soap-callouts-wsdl2apex.md</a>.</td>
+</tr>
+<tr>
+<td>The call is <strong>fast</strong> and fits a transaction.</td>
+<td>Long-running from a screen → <a href="#f06">06-continuation-pattern.md</a>.</td>
+</tr>
+<tr>
+<td>Triggered synchronously and quickly.</td>
+<td>Fired from a trigger / after DML → <a href="#f05">05-asynchronous-callouts.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: fetch a credit score, validate an address, push an order to an ERP, call a shipping rate API.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant APX as Apex
+    participant NC as Named Credential
+    participant EXT as External REST API
+    APX-&gt;&gt;NC: send(req) with endpoint callout:My_API/users/42
+    NC-&gt;&gt;NC: Inject base URL + auth header (token)
+    NC-&gt;&gt;EXT: HTTPS GET /users/42
+    EXT--&gt;&gt;NC: 200 OK + JSON
+    NC--&gt;&gt;APX: HttpResponse (status + body)
+    APX-&gt;&gt;APX: Parse JSON, act on it
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>Apex builds an <code>HttpRequest</code> whose endpoint starts with <code>callout:NamedCredentialName</code>.
+2-3. At send time Salesforce swaps in the real <strong>base URL</strong> and adds the <strong>auth header</strong> from the Named Credential.</li>
+<li>The external API responds.
+5-6. Apex receives the <code>HttpResponse</code> and parses the body (usually JSON).</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<pre><code class="language-apex">Http http = new Http();
+HttpRequest req = new HttpRequest();
+req.setEndpoint('callout:My_API/users/42'); // base URL + auth from Named Credential
+req.setMethod('GET');
+req.setHeader('Content-Type', 'application/json');
+req.setTimeout(120000); // ms, max 120000 (120s)
+
+HttpResponse res = http.send(req);
+if (res.getStatusCode() == 200) {
+    Map&lt;String, Object&gt; body =
+        (Map&lt;String, Object&gt;) JSON.deserializeUntyped(res.getBody());
+    // use body
+} else {
+    // handle 4xx/5xx, log, retry as appropriate
+}
+</code></pre>
+<p><strong>POST with a body</strong></p>
+<pre><code class="language-apex">req.setEndpoint('callout:My_API/orders');
+req.setMethod('POST');
+req.setHeader('Content-Type', 'application/json');
+req.setBody(JSON.serialize(new Map&lt;String,Object&gt;{ 'sku' =&gt; 'A-100', 'qty' =&gt; 2 }));
+</code></pre>
+<blockquote>
+<p><strong>Named Credential vs Remote Site Setting</strong>: a <strong>Named Credential</strong> supplies the URL <em>and</em> authentication, and is the recommended approach. If you ever call a raw hardcoded URL (not recommended), that host must be whitelisted as a <strong>Remote Site Setting</strong> or the callout is blocked. Using <code>callout:</code> avoids that entirely.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No callout after DML</strong></td>
+<td>An uncommitted DML in the same transaction blocks the callout (<code>You have uncommitted work pending</code>).</td>
+<td>Call out <strong>before</strong> DML, or move the callout to async.</td>
+</tr>
+<tr>
+<td><strong>Callout limits</strong></td>
+<td>Max <strong>100</strong> callouts per transaction; request/response max <strong>6 MB sync, 12 MB async</strong>.</td>
+<td>Don't loop callouts per record; bulkify.</td>
+</tr>
+<tr>
+<td><strong>Timeout</strong></td>
+<td>Default 10s, max <strong>120s</strong> per callout; total <strong>120s</strong> per transaction.</td>
+<td>Set <code>setTimeout</code>; if slow, go async/Continuation.</td>
+</tr>
+<tr>
+<td><strong>Synchronous blocks the user</strong></td>
+<td>A slow API freezes the UI.</td>
+<td>Use <a href="#f06">Continuation</a> or <a href="#f05">async</a>.</td>
+</tr>
+<tr>
+<td><strong>Secrets in code</strong></td>
+<td>Hardcoded tokens leak and don't rotate.</td>
+<td>Always use <code>callout:NamedCredential</code>.</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Real callouts aren't allowed in tests.</td>
+<td>Implement <code>HttpCalloutMock</code>. See <a href="#f07">07-callout-limits-and-testing.md</a>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you make an HTTP callout in Apex?</strong>
+A: Build an <code>HttpRequest</code> (method, endpoint, headers, body), send it with <code>Http.send()</code>, and read the <code>HttpResponse</code>. The endpoint should be <code>callout:NamedCredential/path</code> so the URL and auth come from a Named Credential.</p>
+<p><strong>Q: Why use a Named Credential instead of a raw URL?</strong>
+A: It stores the endpoint and credentials in Salesforce's encrypted store, injects the auth header automatically, keeps secrets out of code, and rotates centrally. A raw URL would also require a Remote Site Setting.</p>
+<p><strong>Q: "You have uncommitted work pending" — what causes it?</strong>
+A: Making a callout after a DML statement in the same transaction. Fix by calling out before any DML, or by moving the callout to an asynchronous context.</p>
+<p><strong>Q: What are the key callout limits?</strong>
+A: 100 callouts per transaction, 6 MB request/response synchronously (12 MB async), and a 120-second max per callout and per transaction.</p>
+<p><strong>Q: How do you test callouts?</strong>
+A: You can't hit a live endpoint in a test. Implement <code>HttpCalloutMock</code> (or <code>Test.setMock</code>) to return a canned response, then assert on the parsed result.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's Salesforce making the phone call out. The phone number and password are stored safely in a Named Credential, so the code just says 'call My_API' and never holds the secret."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Callout, Named Credential, Remote Site Setting, HttpRequest/HttpResponse, governor limit, HttpCalloutMock - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts.htm">Invoking Callouts Using Apex — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm">Named Credentials as Callout Endpoints — Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-named-credentials-for-callouts.md</a> - the secure, no-hardcoding way to authenticate every callout.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Named Credentials for Callouts</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The secure, secret-free way to authenticate <strong>every</strong> outbound callout. Your code references <code>callout:Name/path</code>, and Salesforce injects the real URL and the auth header at send time.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Auth</strong>: a <strong>Named Credential</strong> (endpoint) backed by an <strong>External Credential</strong> (auth). Never a hardcoded URL or token.
+<strong>Use when</strong>: Any Apex, Flow, or External Services callout needs authentication. This is the recommended pattern for <strong>all</strong> outbound auth.</p>
+</blockquote>
+<p>This is Module 05, outbound callouts. This file is about <strong>using</strong> Named Credentials in a callout. The full configuration, every auth protocol, principals, and permission-set mapping live in the deep file: <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 - Named Credentials + External Credentials</a>. Read that for the <strong>why and how to configure</strong>. This file is the <strong>how to call</strong> view. For the raw HTTP mechanics, see <a href="#f01">01-http-callouts.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think of a <strong>speed-dial</strong> on an office phone. You press <strong>"VendorX"</strong> and the phone dials the real number and logs in with the right account. You never type the number or the password. If the vendor changes their number or rotates the password, the admin updates the speed-dial entry once. Every phone keeps working. No one re-learns a number.</p>
+<p>A <strong>Named Credential</strong> is that speed-dial. In Apex you write <code>callout:VendorX/v1/orders</code>. At send time Salesforce swaps <code>callout:VendorX</code> for the real base URL <strong>and</strong> attaches the authentication header from the linked <strong>External Credential</strong>. Your code, your repo, your debug logs, and your packaged metadata never hold a secret.</p>
+<p>That single habit, always using <code>callout:</code>, is the line between a clean integration and a security incident waiting to happen.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use a Named Credential when</th>
+<th>❌ Avoid / different approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Any</strong> authenticated outbound callout from Apex, Flow, or External Services.</td>
+<td>A truly public, no-auth, hardcoded URL test (still discouraged) → needs a <strong>Remote Site Setting</strong> instead.</td>
+</tr>
+<tr>
+<td>You want secrets out of code and <strong>central rotation</strong>.</td>
+<td>You need the <em>inbound</em> social login / SSO side → <a href="../03-Authentication/15-auth-providers.md">Auth Providers</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>portability</strong> across sandbox and production.</td>
+<td>You only need the protocol theory → <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 deep file</a>.</td>
+</tr>
+<tr>
+<td>The API uses OAuth, API key, Basic, AWS Sig v4, or mTLS.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: call a payment gateway with OAuth Client Credentials, push to an ERP with an API key in a custom header, sign requests to AWS S3, hit a partner API with a per-user OAuth token.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant APX as Apex / Flow
+    participant NC as Named Credential
+    participant EC as External Credential
+    participant EXT as External API
+    APX-&gt;&gt;NC: send req with callout:VendorX/v1/orders
+    NC-&gt;&gt;EC: Which principal for this running user?
+    EC-&gt;&gt;EC: Get or refresh token, or build auth header
+    EC--&gt;&gt;NC: Authorization header ready
+    NC-&gt;&gt;EXT: HTTPS request to real URL + injected header
+    EXT--&gt;&gt;NC: 200 OK + response
+    NC--&gt;&gt;APX: HttpResponse, no secret ever in code
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>Apex sets the endpoint to <code>callout:VendorX/v1/orders</code>.</li>
+<li>The <strong>Named Credential</strong> resolves the linked <strong>External Credential</strong> and which <strong>principal</strong> applies, using the running user's permission-set mapping.
+3-4. The <strong>External Credential</strong> obtains or refreshes the token, or constructs the header (OAuth token, API key, AWS v4 signature, etc.).</li>
+<li>Salesforce injects the <strong>Authorization header</strong> and sends to the real URL over HTTPS.
+6-7. The response returns to Apex. <strong>Your code never touched a secret.</strong></li>
+</ol>
+<hr />
+<h2>4. The actual code and config</h2>
+<h3>The split, in one line</h3>
+<p>A <strong>Named Credential</strong> holds the <strong>endpoint URL</strong> and points to an <strong>External Credential</strong>, which holds the <strong>auth protocol + principals + permission-set mappings</strong>. Salesforce split them in <strong>Winter '23</strong> so one auth definition can serve many endpoints. Full setup steps are in the <a href="../03-Authentication/14-named-credentials-and-external-credentials.md#6-setup--configuration">Module 03 deep file</a>. Summary: create the External Credential, add a principal, <strong>map it to a permission set</strong> (mandatory), create the Named Credential pointing at it, then assign the permission set to users.</p>
+<h3>The <code>callout:</code> syntax</h3>
+<pre><code class="language-apex">HttpRequest req = new HttpRequest();
+// 'callout:' + Named Credential API name + path
+req.setEndpoint('callout:VendorX/v1/orders');
+req.setMethod('GET');
+
+Http http = new Http();
+HttpResponse res = http.send(req);
+System.debug(res.getStatusCode() + ' ' + res.getBody());
+</code></pre>
+<p>Salesforce substitutes the base URL <strong>and</strong> adds the auth header (when <strong>Generate Authorization Header</strong> is on, the default). No endpoint string, no token, no secret in code.</p>
+<h3>Principals: Named vs Per-User (quick contrast)</h3>
+<table>
+<thead>
+<tr>
+<th>Principal</th>
+<th>One identity or many?</th>
+<th>Pick when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Named Principal</strong></td>
+<td>One shared service identity for all users</td>
+<td>The external system does not care which Salesforce user called.</td>
+</tr>
+<tr>
+<td><strong>Per-User Principal</strong></td>
+<td>Each user authenticates individually</td>
+<td>The external system needs the real end user for data or audit.</td>
+</tr>
+</tbody>
+</table>
+<p>Details and the Client Credentials principal: see <a href="../03-Authentication/14-named-credentials-and-external-credentials.md#4-principals--whose-identity-makes-the-call">Module 03, section 4</a>.</p>
+<h3>Merge fields in custom headers and body</h3>
+<p>A Named Credential can carry <strong>custom headers</strong>, and you can inject stored values with a merge field. This is the clean way to do an <strong>API key</strong> scheme: define a custom header on the Named Credential so every callout carries the key automatically.</p>
+<pre><code class="language-apex">HttpRequest req = new HttpRequest();
+req.setEndpoint('callout:VendorX/v1/tickets');
+req.setMethod('POST');
+req.setHeader('Content-Type', 'application/json');
+// Merge field pulls a stored value at runtime.
+// Requires &quot;Allow Formulas in HTTP Body&quot; on the Named Credential.
+req.setBody('{&quot;agent&quot;:&quot;{!$Credential.VendorX_Cred.Username}&quot;}');
+Http http = new Http();
+HttpResponse res = http.send(req);
+</code></pre>
+<p>The merge syntax is <code>{!$Credential.&lt;ExternalCredential&gt;.&lt;field&gt;}</code>. Only enable <strong>Allow Formulas in HTTP Header / Body</strong> when you genuinely need a merge field, to avoid formula-injection risk.</p>
+<h3>Named Credential vs Remote Site Setting (the key contrast)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Named Credential</strong></th>
+<th><strong>Remote Site Setting</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supplies the URL?</td>
+<td><strong>Yes</strong></td>
+<td>No, it only <strong>allowlists</strong> a host</td>
+</tr>
+<tr>
+<td>Supplies authentication?</td>
+<td><strong>Yes</strong>, injects the header</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td>Used in code as</td>
+<td><code>callout:Name/path</code></td>
+<td>The full hardcoded URL</td>
+</tr>
+<tr>
+<td>Needed when you use <code>callout:</code>?</td>
+<td>This <strong>is</strong> the thing you use</td>
+<td><strong>Not needed at all</strong></td>
+</tr>
+<tr>
+<td>Needed for a raw hardcoded URL?</td>
+<td>n/a</td>
+<td><strong>Required</strong>, or the callout is blocked</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Plainly</strong>: a <strong>Named Credential</strong> is the recommended approach and removes the need for a Remote Site Setting. A <strong>Remote Site Setting</strong> is only the host allowlist you fall back to if you ever hardcode a raw URL (not recommended). Using <code>callout:</code> gives you the URL <strong>and</strong> the auth, so you never touch Remote Site Settings.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hardcoding secrets</strong></td>
+<td>Tokens leak via source control, logs, and packages; rotation means redeploys.</td>
+<td>Always use <code>callout:Name</code>; store secrets in the External Credential.</td>
+</tr>
+<tr>
+<td><strong>Missing permission-set mapping</strong></td>
+<td>The principal is inert; the callout fails with an auth error even for an admin.</td>
+<td>Map the External Credential principal to a permission set and assign it.</td>
+</tr>
+<tr>
+<td><strong>Full URL in setEndpoint</strong></td>
+<td>You lose the auto-injected auth and the secret-free benefit.</td>
+<td>Always <code>callout:Name/path</code>, never the raw URL.</td>
+</tr>
+<tr>
+<td><strong>Wrong principal type</strong></td>
+<td>A Named Principal hides who acted; per-user audit breaks.</td>
+<td>Use <strong>Per-User</strong> when the API needs the real user.</td>
+</tr>
+<tr>
+<td><strong>Merge fields enabled needlessly</strong></td>
+<td>Formula injection or accidental data exposure.</td>
+<td>Only enable <strong>Allow Formulas</strong> when a merge field is required.</td>
+</tr>
+<tr>
+<td><strong>Legacy single Named Credential</strong></td>
+<td>Not enhanced; misses new protocols and features.</td>
+<td>Use the <strong>Named + External Credential</strong> split (Winter '23+).</td>
+</tr>
+<tr>
+<td><strong>Relying on Remote Site Settings</strong></td>
+<td>Means a raw URL with hardcoded auth somewhere.</td>
+<td>Replace with a Named Credential; drop the Remote Site Setting.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you authenticate an outbound callout without putting secrets in code?</strong>
+A: Use a <strong>Named Credential</strong> for the endpoint, backed by an <strong>External Credential</strong> for the auth. In Apex set the endpoint to <code>callout:Name/path</code>. Salesforce injects the real URL and the auth header at send time, so no secret appears in code, logs, or packages.</p>
+<p><strong>Q: What is the <code>callout:</code> prefix doing exactly?</strong>
+A: It tells Salesforce to resolve the Named Credential by API name, substitute its base URL, look up the linked External Credential and the running user's principal, build or refresh the auth header, and attach it. The substitution happens at send time, not in your code.</p>
+<p><strong>Q: Do you still need a Remote Site Setting when using a Named Credential?</strong>
+A: No. A Named Credential supplies the URL and the auth, so it removes the need for a Remote Site Setting. A Remote Site Setting is only a host allowlist required when you call a raw hardcoded URL, which is discouraged.</p>
+<p><strong>Q: Named Principal vs Per-User Principal?</strong>
+A: A <strong>Named Principal</strong> is one shared identity for all users, fine when the external system does not care who called. A <strong>Per-User Principal</strong> has each user authenticate individually, required when the API needs the actual end user for data access or audit.</p>
+<p><strong>Q: How would you implement an API-key API cleanly?</strong>
+A: Create a <strong>Custom</strong> External Credential, store the key, and define a <strong>custom header</strong> on the Named Credential carrying the key (optionally via a <code>{!$Credential...}</code> merge field). Every callout then sends the key automatically, and the key rotates in config with zero code change.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a speed-dial button. The code presses 'VendorX' and the phone dials the real number and logs in. The number and password stay locked in the phone, never written on a sticky note on the desk."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Named Credential, External Credential, principal (Named vs Per-User), Remote Site Setting, merge field, <code>callout:</code> syntax - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. For the full protocol and config reference, see the <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 deep file</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm">Named Credentials as Callout Endpoints — Apex Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.nc_named_creds_and_ext_creds.htm&amp;type=5">Create Named Credentials and External Credentials — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.nc_auth_protocols.htm&amp;type=5">Authentication Protocols for Named Credentials — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.nc_custom_headers_and_api_keys.htm&amp;type=5">Use API Keys in Custom Headers with Named Credentials — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=release-notes.rn_security_map_principals_to_permsets.htm&amp;type=5">Map External Credential Principals to Permission Sets — Release Notes</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-external-services.md</a> - call a REST API from Flow with no handwritten Apex.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - External Services (Low-Code Callouts from Flow)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Register an external REST API from its <strong>OpenAPI schema</strong>, and Salesforce auto-generates <strong>invocable actions</strong> that admins drop into <strong>Flow</strong> with no handwritten Apex.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Auth</strong>: a <strong>Named Credential</strong> supplies the endpoint and auth.
+<strong>Use when</strong>: A low-code or admin team needs to call a REST API from Flow without writing Apex callout code.</p>
+</blockquote>
+<p>This is Module 05, outbound callouts. External Services is the <strong>declarative</strong> sibling of <a href="#f01">01-http-callouts.md</a> (handwritten Apex) and <a href="#f04">04-soap-callouts-wsdl2apex.md</a> (SOAP). The endpoint and auth still come from a Named Credential, see <a href="#f02">02-named-credentials-for-callouts.md</a> and the <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 deep file</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine an external API hands you a <strong>printed menu</strong> of exactly what it can do: every dish (operation), its ingredients (inputs), and what comes out (outputs). That menu is the <strong>OpenAPI schema</strong> (formerly called Swagger). You hand the menu to Salesforce once. Salesforce reads it and builds a row of <strong>ready-made buttons</strong>, one per dish. An admin then drags a button into a <strong>Flow</strong> and fills in the inputs. No cook (developer) writes a recipe by hand.</p>
+<p>So <strong>External Services</strong> is "register the menu, get the buttons." The buttons are <strong>invocable actions</strong>. The kitchen's address and the way you pay (auth) live in a <strong>Named Credential</strong>. The admin never sees a URL or a token, and never writes a single line of Apex.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use External Services when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admins or low-code teams must call a <strong>REST</strong> API from <strong>Flow</strong>.</td>
+<td>The endpoint is <strong>SOAP/WSDL</strong> → <a href="#f04">04-soap-callouts-wsdl2apex.md</a>.</td>
+</tr>
+<tr>
+<td>The API ships a clean <strong>OpenAPI 2.0 or 3.0</strong> schema.</td>
+<td>No OpenAPI schema exists or it is huge / very complex → handwritten <a href="#f01">HTTP callout</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>no handwritten Apex</strong> for the callout.</td>
+<td>You need fine-grained control of retries, chunking, or custom parsing → <a href="#f01">Apex callout</a>.</td>
+</tr>
+<tr>
+<td>The operations map cleanly to inputs and outputs.</td>
+<td>Deeply nested or polymorphic payloads the generator cannot model → custom Apex.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: an admin Flow that validates an address, fetches a shipping quote, looks up a tax rate, or creates a ticket in a partner system, all from a screen or record-triggered Flow.</p>
+<hr />
+<h2>3. How it works (flow diagram)</h2>
+<div class="mermaid">
+flowchart LR
+    SCHEMA[OpenAPI schema&lt;br/&gt;JSON 2.0 or 3.0] --&gt; ES[External Service&lt;br/&gt;registration]
+    NC[Named Credential&lt;br/&gt;endpoint plus auth] --&gt; ES
+    ES --&gt; ACT[Generated invocable&lt;br/&gt;actions]
+    ACT --&gt; FLOW[Flow Builder&lt;br/&gt;admin drags action]
+    FLOW --&gt; API[External REST API]
+    API --&gt;|response mapped to outputs| FLOW
+
+    style SCHEMA fill:#ff9900,color:#fff
+    style ES fill:#00A1E0,color:#fff
+    style NC fill:#9C27B0,color:#fff
+    style ACT fill:#4CAF50,color:#fff
+    style FLOW fill:#607D8B,color:#fff
+    style API fill:#F44336,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>You provide the API's <strong>OpenAPI schema</strong> (JSON, version 2.0 or 3.0) by URL or paste.</li>
+<li>You point the registration at a <strong>Named Credential</strong> that holds the base URL and auth.</li>
+<li>Salesforce parses each <strong>operation</strong> into an <strong>invocable action</strong>, mapping parameters to <strong>inputs</strong> and the response to <strong>outputs</strong>.</li>
+<li>An admin drags the action into a <strong>Flow</strong> and binds the inputs to record fields or variables.</li>
+<li>At runtime the Flow calls the external API through the Named Credential and reads the mapped outputs.</li>
+</ol>
+<hr />
+<h2>4. The setup (point and click)</h2>
+<p>There is <strong>no Apex to write</strong>. The steps:</p>
+<ol>
+<li><strong>Create the Named Credential</strong> (and External Credential) for the API's base URL and auth. See <a href="#f02">02-named-credentials-for-callouts.md</a>.</li>
+<li><strong>Setup → External Services → Add an External Service.</strong></li>
+<li>Choose <strong>From API Specification</strong>, select the <strong>Named Credential</strong>, and supply the <strong>OpenAPI schema</strong> (by URL or by pasting the JSON).</li>
+<li>Salesforce validates the schema, then shows the <strong>operations</strong> it found. Select the ones to import.</li>
+<li><strong>Finish.</strong> Salesforce generates one <strong>invocable action</strong> per selected operation.</li>
+<li>In <strong>Flow Builder</strong>, add an <strong>Action</strong> element, search for your External Service, pick the operation, and map inputs and outputs.</li>
+</ol>
+<p>The generated actions are also invocable from <strong>Apex</strong>, <strong>Einstein Bots / Agentforce</strong>, <strong>Orchestrator</strong>, and <strong>OmniStudio</strong>, not only Flow.</p>
+<blockquote>
+<p><strong>Schema basics to verify before you start</strong>: External Services targets <strong>RESTful</strong> APIs described in <strong>OpenAPI 2.0 or 3.0</strong>. OpenAPI <strong>3.0 JSON</strong> support arrived in <strong>Spring '22</strong>. The schema must satisfy the <strong>External Services Considerations</strong> (see Sources), and Salesforce derives action and type names from the schema, so clear <code>operationId</code> values produce clean action names.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Schema size limit</strong></td>
+<td>A schema over <strong>100,000 characters</strong> fails registration.</td>
+<td>Trim the spec to the operations you actually need, or split it.</td>
+</tr>
+<tr>
+<td><strong>Derived name length</strong></td>
+<td>Salesforce derives type and action names; each derived name must be <strong>fewer than 255 characters</strong>.</td>
+<td>Use short, clear <code>operationId</code> and schema names.</td>
+</tr>
+<tr>
+<td><strong>Complexity limits</strong></td>
+<td>Deeply nested, polymorphic, or unusual constructs may not import cleanly.</td>
+<td>Simplify the schema, or fall back to a handwritten <a href="#f01">Apex callout</a>.</td>
+</tr>
+<tr>
+<td><strong>Regeneration on API change</strong></td>
+<td>If the external API changes its contract, the generated actions go stale.</td>
+<td>Re-edit the External Service to re-import; re-test affected Flows.</td>
+</tr>
+<tr>
+<td><strong>Auth lives in the Named Credential</strong></td>
+<td>The action has no URL or secret of its own.</td>
+<td>Configure auth once in the Named/External Credential; rotate there.</td>
+</tr>
+<tr>
+<td><strong>Governor limits still apply</strong></td>
+<td>These are real callouts under the hood.</td>
+<td>Respect the <strong>100 callouts per transaction</strong> limit; do not loop actions per record.</td>
+</tr>
+<tr>
+<td><strong>Operations must map cleanly</strong></td>
+<td>Inputs/outputs are auto-generated from the schema.</td>
+<td>Confirm the generated inputs/outputs match expectations before shipping.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is an External Service and what problem does it solve?</strong>
+A: It lets you register an external REST API from its <strong>OpenAPI schema</strong> so Salesforce generates <strong>invocable actions</strong>. Admins then call the API from <strong>Flow</strong> with no handwritten Apex. It brings third-party REST calls into low-code automation.</p>
+<p><strong>Q: What schema formats and versions does it support?</strong>
+A: RESTful APIs described in <strong>OpenAPI 2.0 or 3.0</strong>. OpenAPI <strong>3.0 JSON</strong> support was added in Spring '22. The schema must meet the External Services Considerations, including a <strong>100,000-character</strong> size limit.</p>
+<p><strong>Q: How does an External Service authenticate?</strong>
+A: It uses a <strong>Named Credential</strong> for the base URL and a backing <strong>External Credential</strong> for the auth. The generated action carries no URL or secret; everything resolves through the Named Credential at runtime.</p>
+<p><strong>Q: What happens when the external API changes?</strong>
+A: The generated actions can go stale. You <strong>re-edit the External Service to re-import</strong> the updated schema, then re-test any Flows that use the affected actions. It is not automatic.</p>
+<p><strong>Q: When would you choose a handwritten Apex callout instead?</strong>
+A: When there is no usable OpenAPI schema, the schema is too large or complex to import, or you need fine control over retries, payload shaping, or custom parsing. External Services trades control for speed of delivery.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "The API hands Salesforce a printed menu of what it can do. Salesforce turns each menu item into a button. An admin drags the button into a Flow. Nobody writes code, and the address and password stay locked in a Named Credential."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>External Service, OpenAPI / Swagger schema, invocable action, Flow Builder, Named Credential, operation - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. For the auth object behind the endpoint, see <a href="#f02">02-named-credentials-for-callouts.md</a> and the <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 deep file</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.external_services.htm&amp;type=5">Invoke External Service Callouts — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.enhanced_external_services_considerations.htm&amp;type=5">External Services Considerations — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.external_services_intro_openapi_2_3_support.htm&amp;type=5">OpenAPI 2.0 and 3.0 Support — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=platform.external_services_examples_openapi_3_0.htm&amp;type=5">External Services OpenAPI 3.0 Schema — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2022/02/learn-moar-in-spring-22-with-openapi-3-0-support-for-external-services">Learn MOAR in Spring '22: OpenAPI 3.0 Support for External Services — Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-soap-callouts-wsdl2apex.md</a> - calling an external SOAP service from Apex.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - SOAP Callouts (WSDL2Apex)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Point Salesforce at a SOAP service's <strong>WSDL</strong>, let it generate <strong>Apex stub classes</strong>, then call the generated methods to invoke the external SOAP operations.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Auth</strong>: a <strong>Named Credential</strong> supplies the endpoint and auth.
+<strong>Use when</strong>: The external system only offers <strong>SOAP</strong>. For new work, REST/HTTP callouts are preferred.</p>
+</blockquote>
+<p>This is Module 05, outbound callouts. WSDL2Apex is the <strong>SOAP</strong> counterpart to handwritten <a href="#f01">01-http-callouts.md</a> (REST) and low-code <a href="#f03">03-external-services.md</a> (REST from Flow). The endpoint and auth still belong in a Named Credential, see <a href="#f02">02-named-credentials-for-callouts.md</a> and the <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 deep file</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A <strong>WSDL</strong> is a SOAP service's <strong>instruction manual</strong> written in XML. It lists every operation, the exact shape of each request and response, and where to send them. Reading that manual and hand-coding the XML by hand would be slow and error-prone.</p>
+<p><strong>WSDL2Apex</strong> is a <strong>code generator</strong> that reads the manual for you. You upload the WSDL in Setup, and Salesforce writes <strong>Apex stub classes</strong>: typed methods and objects that mirror the SOAP operations. You then call a generated method like an ordinary Apex method. Under the hood the stub builds the SOAP envelope, sends it, and parses the XML reply back into Apex objects.</p>
+<p>So the workflow is: <strong>upload WSDL → get generated Apex → call the stub method.</strong> Think of it as auto-generating a typed client from a contract.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use WSDL2Apex when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The external system <strong>only</strong> speaks <strong>SOAP</strong> and ships a WSDL.</td>
+<td>The system offers <strong>REST</strong> → <a href="#f01">01-http-callouts.md</a> or <a href="#f03">03-external-services.md</a>.</td>
+</tr>
+<tr>
+<td>You want <strong>typed</strong> Apex stubs instead of hand-building XML.</td>
+<td>The WSDL uses <strong>unsupported constructs</strong> (see gotchas) → fix the WSDL or build the envelope manually.</td>
+</tr>
+<tr>
+<td>The SOAP contract is <strong>stable</strong> SOAP 1.1 document/literal.</td>
+<td>A low-code team needs it in Flow → External Services (REST only; SOAP not supported there).</td>
+</tr>
+<tr>
+<td>You are integrating a legacy enterprise partner.</td>
+<td>Brand-new greenfield integration → prefer REST.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a legacy ERP, a bank's payment SOAP API, an older shipping or tax provider, a government web service that predates REST.</p>
+<hr />
+<h2>3. How it works (flow diagram)</h2>
+<div class="mermaid">
+flowchart LR
+    WSDL[SOAP WSDL&lt;br/&gt;XML contract] --&gt; GEN[Generate from WSDL&lt;br/&gt;in Setup]
+    GEN --&gt; STUB[Generated Apex&lt;br/&gt;stub classes]
+    STUB --&gt; CALL[Your Apex calls&lt;br/&gt;a stub method]
+    NC[Named Credential&lt;br/&gt;endpoint plus auth] --&gt; CALL
+    CALL --&gt; SOAP[External SOAP&lt;br/&gt;service]
+    SOAP --&gt;|XML response parsed to Apex| CALL
+
+    style WSDL fill:#ff9900,color:#fff
+    style GEN fill:#00A1E0,color:#fff
+    style STUB fill:#4CAF50,color:#fff
+    style CALL fill:#9C27B0,color:#fff
+    style NC fill:#607D8B,color:#fff
+    style SOAP fill:#F44336,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>You obtain the external service's <strong>WSDL</strong> (the XML contract).</li>
+<li>In Setup you run <strong>Generate from WSDL</strong>. Salesforce parses it.</li>
+<li>Salesforce writes <strong>Apex stub classes</strong> that mirror the operations and types.</li>
+<li>Your Apex calls a generated <strong>stub method</strong>, passing typed inputs.</li>
+<li>The stub uses the <strong>Named Credential</strong> for the endpoint and auth, builds the SOAP envelope, and sends it.</li>
+<li>The SOAP reply XML is parsed back into Apex objects you read directly.</li>
+</ol>
+<hr />
+<h2>4. The setup and code</h2>
+<h3>Generate the stubs</h3>
+<ol>
+<li>Create the <strong>Named Credential</strong> (and External Credential) for the SOAP endpoint and auth. See <a href="#f02">02-named-credentials-for-callouts.md</a>.</li>
+<li><strong>Setup → Apex Classes → Generate from WSDL.</strong></li>
+<li>Upload the <strong>WSDL file</strong> and click <strong>Parse WSDL</strong>.</li>
+<li>Salesforce proposes one or more <strong>Apex class names</strong> (one per namespace in the WSDL). Adjust the names, then <strong>Generate Apex</strong>.</li>
+<li>The generated <strong>stub classes</strong> appear in Apex Classes, ready to call.</li>
+</ol>
+<h3>Call a generated stub method</h3>
+<p>The exact class and method names come from your WSDL. The shape is always the same: instantiate the generated service stub, point it at the Named Credential, and call the operation.</p>
+<pre><code class="language-apex">// Class and method names are generated from the WSDL.
+exampleSoap.OrdersPort stub = new exampleSoap.OrdersPort();
+// Endpoint and auth come from a Named Credential, never a hardcoded URL.
+stub.endpoint_x = 'callout:Vendor_Soap';
+
+try {
+    // 'createOrder' is a generated method mirroring the SOAP operation.
+    exampleSoap.OrderResult result = stub.createOrder('A-100', 2);
+    System.debug(result.orderId);
+} catch (CalloutException e) {
+    // Handle SOAP faults and transport errors.
+    System.debug('SOAP callout failed: ' + e.getMessage());
+}
+</code></pre>
+<blockquote>
+<p><strong>Auth note</strong>: set <code>endpoint_x</code> to <code>callout:Named_Credential</code> so the URL and auth header are injected, exactly like a REST callout. Never hardcode the SOAP endpoint URL or credentials in the stub.</p>
+</blockquote>
+<h3>Test coverage</h3>
+<p>The <strong>generated stub classes need test coverage</strong> like any Apex. Use <code>WebServiceMock</code> (the SOAP analogue of <code>HttpCalloutMock</code>) with <code>Test.setMock</code> to return a canned response, since real callouts are not allowed in tests. See <a href="#f07">07-callout-limits-and-testing.md</a>.</p>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unsupported WSDL constructs</strong></td>
+<td>WSDL2Apex supports <strong>document/literal SOAP 1.1</strong> only. <strong>SOAP 1.2</strong>, RPC/encoded, multiple <code>portType</code>s, multiple bindings, multiple services, and external schema imports fail to import.</td>
+<td>Edit the WSDL to a single binding/portType, or hand-build the SOAP envelope with <a href="#f01">HTTP callouts</a>.</td>
+</tr>
+<tr>
+<td><strong>1 million character limit</strong></td>
+<td>Generation fails if the resulting classes exceed the <strong>1,000,000-character</strong> Apex class limit.</td>
+<td>Trim the WSDL to needed operations, or split into multiple classes.</td>
+</tr>
+<tr>
+<td><strong>Whole-WSDL import</strong></td>
+<td>You import the entire WSDL even if you need one operation.</td>
+<td>Prune the WSDL before generating if it is large.</td>
+</tr>
+<tr>
+<td><strong>Regenerate on contract change</strong></td>
+<td>If the SOAP contract changes, the stubs go stale.</td>
+<td>Re-run Generate from WSDL and re-test.</td>
+</tr>
+<tr>
+<td><strong>SOAP faults</strong></td>
+<td>Errors arrive as SOAP fault XML, surfaced as exceptions.</td>
+<td>Wrap calls in try/catch on <code>CalloutException</code>; inspect the fault.</td>
+</tr>
+<tr>
+<td><strong>Hardcoded endpoint/secret</strong></td>
+<td>Putting the URL or credentials in the stub leaks secrets and breaks portability.</td>
+<td>Set <code>endpoint_x = 'callout:Name'</code>; keep auth in the Named Credential.</td>
+</tr>
+<tr>
+<td><strong>Same callout limits as REST</strong></td>
+<td>SOAP callouts count against the same governor limits.</td>
+<td>Respect <strong>100 callouts per transaction</strong>; no DML before the callout.</td>
+</tr>
+<tr>
+<td><strong>Status: legacy-leaning</strong></td>
+<td>SOAP is maintained, but REST is preferred for new work.</td>
+<td>Default to REST/HTTP; use WSDL2Apex only when the partner is SOAP-only.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: How do you call an external SOAP service from Apex?</strong>
+A: Use <strong>WSDL2Apex</strong>: in Setup, <strong>Apex Classes → Generate from WSDL</strong>, upload the WSDL, and Salesforce generates <strong>Apex stub classes</strong>. You then call a generated method, setting <code>endpoint_x</code> to <code>callout:Named_Credential</code> so the URL and auth come from a Named Credential.</p>
+<p><strong>Q: What WSDL constructs does WSDL2Apex not support?</strong>
+A: It supports <strong>document/literal SOAP 1.1</strong> only. It cannot import <strong>SOAP 1.2</strong>, RPC/encoded services, WSDLs with <strong>multiple portTypes, bindings, or services</strong>, or WSDLs that import <strong>external schemas</strong>. You either edit the WSDL to a single binding/portType or build the SOAP envelope manually.</p>
+<p><strong>Q: Is there a size limit on generated classes?</strong>
+A: Yes. Generation fails if the resulting Apex exceeds the <strong>1,000,000-character</strong> per-class limit. Trim the WSDL to the operations you need or split into multiple classes.</p>
+<p><strong>Q: How do you handle authentication for a SOAP callout?</strong>
+A: The same way as REST. Set the stub's <code>endpoint_x</code> to <code>callout:Named_Credential</code> so Salesforce injects the endpoint and auth header. Secrets stay in the External Credential, never in the stub.</p>
+<p><strong>Q: REST or SOAP for a new integration, and why?</strong>
+A: <strong>REST/HTTP</strong> for new work: it is lighter, JSON-based, and supported by External Services for low-code. Use <strong>WSDL2Apex/SOAP</strong> only when the external system offers nothing but SOAP, typically a legacy enterprise partner.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "A WSDL is the SOAP service's instruction manual. Salesforce reads the manual and writes the client code for you. You just call the generated method, and the address and password stay locked in a Named Credential."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>WSDL, WSDL2Apex, SOAP, stub class, SOAP fault, <code>WebServiceMock</code>, Named Credential - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>. For the auth object behind the endpoint, see <a href="#f02">02-named-credentials-for-callouts.md</a> and the <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 deep file</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_wsdl2apex.htm">SOAP Services: Defining a Class from a WSDL Document — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_wsdl2apex_gen_code.htm">Understanding the Generated Code (WSDL2Apex) — Apex Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.code_wsdl_to_package.htm&amp;type=5">Create an Apex Class from a WSDL — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_wsdl2apex_testing.htm">Testing Web Service Callouts (WebServiceMock) — Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-asynchronous-callouts.md</a> - making callouts from triggers and async contexts without hitting the DML-then-callout wall.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Asynchronous Callouts</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Run the callout <strong>off the main thread</strong> so it does not block the user, can fire from a trigger, and can run <strong>after</strong> DML.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Timing</strong>: Asynchronous (later, separate transaction).
+<strong>Use when</strong>: You need a callout but cannot make it synchronously, or the work is too slow to make the user wait.</p>
+</blockquote>
+<p>This is Module 05, outbound callouts. The callout mechanics are in <a href="#f01">01-http-callouts.md</a>. The auth object is <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03 - Named Credentials</a>. For a slow callout from a Lightning screen, see <a href="#f06">06-continuation-pattern.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A synchronous callout is making a phone call <strong>while the customer waits at your desk</strong>. An asynchronous callout is taking their number and <strong>calling them back later</strong>, after they have walked away. The customer is not stuck watching you dial.</p>
+<p>There are three reasons you are forced to call back later instead of calling now:</p>
+<ol>
+<li><strong>You cannot call out after uncommitted DML.</strong> Once your transaction has changed data but not committed, Salesforce blocks the callout with <code>You have uncommitted work pending</code>. Save now, call later.</li>
+<li><strong>Triggers cannot call out directly.</strong> A trigger runs inside the DML transaction, so any callout from a trigger <strong>must</strong> be handed to an async context.</li>
+<li><strong>Long work should not block a user or a transaction.</strong> A 60-second callout freezing a save is bad UX and risks the <a href="#f07">concurrent long-running request limit</a>.</li>
+</ol>
+<p>So you move the callout to its own transaction that runs in the background.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You must call out <strong>from a trigger</strong>.</td>
+<td>A fast call with no DML before it → sync <a href="#f01">01-http-callouts.md</a>.</td>
+</tr>
+<tr>
+<td>You need a callout <strong>after DML</strong> in the same flow.</td>
+<td>A user is at a screen waiting on a slow API → <a href="#f06">06-continuation-pattern.md</a>.</td>
+</tr>
+<tr>
+<td>The work is <strong>slow</strong> and the user should not wait.</td>
+<td>You need the result <strong>immediately</strong> to continue.</td>
+</tr>
+<tr>
+<td>You are processing <strong>many records</strong> that each call out.</td>
+<td>The external system cannot handle background bursts.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a trigger on Order syncs to an ERP after insert, a Lead trigger enriches data via a third-party API, a nightly batch pushes thousands of records to a warehouse.</p>
+<hr />
+<h2>3. The options and how to choose</h2>
+<p>Salesforce gives you four async entry points. Three can call out directly. One cannot.</p>
+<div class="mermaid">
+flowchart TD
+    A[Need an async callout] --&gt; B{Simple fire-and-forget&lt;br/&gt;primitive params only?}
+    B --&gt;|Yes| C["@future callout=true"]
+    B --&gt;|No| D{Need to pass sObjects&lt;br/&gt;or chain jobs?}
+    D --&gt;|Yes| E[Queueable&lt;br/&gt;Database.AllowsCallouts]
+    D --&gt;|Bulk, many records| F[Batch Apex&lt;br/&gt;Database.AllowsCallouts]
+    A --&gt; G{Triggered by a schedule?}
+    G --&gt;|Yes| H["Scheduled Apex&lt;br/&gt;delegates to Queueable / @future"]
+    style C fill:#ff9900,color:#fff
+    style E fill:#4CAF50,color:#fff
+    style F fill:#9C27B0,color:#fff
+    style H fill:#607D8B,color:#fff
+
+</div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Mark it for callouts</th>
+<th>Can pass</th>
+<th>Chainable</th>
+<th>Monitorable</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>@future(callout=true)</code></strong></td>
+<td>annotation param</td>
+<td><strong>primitives only</strong></td>
+<td>No</td>
+<td>No (just an Id)</td>
+<td>Simple, single, fire-and-forget callout</td>
+</tr>
+<tr>
+<td><strong>Queueable</strong></td>
+<td>implement <code>Database.AllowsCallouts</code></td>
+<td>sObjects, objects</td>
+<td><strong>Yes</strong></td>
+<td><strong>Yes</strong> (AsyncApexJob)</td>
+<td>The modern default. Most callouts</td>
+</tr>
+<tr>
+<td><strong>Batch Apex</strong></td>
+<td>implement <code>Database.AllowsCallouts</code></td>
+<td>a scope of records</td>
+<td>Via Finish</td>
+<td><strong>Yes</strong></td>
+<td>Bulk: callout per batch of records</td>
+</tr>
+<tr>
+<td><strong>Scheduled Apex</strong></td>
+<td><strong>cannot call out directly</strong></td>
+<td>n/a</td>
+<td>n/a</td>
+<td>Yes</td>
+<td>Delegate to Queueable/<code>@future</code> to call out</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The short rule</strong>: reach for <strong>Queueable</strong> first. Salesforce officially recommends Queueable over <code>@future</code> because it can take rich types, be chained, and be tracked through the <code>AsyncApexJob</code> object. Use <code>@future</code> only for the simplest case. Use <strong>Batch</strong> when you are calling out across a large data volume. Never try to call out straight from a <code>Schedulable</code> - schedule a job that <strong>enqueues</strong> a Queueable.</p>
+<hr />
+<h2>4. The actual code</h2>
+<p><strong>Queueable with a callout (the preferred pattern)</strong></p>
+<pre><code class="language-apex">public class OrderSyncQueueable implements Queueable, Database.AllowsCallouts {
+    private List&lt;Order&gt; orders; // Queueable can carry sObjects
+
+    public OrderSyncQueueable(List&lt;Order&gt; orders) {
+        this.orders = orders;
+    }
+
+    public void execute(QueueableContext ctx) {
+        for (Order o : orders) {
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('callout:ERP_System/orders'); // URL + auth from Named Credential
+            req.setMethod('POST');
+            req.setHeader('Content-Type', 'application/json');
+            req.setBody(JSON.serialize(o));
+            req.setTimeout(120000); // ms, max 120s
+
+            HttpResponse res = new Http().send(req);
+            if (res.getStatusCode() != 200) {
+                // log, flag the record, or chain a retry job
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>Enqueue it from a trigger handler (callout after the trigger, not inside it)</strong></p>
+<pre><code class="language-apex">// In an after-insert trigger handler:
+System.enqueueJob(new OrderSyncQueueable(Trigger.new));
+</code></pre>
+<p><strong>The <code>@future</code> shape (primitives only, no return)</strong></p>
+<pre><code class="language-apex">public class LeadEnricher {
+    @future(callout=true)
+    public static void enrich(Set&lt;Id&gt; leadIds) { // primitive/collection of primitives only
+        // build and send the HttpRequest here
+    }
+}
+</code></pre>
+<blockquote>
+<p><strong>Auth</strong>: every async callout still authenticates with a <strong>Named Credential</strong>. Never hardcode a secret. See <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>@future</code> is limited</strong></td>
+<td>No sObjects, no return value, hard to monitor, cannot chain.</td>
+<td>Prefer <strong>Queueable</strong> for anything beyond the trivial.</td>
+</tr>
+<tr>
+<td><strong>Callout chain depth</strong></td>
+<td>A Queueable that calls out can only chain to a limited depth of jobs that also call out.</td>
+<td>Do not build deep retry chains of calling-out jobs. Use a finite backoff.</td>
+</tr>
+<tr>
+<td><strong>Scheduled Apex cannot call out</strong></td>
+<td>Calling out from <code>execute(SchedulableContext)</code> throws.</td>
+<td>Have the scheduled job <strong>enqueue</strong> a Queueable that does the callout.</td>
+</tr>
+<tr>
+<td><strong><code>@future</code> limit per transaction</strong></td>
+<td>A cap on future invocations per transaction.</td>
+<td>Bulkify: pass a <code>Set&lt;Id&gt;</code>, do not call <code>@future</code> per record in a loop.</td>
+</tr>
+<tr>
+<td><strong>No ordering guarantee</strong></td>
+<td>Async jobs run when the platform schedules them.</td>
+<td>Do not assume order across separate enqueues. Chain if order matters.</td>
+</tr>
+<tr>
+<td><strong>Still bound by callout limits</strong></td>
+<td>Async raises <strong>size</strong> limits but the <strong>100 callouts/transaction</strong> cap still applies.</td>
+<td>Bulkify inside the job. See <a href="#f07">07-callout-limits-and-testing.md</a>.</td>
+</tr>
+<tr>
+<td><strong>Testing async callouts</strong></td>
+<td>Real callouts are blocked in tests; async runs at <code>stopTest</code>.</td>
+<td>Mock with <code>HttpCalloutMock</code> and wrap in <code>Test.startTest()/stopTest()</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Why can't you make a callout after DML in the same transaction?</strong>
+A: An uncommitted DML opens a database transaction, and Salesforce will not let you hold that open across a callout. You get <code>You have uncommitted work pending</code>. Either call out before any DML, or move the callout to an asynchronous context that runs in its own transaction.</p>
+<p><strong>Q: How do you call out from a trigger?</strong>
+A: You cannot call out directly inside a trigger. Hand the work to an async context - enqueue a <strong>Queueable</strong> (implementing <code>Database.AllowsCallouts</code>) or call a <code>@future(callout=true)</code> method from the trigger handler.</p>
+<p><strong>Q: Queueable vs @future for callouts - which and why?</strong>
+A: Queueable. It accepts sObjects and complex types, is chainable, and is monitorable through <code>AsyncApexJob</code>. <code>@future</code> only takes primitives, returns nothing, and cannot be tracked or chained. Salesforce officially recommends Queueable over future methods.</p>
+<p><strong>Q: Can Scheduled Apex make a callout?</strong>
+A: Not directly. The <code>Schedulable.execute</code> method cannot perform a callout. The pattern is to have the scheduled class enqueue a Queueable (or call a <code>@future(callout=true)</code> method) that performs the actual callout.</p>
+<p><strong>Q: What do you implement to allow callouts in a Queueable or Batch class?</strong>
+A: The marker interface <strong><code>Database.AllowsCallouts</code></strong>. It has no methods - it just signals to the platform that callouts are permitted in that async job.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Instead of making the customer wait while I dial, I take their number and call them back. That is async - the callout runs in the background, so the save finishes fast and a trigger can still reach the outside world."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Asynchronous, <code>@future</code>, Queueable, <code>Database.AllowsCallouts</code>, Batch Apex, Scheduled Apex, <code>AsyncApexJob</code>, uncommitted DML - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_async_overview.htm">Asynchronous Apex - Apex Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_queueing_jobs.htm">Queueable Apex - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts.htm">Invoking Callouts Using Apex - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/developer-relations/2015/05/queueable-apex-future">Queueable Apex: More Than an @future - Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-continuation-pattern.md</a> - making a long-running callout from a Lightning screen without blocking the user.</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - Continuation Pattern</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Fire a <strong>long-running callout from a Lightning or Visualforce screen</strong> without holding an app server thread, then process the answer in a <strong>callback</strong>.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Timing</strong>: Asynchronous from the UI, but the user still gets a result on the same page.
+<strong>Use when</strong>: A Lightning page (Aura/LWC) or Visualforce page calls a <strong>slow</strong> external API and you do not want to freeze a server thread.</p>
+</blockquote>
+<p>This is Module 05, outbound callouts. For the plain callout, see <a href="#f01">01-http-callouts.md</a>. For background callouts not tied to a screen, see <a href="#f05">05-asynchronous-callouts.md</a>. Auth is <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine a receptionist who can only handle a fixed number of calls at once. If one caller is put on hold for two minutes waiting on a slow supplier, that receptionist is <strong>stuck</strong> and cannot help anyone else. A few of those and the whole front desk jams.</p>
+<p>A <strong>Continuation</strong> is the receptionist saying: "Let me take your request, <strong>hang up the internal line</strong>, and the supplier will ring us back when they are done. Then I will pick the answer up and finish your request." The slow wait happens <strong>off</strong> the Salesforce app server thread.</p>
+<p>Technically: a synchronous callout from the UI holds a Salesforce <strong>application server thread</strong> for its whole duration. Salesforce limits how many requests can run longer than <strong>5 seconds</strong> at once (the <strong>concurrent long-running request limit</strong>). A Continuation lets the action return the thread to the pool while the external system works, so a slow API does not eat your concurrency budget. When the response arrives, a <strong>callback method</strong> runs to process it and update the UI.</p>
+<hr />
+<h2>2. When to use it (and when not)</h2>
+<table>
+<thead>
+<tr>
+<th>✅ Use it when</th>
+<th>❌ Avoid / use something else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A <strong>Lightning</strong> or <strong>Visualforce</strong> page calls a <strong>slow</strong> external API.</td>
+<td>The call is <strong>fast</strong> - just use a normal callout <a href="#f01">01-http-callouts.md</a>.</td>
+</tr>
+<tr>
+<td>You want to <strong>protect the concurrent long-running request limit</strong>.</td>
+<td>The work is not tied to a screen → <a href="#f05">05-asynchronous-callouts.md</a>.</td>
+</tr>
+<tr>
+<td>The user is <strong>waiting on the page</strong> for the result.</td>
+<td>You need to call out <strong>after DML</strong> in a backend flow → async.</td>
+</tr>
+<tr>
+<td>You can live with <strong>max 3</strong> parallel callouts per Continuation.</td>
+<td>You need many parallel callouts or a huge response.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real-world examples</strong>: a Lightning component pulling a slow shipping-rate quote, a Visualforce page calling a sluggish legacy pricing service, an agent console widget fetching an external account 360 view that takes several seconds.</p>
+<hr />
+<h2>3. How it works (sequence diagram)</h2>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant UI as Lightning / VF Page
+    participant APX as Apex Controller
+    participant CONT as Continuation
+    participant EXT as External API
+    UI-&gt;&gt;APX: User action calls @AuraEnabled method
+    APX-&gt;&gt;CONT: Build Continuation, add HttpRequest via callout:NamedCredential
+    APX--&gt;&gt;UI: Return Continuation - app server thread released
+    CONT-&gt;&gt;EXT: Async HTTPS request
+    Note over CONT,EXT: User thread is free. No 5s concurrency cost
+    EXT--&gt;&gt;CONT: Response arrives later
+    CONT-&gt;&gt;APX: Platform invokes the callback method
+    APX-&gt;&gt;APX: Read response with getResponse, parse
+    APX--&gt;&gt;UI: Return result, UI updates
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The user triggers an <code>@AuraEnabled</code> (or VF action) method.</li>
+<li>The controller creates a <code>Continuation</code>, sets the <strong>callback method name</strong>, and adds one to three <code>HttpRequest</code> objects whose endpoint is <code>callout:NamedCredential/...</code>.</li>
+<li>The method <strong>returns the Continuation object</strong>. Salesforce releases the app server thread back to the pool.
+4-5. The platform sends the request asynchronously. The user's thread is not blocked, so it does not count against the concurrent long-running limit.
+6-7. When the response returns, Salesforce calls the <strong>callback</strong> you named.</li>
+<li>The callback reads the response via <code>Continuation.getResponse(requestLabel)</code>, parses it, and returns the result to the UI.</li>
+</ol>
+<hr />
+<h2>4. The actual code</h2>
+<p><strong>Aura/LWC controller with a Continuation and callback</strong></p>
+<pre><code class="language-apex">public with sharing class RateController {
+
+    // 1) Action method: returns an Object (the Continuation)
+    @AuraEnabled(continuation=true, cacheable=false)
+    public static Object startRequest() {
+        Continuation con = new Continuation(120); // timeout in seconds, max 120
+        con.continuationMethod = 'processResponse'; // name of the callback
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('callout:Shipping_API/rates'); // URL + auth from Named Credential
+        req.setMethod('GET');
+
+        // addHttpRequest returns a label you use to fetch the matching response
+        con.addHttpRequest(req);
+        return con; // app server thread is released here
+    }
+
+    // 2) Callback: runs when the external response arrives
+    @AuraEnabled(cacheable=false)
+    public static Object processResponse(List&lt;String&gt; labels, Object state) {
+        HttpResponse res = Continuation.getResponse(labels[0]);
+        if (res.getStatusCode() == 200) {
+            return res.getBody(); // hand the result back to the UI
+        }
+        return null; // handle non-200 in the UI
+    }
+}
+</code></pre>
+<p><strong>Adding multiple parallel callouts (up to 3)</strong></p>
+<pre><code class="language-apex">Continuation con = new Continuation(120);
+con.continuationMethod = 'processResponses';
+con.addHttpRequest(reqA);
+con.addHttpRequest(reqB);
+con.addHttpRequest(reqC); // a 4th would exceed the per-Continuation limit
+</code></pre>
+<blockquote>
+<p><strong>Auth</strong>: Continuations support <strong>Named Credentials</strong>. If the endpoint is a <code>callout:</code> named credential, you do not need a Remote Site Setting. See <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</p>
+</blockquote>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Max 3 parallel callouts</strong></td>
+<td>A single Continuation can hold at most <strong>3</strong> requests.</td>
+<td>Batch what you need, or chain Continuations.</td>
+</tr>
+<tr>
+<td><strong>120 s per callout</strong></td>
+<td>Each callout in the Continuation can run up to <strong>120 seconds</strong>.</td>
+<td>Set the Continuation timeout sensibly. Parallel calls finish in the time of the slowest.</td>
+</tr>
+<tr>
+<td><strong>Chaining limit</strong></td>
+<td>You can chain up to <strong>3</strong> Continuations in one request, giving up to ~360 s total.</td>
+<td>Use chaining only if one round trip is not enough.</td>
+</tr>
+<tr>
+<td><strong>Response size cap</strong></td>
+<td>The Continuation response is capped, commonly documented at <strong>1 MB</strong>.</td>
+<td>Keep responses small. Page or filter on the external side.</td>
+</tr>
+<tr>
+<td><strong>Supported contexts only</strong></td>
+<td>Works from <strong>Aura, LWC, and Visualforce</strong>, not from generic backend Apex.</td>
+<td>For non-UI background callouts use <a href="#f05">async</a>.</td>
+</tr>
+<tr>
+<td><strong>Callback is a separate execution</strong></td>
+<td>State is passed via the Continuation <code>state</code>, not instance variables.</td>
+<td>Stash anything the callback needs in <code>con.state</code>.</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Use <code>Test.setContinuationResponse</code> plus <code>Test.invokeContinuationMethod</code>.</td>
+<td>Mock the response, then assert the callback output.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What problem does a Continuation solve?</strong>
+A: A synchronous callout from the UI holds a Salesforce application server thread for its whole duration, and there is a limit on how many requests can run longer than 5 seconds at once. A Continuation releases the thread while the external system works and resumes in a callback when the response arrives, so a slow API does not consume your concurrency budget or freeze the page.</p>
+<p><strong>Q: How many callouts can one Continuation make, and for how long?</strong>
+A: Up to <strong>3 parallel callouts</strong> per Continuation, each up to <strong>120 seconds</strong>. Because they run in parallel, total time is the slowest call. You can chain up to <strong>3</strong> Continuations for longer multi-step work.</p>
+<p><strong>Q: Where can you use Continuations?</strong>
+A: From supported UI contexts only - <strong>Aura components, Lightning Web Components, and Visualforce</strong>. They are not for generic backend Apex; for that you use <code>@future</code>, Queueable, or Batch.</p>
+<p><strong>Q: Do Continuations support Named Credentials?</strong>
+A: Yes. If the request endpoint is a <code>callout:</code> Named Credential, the URL and auth are injected and you do not need a Remote Site Setting.</p>
+<p><strong>Q: How is the response handled?</strong>
+A: Not inline. You name a callback method on the Continuation. When the response returns, the platform invokes that callback, which reads the response with <code>Continuation.getResponse(label)</code> and returns the result to the UI.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "The receptionist takes your request, hangs up the internal line so they can help others, and the slow supplier rings back when ready. Salesforce frees the thread during the wait, then picks up the answer to finish your page."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Continuation, callback, concurrent long-running request limit, app server thread, parallel callouts, Named Credential - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_continuation_overview.htm">Make Long-Running Callouts with Continuations - Apex Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_continuation_limits.htm">Asynchronous Callout Limits - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_continuation_multiple_callouts.htm">Making Multiple Asynchronous Callouts - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/lwc/guide/apex-continuations.html">Continuations - Lightning Web Components Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f07">07-callout-limits-and-testing.md</a> - the full limits reference and how to test callouts.</em></p>
+</section>
+<section id="f07" class="doc">
+<h1>07 - Callout Limits and Testing</h1>
+<blockquote>
+<p><strong>One-liner</strong>: The <strong>limits</strong> that govern every outbound callout, and how to <strong>test</strong> callouts when real network calls are not allowed.
+<strong>Direction</strong>: Salesforce → External (outbound). <strong>Scope</strong>: Reference + reliability + testing.
+<strong>Use when</strong>: You are designing for scale, debugging a limit error, or writing test coverage for callout code.</p>
+</blockquote>
+<p>This is the final outbound file in Module 05. It ties together <a href="#f01">01-http-callouts.md</a>, <a href="#f05">05-asynchronous-callouts.md</a>, and <a href="#f06">06-continuation-pattern.md</a>. Auth lives in <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">Module 03</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Every callout runs inside a <strong>speed limit and a weight limit</strong>. Salesforce caps <strong>how many</strong> calls you make, <strong>how big</strong> the payload is, <strong>how long</strong> each call may take, and <strong>how many slow calls</strong> the whole org runs at once. Cross a line and you get a runtime exception, not a slow response.</p>
+<p>And there is a second rule that trips everyone: <strong>you cannot make a real network call inside an Apex test.</strong> Tests must run fast and deterministically with no external dependency, so the platform forces you to supply a <strong>fake response</strong> with a mock. Knowing both - the limits and the mocks - is what separates an integration that survives production from one that fails on the first busy Monday.</p>
+<hr />
+<h2>2. The limits (the table to memorize)</h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Callouts per transaction</strong></td>
+<td><strong>100</strong></td>
+<td>Across all callouts (HTTP and web service) in one Apex transaction. Bulkify, do not loop.</td>
+</tr>
+<tr>
+<td><strong>Max request or response size (sync)</strong></td>
+<td><strong>6 MB</strong></td>
+<td>Synchronous transaction heap context.</td>
+</tr>
+<tr>
+<td><strong>Max request or response size (async)</strong></td>
+<td><strong>12 MB</strong></td>
+<td>Higher ceiling in async (Queueable, Batch, <code>@future</code>).</td>
+</tr>
+<tr>
+<td><strong>Timeout per callout</strong></td>
+<td><strong>120 s</strong></td>
+<td>Default is <strong>10 s</strong>. Set with <code>req.setTimeout(ms)</code>, max <code>120000</code>.</td>
+</tr>
+<tr>
+<td><strong>Total callout time per transaction</strong></td>
+<td><strong>120 s</strong></td>
+<td>Sum of all callout time in the transaction.</td>
+</tr>
+<tr>
+<td><strong>Concurrent long-running requests</strong></td>
+<td><strong>10</strong></td>
+<td>Synchronous requests running <strong>&gt; 5 s</strong> count; org-wide. Newer orgs scale higher by license, minimum 10.</td>
+</tr>
+<tr>
+<td><strong>No callout after uncommitted DML</strong></td>
+<td>rule</td>
+<td>A pending DML in the same transaction blocks the callout.</td>
+</tr>
+<tr>
+<td><strong>Continuation parallel callouts</strong></td>
+<td><strong>3</strong></td>
+<td>Per Continuation, each up to 120 s. Up to 3 Continuations chained. See <a href="#f06">06</a>.</td>
+</tr>
+</tbody>
+</table>
+<div class="mermaid">
+flowchart LR
+    A[Outbound callout] --&gt; B{Sync or async?}
+    B --&gt;|Sync| C[6 MB payload&lt;br/&gt;counts toward&lt;br/&gt;10 concurrent if &gt; 5s]
+    B --&gt;|Async| D[12 MB payload&lt;br/&gt;does not count toward&lt;br/&gt;concurrent limit]
+    A --&gt; E[100 callouts / txn]
+    A --&gt; F[120s per callout&lt;br/&gt;120s total / txn]
+    style C fill:#00A1E0,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style E fill:#ff9900,color:#fff
+    style F fill:#9C27B0,color:#fff
+
+</div>
+<p><strong>The no-callout-after-DML rule.</strong> Once your transaction issues DML and has not committed, a callout throws <code>You have uncommitted work pending</code>. Fix it by calling out <strong>before</strong> any DML, or by moving the callout to <a href="#f05">async</a> so it runs in its own transaction. This is the single most common callout error in interviews and in real code.</p>
+<p><strong>The concurrent long-running request limit.</strong> Any <strong>synchronous</strong> request that runs longer than <strong>5 seconds</strong> counts against an org-wide pool of (historically) <strong>10</strong>. Batch Apex, <code>@future</code>, scheduled jobs, and Bulk API do <strong>not</strong> count. This is exactly why slow UI callouts should use a <a href="#f06">Continuation</a>, which releases the thread.</p>
+<hr />
+<h2>3. Testing callouts (mocks are mandatory)</h2>
+<p>Real callouts are <strong>blocked in tests</strong>. A test that calls a live endpoint fails with "Methods defined as TestMethod do not support Web service callouts." You must inject a fake response.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>For</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>HttpCalloutMock</code></strong></td>
+<td>HTTP/REST callouts</td>
+<td>Interface you implement to return a fake <code>HttpResponse</code>.</td>
+</tr>
+<tr>
+<td><strong><code>WebServiceMock</code></strong></td>
+<td>SOAP callouts</td>
+<td>Interface for mocking generated WSDL stub responses.</td>
+</tr>
+<tr>
+<td><strong><code>StaticResourceCalloutMock</code></strong></td>
+<td>HTTP from a file</td>
+<td>Built-in class that returns a static resource as the response body.</td>
+</tr>
+<tr>
+<td><strong><code>Test.setMock</code></strong></td>
+<td>wiring</td>
+<td>Registers your mock so the platform uses it during the test.</td>
+</tr>
+<tr>
+<td><strong><code>Test.startTest()</code> / <code>Test.stopTest()</code></strong></td>
+<td>async</td>
+<td>Forces queued async work (Queueable, <code>@future</code>, Batch) to run, so async callouts execute.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HttpCalloutMock example</strong></p>
+<pre><code class="language-apex">@isTest
+private class OrderSyncTest {
+
+    // 1) The mock returns a canned response
+    private class MockResponse implements HttpCalloutMock {
+        public HttpResponse respond(HttpRequest req) {
+            HttpResponse res = new HttpResponse();
+            res.setHeader('Content-Type', 'application/json');
+            res.setBody('{&quot;status&quot;:&quot;ok&quot;,&quot;id&quot;:&quot;A-100&quot;}');
+            res.setStatusCode(200);
+            return res;
+        }
+    }
+
+    @isTest
+    static void testQueueableCallout() {
+        Test.setMock(HttpCalloutMock.class, new MockResponse()); // register mock
+
+        Test.startTest();
+        System.enqueueJob(new OrderSyncQueueable(/* test orders */ null));
+        Test.stopTest(); // async callout runs here, using the mock
+
+        // assert the side effects (records flagged, fields set, etc.)
+    }
+}
+</code></pre>
+<p>For SOAP, implement <code>WebServiceMock</code> and register it the same way with <code>Test.setMock(WebServiceMock.class, ...)</code>. For Continuations, use <code>Test.setContinuationResponse</code> and <code>Test.invokeContinuationMethod</code> instead.</p>
+<hr />
+<h2>4. Reliability: error handling, retries, idempotency, logging</h2>
+<p>A callout can return a bad status, time out, or hit a down service. Production code plans for all of it.</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>What can go wrong</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>4xx errors</strong></td>
+<td>Bad request, auth failure, not found.</td>
+<td>Do <strong>not</strong> blindly retry. Log, surface, fix the request. 401 may mean rotate/refresh the credential.</td>
+</tr>
+<tr>
+<td><strong>5xx errors</strong></td>
+<td>The external service failed.</td>
+<td>Retry with <strong>backoff</strong>, capped attempts. These are often transient.</td>
+</tr>
+<tr>
+<td><strong>Timeouts</strong></td>
+<td>Service too slow or hung.</td>
+<td>Catch <code>CalloutException</code>. Retry async or fail gracefully. Consider a shorter <code>setTimeout</code>.</td>
+</tr>
+<tr>
+<td><strong>Retries</strong></td>
+<td>A naive retry storm worsens an outage.</td>
+<td>Limit attempts, add exponential backoff, ideally route through a calling-out Queueable.</td>
+</tr>
+<tr>
+<td><strong>Idempotency</strong></td>
+<td>A retry double-creates or double-charges.</td>
+<td>Send an <strong>idempotency key</strong> or check-before-create so repeats are safe.</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>Silent failures are invisible.</td>
+<td>Persist request/response metadata to a custom object or platform event. Never log secrets.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-apex">try {
+    HttpResponse res = new Http().send(req);
+    Integer code = res.getStatusCode();
+    if (code == 200) {
+        // success
+    } else if (code &gt;= 500) {
+        // transient: enqueue a bounded retry
+    } else {
+        // 4xx: log and stop, do not retry blindly
+    }
+} catch (System.CalloutException e) {
+    // timeout or connection failure: log and retry async or fail gracefully
+}
+</code></pre>
+<hr />
+<h2>5. Design considerations and gotchas</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Why it matters</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bulkification</strong></td>
+<td>A trigger calling out per record blows the 100/txn cap fast.</td>
+<td>Aggregate, then call out once per batch. Move to Queueable/Batch.</td>
+</tr>
+<tr>
+<td><strong>Sync vs async size</strong></td>
+<td>A 9 MB payload fails sync but works async.</td>
+<td>Choose the context that fits the payload (6 MB sync, 12 MB async).</td>
+</tr>
+<tr>
+<td><strong>Slow calls and concurrency</strong></td>
+<td>Sync calls &gt; 5 s eat the org-wide pool of 10.</td>
+<td>Use a <a href="#f06">Continuation</a> or push to async.</td>
+</tr>
+<tr>
+<td><strong>DML ordering</strong></td>
+<td>Callout after DML throws.</td>
+<td>Call out first, or async. See <a href="#f05">05</a>.</td>
+</tr>
+<tr>
+<td><strong>No live calls in tests</strong></td>
+<td>Tests fail or are non-deterministic.</td>
+<td>Always mock with <code>HttpCalloutMock</code> / <code>WebServiceMock</code>.</td>
+</tr>
+<tr>
+<td><strong>Async runs at stopTest</strong></td>
+<td>Forgetting <code>startTest/stopTest</code> means async never executes.</td>
+<td>Wrap enqueue/batch between <code>Test.startTest()</code> and <code>Test.stopTest()</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What are the core callout limits?</strong>
+A: <strong>100</strong> callouts per transaction. Request/response max <strong>6 MB synchronous, 12 MB asynchronous</strong>. <strong>120 s</strong> max per callout and <strong>120 s</strong> total per transaction (default per-callout timeout is 10 s). Plus the org-wide concurrent long-running request limit.</p>
+<p><strong>Q: What is the concurrent long-running request limit?</strong>
+A: Synchronous Apex requests running longer than <strong>5 seconds</strong> count against an org-wide pool (historically <strong>10</strong>). Exceeding it throws a runtime exception on new sync requests. Async work - Batch, <code>@future</code>, scheduled, Bulk API - does not count, which is why slow UI callouts use a Continuation.</p>
+<p><strong>Q: How do you test a callout if live calls are blocked?</strong>
+A: Implement <strong><code>HttpCalloutMock</code></strong> (or <code>WebServiceMock</code> for SOAP), register it with <strong><code>Test.setMock</code></strong>, and have it return a canned <code>HttpResponse</code>. You can also use <code>StaticResourceCalloutMock</code> to serve a response from a static resource. Then assert on the result.</p>
+<p><strong>Q: How do you test an asynchronous callout specifically?</strong>
+A: Same mock, but wrap the enqueue or batch call between <strong><code>Test.startTest()</code></strong> and <strong><code>Test.stopTest()</code></strong>. The async job runs synchronously at <code>stopTest</code>, executing the callout against the mock so you can assert side effects.</p>
+<p><strong>Q: How do you make callouts reliable?</strong>
+A: Handle 4xx (log and fix, do not retry blindly) and 5xx/timeouts (bounded retry with backoff). Make requests <strong>idempotent</strong> with a key so retries are safe. Log request/response metadata - never secrets - for traceability.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Every call has a speed limit, a weight limit, and a rule that you cannot call out after you have started changing data. And you can never make a real call in a test, so you hand the code a pretend answer and check it does the right thing with it."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Governor limit, callout limit, concurrent long-running request limit, uncommitted DML, <code>HttpCalloutMock</code>, <code>WebServiceMock</code>, <code>StaticResourceCalloutMock</code>, <code>Test.setMock</code>, idempotency, backoff - defined in <a href="../01-Fundamentals/02-core-vocabulary.md">Module 01 vocabulary</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations - Apex Developer Guide (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_restful_http_testing.htm">Testing HTTP Callouts - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_restful_http_testing_httpcalloutmock.htm">Testing HTTP Callouts by Implementing HttpCalloutMock - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/engineering/2015/11/avoiding-the-concurrent-request-limit-via-synchronous-callout-optimization">Avoiding the Concurrent Request Limit - Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README.md</a> for the module map. From here, Module 06 (Event-Driven) covers Platform Events and Change Data Capture, and Module 07 (Bulk and Async) goes deeper on Batch, Queueable chaining, and high-volume processing - the natural continuation of outbound integration.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 05 Outbound Callouts · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

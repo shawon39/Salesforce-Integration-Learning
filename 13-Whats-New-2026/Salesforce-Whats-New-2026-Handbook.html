@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — What's New 2026 Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>What's New 2026</h1>
+  <div class="sub">The 2026 shifts: AI agents and MCP, MuleSoft's agent fabric, new platform APIs, and the retirement timeline.</div>
+  <div>
+    <span class="pill">Retirement timeline</span><span class="pill">Agentforce + MCP</span>
+    <span class="pill">MuleSoft 2026</span><span class="pill">Named Query API</span>
+    <span class="pill">Pub/Sub default</span><span class="pill">Data Cloud APIs</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - Retirements & Deprecations (the 2026-2028 timeline)</a></li>
+<li class=""><a href="#f02">02 - Agentforce, MCP & Integration (the AI-agent shift)</a></li>
+<li class=""><a href="#f03">03 - MuleSoft in 2026 (the agent era)</a></li>
+<li class=""><a href="#f04">04 - Platform & API Additions (new integration capabilities)</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 13 - What's New in 2026</h1>
+<blockquote>
+<p><strong>Goal</strong>: Know what's arriving and what's going away so you sound current and never get blindsided.
+<strong>API version</strong>: v66.0 (Spring '26); current live is v67.0 (Summer '26). Learn Modules 01-12 first, then use this for awareness.</p>
+</blockquote>
+<p>Two forces define 2026: the <strong>AI-agent shift</strong> (Agentforce + MCP turning integrations into agent-callable Actions) and a wave of <strong>security-driven retirements</strong> (OAuth + External Client Apps everywhere). This module is awareness-depth, but accurate and sourced.</p>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">retirements-and-deprecations</a></td>
+<td>The 2026-2028 retirement timeline + migrations</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">agentforce-mcp-and-integration</a></td>
+<td>AI agents calling integrations as Actions via MCP</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">mulesoft-2026</a></td>
+<td>Agent Fabric, Composer, API Catalog, governance</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">platform-and-api-additions</a></td>
+<td>Named Query API, Pub/Sub default, Data Cloud APIs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Headline changes (the quick table)</h2>
+<table>
+<thead>
+<tr>
+<th>Theme</th>
+<th>What</th>
+<th>When / status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Retiring</strong></td>
+<td>SOAP <code>login()</code></td>
+<td>Summer '27 (Jun 1, 2027)</td>
+</tr>
+<tr>
+<td><strong>Retiring</strong></td>
+<td>OAuth Username-Password flow</td>
+<td>Winter '27</td>
+</tr>
+<tr>
+<td><strong>Off by default</strong></td>
+<td>New Connected App creation</td>
+<td>Spring '26</td>
+</tr>
+<tr>
+<td><strong>Discontinued</strong></td>
+<td>Salesforce-to-Salesforce</td>
+<td>Summer '26</td>
+</tr>
+<tr>
+<td><strong>New (GA)</strong></td>
+<td>Salesforce-hosted <strong>MCP servers</strong></td>
+<td>Summer '26</td>
+</tr>
+<tr>
+<td><strong>New (GA)</strong></td>
+<td><strong>Named Query API</strong></td>
+<td>2026</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><strong>Pub/Sub API</strong> for events (Streaming legacy)</td>
+<td>now</td>
+</tr>
+<tr>
+<td><strong>Beta</strong></td>
+<td>Managed Event Subscriptions</td>
+<td>2026</td>
+</tr>
+</tbody>
+</table>
+<p>Full dated timeline in <a href="#f01">01-retirements-and-deprecations.md</a>.</p>
+<hr />
+<h2>How AI agents change integration</h2>
+<div class="mermaid">
+flowchart LR
+    USER[User asks an agent] --&gt; AGENT[Agentforce agent]
+    AGENT --&gt; MCP{MCP / Action router}
+    MCP --&gt; FLOW[Salesforce Flow]
+    MCP --&gt; APEX[Apex action / Named Query]
+    MCP --&gt; MULE[MuleSoft API]
+    MCP --&gt; EXT[External Service]
+    FLOW --&gt; SF[(Salesforce data)]
+    MULE --&gt; SAP[(SAP / NetSuite)]
+    EXT --&gt; API[(Public API)]
+
+    style AGENT fill:#00A1E0,color:#fff
+    style MCP fill:#ff9900,color:#fff
+    style MULE fill:#9C27B0,color:#fff
+
+</div>
+<p><strong>The key shift</strong>: integrations are now exposed as <strong>Actions</strong> that AI agents discover and call. Your Apex action, Flow, Named Query, or MuleSoft API can become an agent tool, accessed over standard <strong>OAuth</strong>. Detail in <a href="#f02">02-agentforce-mcp-and-integration.md</a>.</p>
+<hr />
+<h2>Accuracy note</h2>
+<p>The event-bus retention for high-volume Platform Events and Change Data Capture is <strong>72 hours (3 days)</strong>, not 96. If you see "96-hour replay" anywhere, it's wrong. See <a href="../06-Event-Driven/01-event-driven-basics.md">Module 06</a>.</p>
+<hr />
+<h2>Outcome</h2>
+<p>You won't be blindsided when someone says "wire this into Agentforce," "expose this as an MCP action," or "we need to migrate off SOAP login before Summer '27."</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://www.salesforce.com/blog/spring-26-release-architect-highlights/">Spring '26 Release Architect Highlights — Salesforce</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2026/06/the-salesforce-developers-guide-to-the-summer-26-release">The Salesforce Developer's Guide to the Summer '26 Release</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=005132110&amp;type=1">Platform SOAP API login() Retirement — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Event Message Durability — Pub/Sub API</a></li>
+</ul>
+<p><em>Each file has its own Sources section with specific official docs.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - Retirements &amp; Deprecations (the 2026-2028 timeline)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Salesforce is retiring legacy, password-based, and old-API integration paths and pushing everything to <strong>OAuth + External Client Apps + current API versions</strong>.
+<strong>Why it matters</strong>: These are the "what's changing on the platform?" questions interviewers love, and the migrations you'll actually be asked to do.</p>
+</blockquote>
+<p>This is Module 13, awareness of what's new and what's going away. The replacements are all covered in Modules 03-09. Dates use Salesforce <strong>release</strong> names; a release rolls out over a few weeks around its season.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Salesforce retires things for two reasons: <strong>security</strong> (kill password-in-the-request and weak auth) and <strong>modernization</strong> (move everyone onto current APIs and External Client Apps). The pattern is always the same: a feature is <strong>deprecated</strong> (still works, no new investment), then <strong>disabled by default</strong> for new orgs, then <strong>retired</strong> (stops working). If you know the dates, you're never blindsided, and you sound current in an interview.</p>
+<hr />
+<h2>2. The timeline (memorize the big four)</h2>
+<div class="mermaid">
+flowchart LR
+    A[Summer '25&lt;br/&gt;API v21-30 retired] --&gt; B[Feb 16 2026&lt;br/&gt;Outbound Msg session Ids blocked]
+    B --&gt; C[Spring '26&lt;br/&gt;New Connected App creation off]
+    C --&gt; D[Summer '26&lt;br/&gt;Salesforce-to-Salesforce ends]
+    D --&gt; E[Winter '27&lt;br/&gt;Username-Password flow retired]
+    E --&gt; F[Summer '27 - Jun 1&lt;br/&gt;SOAP login retired]
+    F --&gt; G[Dec 2027&lt;br/&gt;Salesforce for Outlook retired]
+    G --&gt; H[Summer '28&lt;br/&gt;API v31-40 retired]
+
+    style C fill:#ff9900,color:#fff
+    style E fill:#F44336,color:#fff
+    style F fill:#F44336,color:#fff
+    style H fill:#9C27B0,color:#fff
+
+</div>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What retires / changes</th>
+<th>What to do instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Done (Summer '25)</strong></td>
+<td>API versions <strong>21.0-30.0</strong> retired</td>
+<td>Move to <strong>v41.0+</strong> (ideally current v66/67).</td>
+</tr>
+<tr>
+<td><strong>Feb 16, 2026</strong></td>
+<td><strong>Outbound Messages</strong> can no longer send a <strong>Session ID</strong></td>
+<td>Authenticate the callback with <strong>OAuth</strong>.</td>
+</tr>
+<tr>
+<td><strong>Spring '26</strong></td>
+<td>New <strong>Connected App</strong> creation <strong>disabled by default</strong></td>
+<td>Build new apps as <strong><a href="../03-Authentication/13-connected-apps-vs-external-client-apps.md">External Client Apps</a></strong>.</td>
+</tr>
+<tr>
+<td><strong>Summer '26 (v67.0)</strong></td>
+<td><strong>Salesforce-to-Salesforce</strong> discontinued; <strong>"Use Any API Auth"</strong> perm added; <strong>API v31.0-40.0 deprecated</strong></td>
+<td>Migrate S2S to Data Cloud One / MuleSoft / Partner tools.</td>
+</tr>
+<tr>
+<td><strong>Winter '27</strong></td>
+<td><strong>OAuth Username-Password flow</strong> retired</td>
+<td><strong><a href="../03-Authentication/05-client-credentials-flow.md">Client Credentials</a></strong> (server) or <strong>Web Server + PKCE</strong> (user).</td>
+</tr>
+<tr>
+<td><strong>Summer '27 (Jun 1, 2027)</strong></td>
+<td><strong>SOAP API <code>login()</code></strong> retired (v31.0-64.0; already gone in v65.0+)</td>
+<td>OAuth via ECA. SOAP now accepts <strong>JWT</strong> access tokens.</td>
+</tr>
+<tr>
+<td><strong>Dec 2027</strong></td>
+<td><strong>Salesforce for Outlook</strong> retired</td>
+<td>Outlook Integration + Einstein Activity Capture.</td>
+</tr>
+<tr>
+<td><strong>Summer '28</strong></td>
+<td>API versions <strong>31.0-40.0</strong> retired</td>
+<td>Move to <strong>v41.0+</strong>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. The big four, explained</h2>
+<p><strong>1. New Connected Apps are off by default (Spring '26).</strong> Creation is blocked in the UI and Metadata API (except package installs); re-enabling needs a Salesforce Support request. Build new integrations as <strong>External Client Apps</strong>, which separate developer config from admin policy and support only modern OAuth flows. See <a href="../03-Authentication/13-connected-apps-vs-external-client-apps.md">Module 03</a>.</p>
+<p><strong>2. Username-Password OAuth flow retires (Winter '27).</strong> Already blocked by default for orgs created Summer '23+. It passes raw credentials and bypasses MFA. Move servers to <strong>Client Credentials</strong>, users to <strong>Web Server + PKCE</strong>. See <a href="../03-Authentication/07-username-password-flow.md">Module 03</a>.</p>
+<p><strong>3. SOAP <code>login()</code> retires (Summer '27, June 1 2027).</strong> The most common legacy auth call. Gone from API <strong>v65.0+</strong> already; disabled by default in new orgs; from Summer '26 needs the <strong>"Use Any API Auth"</strong> permission. SOAP now accepts <strong>JWT</strong> OAuth tokens, so migrate auth to OAuth and keep your SOAP payloads if needed. See <a href="../04-Inbound-APIs/02-standard-soap-api.md">Module 04</a>.</p>
+<p><strong>4. Old API versions retire (v31-40 in Summer '28).</strong> Deprecated versions stop getting fixes, then fail. Audit integrations and bump to a current version (this vault targets <strong>v66.0</strong>).</p>
+<hr />
+<h2>4. How to find what affects your org</h2>
+<ul>
+<li>Read each <strong>Release Notes</strong> "Retirement" section every season.</li>
+<li>Check <strong>API Total Usage</strong> and the per-version usage in <strong>Setup → API Usage</strong>, and the <strong><code>/services/data</code></strong> version list.</li>
+<li>Review <strong>Connected Apps OAuth Usage</strong> and <strong>Login History</strong> to spot legacy flows (Username-Password, SOAP login) still in use.</li>
+<li>Search Salesforce Help for the specific <strong>"... Retirement"</strong> knowledge article for an exact enforcement date.</li>
+</ul>
+<hr />
+<h2>5. Interview Q&amp;A</h2>
+<p><strong>Q: What major integration retirements are coming?</strong>
+A: New Connected App creation is off by default (Spring '26), the Username-Password OAuth flow retires (Winter '27), SOAP <code>login()</code> retires (Summer '27), and API versions 31-40 retire (Summer '28). The throughline is OAuth + External Client Apps + current API versions.</p>
+<p><strong>Q: A legacy job authenticates with SOAP <code>login()</code> and a password. How do you modernize it?</strong>
+A: Move auth to OAuth via an External Client App, using <strong>JWT Bearer</strong> or <strong>Client Credentials</strong>. SOAP API now accepts JWT access tokens, so the SOAP calls can stay while the auth modernizes.</p>
+<p><strong>Q: Connected App or External Client App for a new build?</strong>
+A: External Client App. New Connected App creation is disabled by default as of Spring '26.</p>
+<p><strong>Q: How do you know if a retirement affects you?</strong>
+A: Release notes retirement sections, API usage by version in Setup, and Login History / OAuth usage to find legacy auth still running.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Salesforce is turning off the old, password-based doors and moving everyone to modern keycards. The dates are published, so you migrate before the door locks."</p>
+<hr />
+<h2>6. Key terms</h2>
+<p>Deprecation, retirement, disabled-by-default, External Client App, JWT Bearer, Client Credentials - defined in <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a> and the <a href="#overview">README</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=005132110&amp;type=1">Platform SOAP API login() Retirement — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2026/06/the-salesforce-developers-guide-to-the-summer-26-release">The Salesforce Developer's Guide to the Summer '26 Release</a></li>
+<li><a href="https://www.salesforce.com/blog/spring-26-release-architect-highlights/">Spring '26 Release Architect Highlights</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=release-notes.rn_security_unpw_flow_retirement.htm&amp;type=5">Retirement of OAuth 2.0 Username-Password Flow — Release Notes</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-agentforce-mcp-and-integration.md</a> - how AI agents now call your integrations as Actions.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Agentforce, MCP &amp; Integration (the AI-agent shift)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: AI agents can now call your integrations directly. An <strong>MCP-compatible client</strong> (Claude, ChatGPT, Cursor) connects to an org over <strong>OAuth</strong> and uses your <strong>Flows, Apex actions, and Named Queries</strong> as tools.
+<strong>Why it matters</strong>: This is the biggest 2026 shift for integration engineers. The integrations you build are no longer just for apps and ETL jobs, they become <strong>actions an AI agent can discover and invoke</strong>.
+<strong>Status</strong>: <strong>Salesforce Hosted MCP Servers are GA</strong> (announced Apr 29, 2026, headlined in Summer '26, API v67.0). Some adjacent pieces (Data 360 MCP server, Multi-Agent Orchestration) are still Preview/Beta. Flags below.</p>
+</blockquote>
+<p>This is Module 13, awareness depth. For the underlying mechanics, see <a href="../03-Authentication/01-authentication-fundamentals.md">Authentication</a> and <a href="../08-Modern-APIs/04-modern-api-landscape.md">Modern APIs</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>For years, an integration meant "system A calls system B over an API." In 2026 a third caller shows up: an <strong>AI agent</strong>. A user types a request in plain English, and an agent figures out which tool to call to satisfy it.</p>
+<p>Two names you must know:</p>
+<ul>
+<li><strong>Agentforce</strong> is Salesforce's platform for building and running <strong>AI agents</strong> (autonomous assistants that reason over a request and take actions). An agent reasons, then calls <strong>Actions</strong>, the discrete operations it is allowed to perform.</li>
+<li><strong>MCP (Model Context Protocol)</strong> is an <strong>open standard</strong> for connecting AI clients to systems. Think of it as <strong>USB-C for AI tools</strong>: one plug shape so any compatible client can talk to any compatible server. Salesforce did not invent it, it adopted it.</li>
+</ul>
+<p>The practical headline: <strong>Salesforce now hosts MCP servers for you.</strong> Enable a server in Setup and any MCP client can connect to your org over <strong>OAuth</strong>, with <strong>your existing permissions</strong> (CRUD, FLS, sharing) enforced automatically. No infrastructure to run.</p>
+<hr />
+<h2>2. What's new (the specifics)</h2>
+<p>A <strong>hosted MCP server</strong> is a Salesforce-managed endpoint that exposes your org's logic and data to any client that speaks MCP. You get two flavors: <strong>standard</strong> (prebuilt) and <strong>custom</strong> (you choose what to expose).</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is</th>
+<th>Status (June 2026)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hosted MCP Servers</strong></td>
+<td>Salesforce-managed MCP endpoints, OAuth + PKCE, permissions enforced per user</td>
+<td><strong>GA</strong> (Enterprise Edition and above)</td>
+</tr>
+<tr>
+<td><strong>Standard servers</strong></td>
+<td>Prebuilt: <strong>SObject</strong> (CRUD, SOQL, search), <strong>Data 360</strong> (queries, graph traversal), <strong>Tableau</strong> (analytics)</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong>Custom servers</strong></td>
+<td>You pick which tools and prompts to expose, full sharing model respected</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong><code>mcp_api</code> OAuth scope</strong></td>
+<td>A dedicated scope for MCP, separate from the existing REST API scope</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong>Prompt templates</strong></td>
+<td>Prebuilt natural-language starting points (such as account review, deal analysis)</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong>Agentforce as MCP tool</strong></td>
+<td>Expose an Agentforce agent itself as an MCP tool</td>
+<td>Rolling out</td>
+</tr>
+<tr>
+<td><strong>Data 360 MCP Server</strong></td>
+<td>Open-source server fronting roughly 200 Data 360 REST ops behind 3 facade tools</td>
+<td><strong>Developer Preview</strong></td>
+</tr>
+<tr>
+<td><strong>Marketing Cloud Engagement MCP</strong></td>
+<td>Exposes data extensions and journeys as tools</td>
+<td><strong>GA</strong> (from July 2026)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The big shift: your integrations become agent tools.</strong> A custom MCP server can build tools from any of these, with <strong>no integration glue code</strong>:</p>
+<ul>
+<li><strong>Apex Actions</strong> - methods annotated <code>@InvocableMethod</code>.</li>
+<li><strong>Apex REST</strong> - your existing custom <code>@RestResource</code> endpoints.</li>
+<li><strong>AuraEnabled Apex</strong> - <code>@AuraEnabled</code> methods.</li>
+<li><strong>Lightning Flows</strong> - autolaunched flows.</li>
+<li><strong>Named Query API</strong> - parameterized SOQL exposed as a resource (see <a href="#f04">04-platform-and-api-additions.md</a>).</li>
+<li><strong>Prompt Builder</strong> prompts and the <strong>API Catalog</strong> (your curated REST registry).</li>
+</ul>
+<p>So the Apex REST class you wrote in <a href="../04-Inbound-APIs/01-standard-rest-api.md">Module 04</a>, the Flow from a callout in <a href="../05-Outbound-Callouts/01-http-callouts.md">Module 05</a>, or a MuleSoft API can all become an <strong>action an agent calls by name</strong>.</p>
+<hr />
+<h2>3. How it works (architecture)</h2>
+<div class="mermaid">
+flowchart LR
+    USER[User asks in plain English] --&gt; CLIENT[MCP Client&lt;br/&gt;Claude / ChatGPT / Cursor]
+    CLIENT --&gt;|OAuth + PKCE&lt;br/&gt;scope mcp api| MCP{Hosted MCP Server&lt;br/&gt;action router}
+    MCP --&gt; APEX[Apex Action&lt;br/&gt;InvocableMethod]
+    MCP --&gt; FLOW[Autolaunched Flow]
+    MCP --&gt; NQ[Named Query API]
+    MCP --&gt; MULE[MuleSoft API]
+    APEX --&gt; SF[(Salesforce Data)]
+    FLOW --&gt; SF
+    NQ --&gt; SF
+    MULE --&gt; EXT[(SAP / NetSuite / External)]
+
+    style MCP fill:#0d9dda,color:#fff
+    style CLIENT fill:#00a1e0,color:#fff
+    style MULE fill:#ff9900,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>The user asks for something in natural language inside their AI client.</li>
+<li>The client connects to the org's hosted MCP server using <strong>OAuth</strong> (a dedicated <code>mcp_api</code> scope, plus <strong>PKCE</strong>). Every transaction runs <strong>as the authenticated user</strong>.</li>
+<li>The server is the <strong>action router</strong>. It advertises only the tools you explicitly exposed, the agent cannot call an API that was not published.</li>
+<li>The chosen tool runs: an Apex action, a Flow, a Named Query, or a MuleSoft-backed endpoint.</li>
+<li><strong>Security is automatic.</strong> CRUD, FLS, and sharing apply. If the user lacks permission, the agent cannot do it either. The user's name lands in the audit trail.</li>
+</ol>
+<p><strong>Why "human at the wheel" matters</strong>: MCP is itself a safety mechanism. <strong>Structured tool calls replace open API access</strong>, the server defines exactly what is callable, and the <code>mcp_api</code> scope does <strong>not</strong> grant the old REST APIs. Salesforce layers its permission model, audit trails, and a secure-by-default posture (servers must be explicitly enabled) on top.</p>
+<hr />
+<h2>4. What it means for integration work</h2>
+<p>The design rule changes. You are no longer building only for a known caller, you are building for an agent that <strong>discovers</strong> your tool and decides whether to call it. Design integrations to be <strong>agent-consumable</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Old mindset (app-to-app)</th>
+<th>New mindset (agent-consumable)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Endpoint named for an internal system</td>
+<td><strong>Clear name + description</strong> so an agent can pick it by intent</td>
+</tr>
+<tr>
+<td>Inputs documented in a wiki</td>
+<td><strong>Typed, self-describing inputs/outputs</strong> (invocable variables, OpenAPI)</td>
+</tr>
+<tr>
+<td>One service account, broad rights</td>
+<td><strong>Runs as the user</strong>, least-privilege, FLS and sharing do the gating</td>
+</tr>
+<tr>
+<td>Auth via password or session ID</td>
+<td><strong>OAuth + PKCE</strong>, the <code>mcp_api</code> scope</td>
+</tr>
+<tr>
+<td>Governance is "trust the caller"</td>
+<td><strong>Governance is the design</strong>: expose only what is safe, log everything</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When you would reach for this</strong>: a sales rep wants an account briefing without leaving Slack or Claude. A finance team reconciles closed-won opportunities against ERP entries from one chat. An ISV exposes industry-specific Apex actions so customer agents speak the data model in plain English. <strong>When you would not</strong>: high-volume system-to-system ETL still belongs on Bulk API 2.0 and Pub/Sub, MCP is for <strong>agent-driven, conversational</strong> access, not batch throughput.</p>
+<p><strong>Getting started (under 30 minutes per Salesforce)</strong>: enable a server in <strong>Setup -&gt; API Catalog -&gt; MCP Servers</strong>, create an <strong><a href="../03-Authentication/13-connected-apps-vs-external-client-apps.md">External Client App</a></strong> with <code>mcp_api</code> and <code>refresh_token</code> scopes, then connect a client. Start with the read-only <code>sobject-reads</code> server in a sandbox.</p>
+<hr />
+<h2>5. Interview Q&amp;A</h2>
+<p><strong>Q: What is MCP and why does Salesforce care?</strong>
+A: The <strong>Model Context Protocol</strong> is an open standard for connecting AI clients to systems, like USB-C for AI tools. Salesforce adopted it and now <strong>hosts MCP servers</strong> (GA, Summer '26), so any MCP-compatible client connects to an org over OAuth and uses Salesforce data and logic as tools, with permissions enforced.</p>
+<p><strong>Q: How does an agent authenticate, and is it safe?</strong>
+A: <strong>OAuth with PKCE</strong>, using a dedicated <code>mcp_api</code> scope that does not unlock the regular REST APIs. Every transaction runs as the <strong>authenticated user</strong>, so CRUD, FLS, and sharing apply and the action is audited. The server only exposes tools you explicitly publish.</p>
+<p><strong>Q: My team has an Apex REST class and a Flow. How do they become agent tools?</strong>
+A: Build a <strong>custom hosted MCP server</strong> and map them in. Custom servers can expose <code>@InvocableMethod</code> Apex actions, Apex REST, <code>@AuraEnabled</code> methods, autolaunched Flows, Named Queries, and Prompt Builder prompts, with no integration code.</p>
+<p><strong>Q: How is this different from just calling the REST API?</strong>
+A: REST is open access to whatever the token allows. MCP gives the agent <strong>structured, named tool calls</strong> limited to what the server publishes, and a separate scope. It is safer and self-describing, the agent picks tools by intent rather than constructing arbitrary calls.</p>
+<p><strong>Q: Should I move my nightly ETL to MCP?</strong>
+A: No. MCP suits <strong>agent-driven, conversational</strong> access. High-volume batch still belongs on <strong>Bulk API 2.0</strong> and <strong>Pub/Sub API</strong>. Use the right tool per workload.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "We gave the org a universal AI plug. Any AI assistant can plug in, but it can only touch the doors we unlocked, only as the person using it, and every move is recorded."</p>
+<hr />
+<h2>6. Key terms</h2>
+<p><strong>Agentforce</strong> (Salesforce's AI agent platform), <strong>MCP</strong> (open AI-to-system protocol), <strong>hosted MCP server</strong> (Salesforce-managed MCP endpoint), <strong>Action</strong> (a discrete operation an agent can call), <strong><code>mcp_api</code> scope</strong> (OAuth scope for MCP), <strong>standard vs custom server</strong>. OAuth, PKCE, and External Client Apps are defined in <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/blogs/2026/04/salesforce-hosted-mcp-servers-are-now-generally-available">Salesforce Hosted MCP Servers Are Now Generally Available - Salesforce Developers Blog</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2026/06/the-salesforce-developers-guide-to-the-summer-26-release">The Salesforce Developer's Guide to the Summer '26 Release</a></li>
+<li><a href="https://www.salesforce.com/agentforce/mcp-support/">Agentforce MCP Support - Salesforce</a></li>
+<li><a href="https://developer.salesforce.com/docs/ai/agentforce/guide/mcp.html">MCP Solutions - Agentforce Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/hosted-mcp-servers">Hosted MCP Servers Developer Docs</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-mulesoft-2026.md</a> - MuleSoft as the governance and connectivity fabric for agents.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - MuleSoft in 2026 (the agent era)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: MuleSoft is repositioning from "connect apps and APIs" to <strong>"govern and connect AI agents."</strong> Agent Fabric manages agent sprawl, Composer lets business users build integrations, and the API Catalog keeps agents on approved APIs.
+<strong>Why it matters</strong>: When agents start calling integrations (see <a href="#f02">02-agentforce-mcp-and-integration.md</a>), someone has to govern which agents and APIs they can use. MuleSoft is making that its job.
+<strong>Status</strong>: <strong>Agent Fabric components are GA</strong> (Registry, Broker, Governance, Visualizer, since Oct 2025), Agent Scanners and AI Gateway LLM Governance GA in early 2026. <strong>API Governance for Salesforce is Beta</strong>. Flags below.</p>
+</blockquote>
+<p>This is Module 13, awareness depth. For middleware and iPaaS fundamentals, see <a href="../10-Tools-Middleware/06-middleware-and-ipaas.md">../10-Tools-Middleware/06-middleware-and-ipaas.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>MuleSoft's classic value was <strong>API-led connectivity</strong>: build reusable APIs in three layers (<strong>System</strong> APIs to back-end systems, <strong>Process</strong> APIs for business logic, <strong>Experience</strong> APIs for each channel), then assemble apps from them instead of point-to-point spaghetti.</p>
+<p>In 2026 that same idea is being pointed at <strong>AI agents</strong>. Enterprises are spinning up agents on every platform (Agentforce, Bedrock, Vertex, Copilot Studio), and the result is <strong>agent sprawl</strong>: redundant agents, no shared catalog, compliance blind spots. MuleSoft's pitch: it has governed APIs and applications for over a decade, so it is positioned to be the <strong>governance and connectivity fabric for agents</strong> too.</p>
+<p>Think <strong>air traffic control</strong> for a fleet of agents: a single place to <strong>register, route, govern, and observe</strong> every agent, no matter who built it.</p>
+<hr />
+<h2>2. What's new (the specifics)</h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it does</th>
+<th>Status (June 2026)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MuleSoft Agent Fabric</strong></td>
+<td>Discover, orchestrate, govern, observe any AI agent across clouds</td>
+<td>GA (suite)</td>
+</tr>
+<tr>
+<td>- <strong>Agent Registry</strong></td>
+<td>Central catalog where any agent or tool, including <strong>MCP and A2A</strong> servers, is registered and made discoverable</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td>- <strong>Agent Broker</strong></td>
+<td>Intelligent router that groups agents into business domains and routes tasks across them</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td>- <strong>Agent Governance</strong></td>
+<td>Enterprise guardrails: security, compliance, policy on every agent interaction</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td>- <strong>Agent Visualizer</strong></td>
+<td>Live map of the agent network, interactions, and dependencies</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td>- <strong>Agent Scanners</strong></td>
+<td>Auto-discover agents across Salesforce, Bedrock, Vertex AI, Copilot Studio</td>
+<td><strong>GA</strong> (early 2026)</td>
+</tr>
+<tr>
+<td><strong>AI Gateway LLM Governance</strong></td>
+<td>Central visibility of token usage, cost, and data flows for third-party models</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong>MuleSoft Composer</strong></td>
+<td>No-code "citizen integrator" tool inside Salesforce</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong>API Catalog with MuleSoft Sync</strong></td>
+<td>Governance and discovery layer so agents reach only <strong>approved</strong> APIs</td>
+<td>Available</td>
+</tr>
+<tr>
+<td><strong>API Governance for Salesforce</strong></td>
+<td>Apply API governance rules and standards to Salesforce-built APIs</td>
+<td><strong>Beta</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>MuleSoft Composer</strong> is the no-code piece. It is a <strong>declarative, clicks-not-code</strong> integration tool embedded in Salesforce, built for <strong>business teams</strong> (the "citizen integrator"). It ships prebuilt connectors for systems such as <strong>Slack, Jira, NetSuite, Workday, and Google Sheets</strong>, and turns manual multi-step processes into event-based automations. Typical flows: when a Salesforce opportunity closes, create the <strong>NetSuite</strong> sales order and post to <strong>Slack</strong>, or turn an urgent Service Cloud case into a <strong>Jira</strong> ticket plus a Slack alert. Business users build on <strong>IT-built assets and templates</strong>, so it complements, not replaces, full Anypoint development.</p>
+<p><strong>API Catalog with MuleSoft Sync</strong> is the discovery and governance layer. It is the curated registry agents and developers browse to find <strong>approved</strong> APIs, so an agent reaches a sanctioned, governed endpoint rather than an arbitrary one. <strong>API Governance for Salesforce (Beta)</strong> extends MuleSoft's governance rules onto Salesforce-built APIs so they meet the same standards.</p>
+<hr />
+<h2>3. How it works (Agent Fabric between agents and APIs)</h2>
+<div class="mermaid">
+flowchart TB
+    subgraph AGENTS[AI Agents - any platform]
+        AF[Agentforce Agent]
+        BR[Bedrock Agent]
+        CP[Copilot Studio Agent]
+    end
+
+    subgraph FABRIC[MuleSoft Agent Fabric - governance layer]
+        REG[Agent Registry&lt;br/&gt;discover and catalog]
+        BROK[Agent Broker&lt;br/&gt;route by domain]
+        GOV[Agent Governance&lt;br/&gt;security and policy]
+        VIS[Agent Visualizer&lt;br/&gt;observe]
+    end
+
+    subgraph CONN[Connectivity layer]
+        CAT[API Catalog&lt;br/&gt;approved APIs only]
+        SYS[System / Process / Experience APIs]
+    end
+
+    AF --&gt; REG
+    BR --&gt; REG
+    CP --&gt; REG
+    REG --&gt; BROK
+    BROK --&gt; GOV
+    GOV --&gt; CAT
+    CAT --&gt; SYS
+    SYS --&gt; BACK[(Salesforce / SAP / NetSuite / SaaS)]
+
+    style FABRIC fill:#0d9dda,color:#fff
+    style REG fill:#00a1e0,color:#fff
+    style BROK fill:#00a1e0,color:#fff
+    style GOV fill:#ff9900,color:#fff
+    style CAT fill:#ff9900,color:#fff
+
+</div>
+<p><strong>Walkthrough</strong></p>
+<ol>
+<li>Agents from <strong>any</strong> platform register in the <strong>Agent Registry</strong>, which also catalogs MCP and <strong>A2A</strong> (agent-to-agent) servers.</li>
+<li>A request hits the <strong>Agent Broker</strong>, which sorts agents and tools into business domains and routes the task to the best-fit agent.</li>
+<li><strong>Agent Governance</strong> applies security, compliance, and policy to every hop before anything runs.</li>
+<li>Calls flow through the <strong>API Catalog</strong>, so agents reach only <strong>approved, governed</strong> APIs, which sit on classic <strong>System / Process / Experience</strong> layers to the back ends.</li>
+<li><strong>Agent Visualizer</strong> gives IT a live map for spotting bottlenecks and failures.</li>
+</ol>
+<hr />
+<h2>4. What it means for integration work</h2>
+<p>MuleSoft is staking out the <strong>control plane</strong> for agents. The skills carry over directly: API-led layering, an API catalog, and governance policies are exactly what an agent estate needs.</p>
+<table>
+<thead>
+<tr>
+<th>Classic MuleSoft job</th>
+<th>The 2026 agent-era version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API catalog for developers</td>
+<td><strong>Registry + API Catalog</strong> for agents and developers</td>
+</tr>
+<tr>
+<td>Anypoint policies on API traffic</td>
+<td><strong>Agent Governance</strong> on every agent interaction</td>
+</tr>
+<tr>
+<td>Route between systems</td>
+<td><strong>Agent Broker</strong> routes between agents and tools</td>
+</tr>
+<tr>
+<td>Monitor API health</td>
+<td><strong>Visualizer</strong> observes the agent network and LLM cost</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When you would use it</strong>: multi-cloud agents (some on Agentforce, some on Bedrock or Copilot) that must work together safely, or business teams who need simple SaaS-to-SaaS automations without IT for every change (<strong>Composer</strong>). <strong>The throughline</strong>: as agents multiply, MuleSoft sells itself as the <strong>governance + connectivity fabric</strong> that keeps them discoverable, routed, and compliant. Note the <strong>MuleSoft AI Gateway</strong> also acts as an MCP gateway for centralized control across <strong>all</strong> your MCP servers, not just Salesforce, which pairs naturally with the hosted MCP servers from <a href="#f02">Module 13.02</a>.</p>
+<hr />
+<h2>5. Interview Q&amp;A</h2>
+<p><strong>Q: What is MuleSoft Agent Fabric?</strong>
+A: A solution to <strong>discover, orchestrate, govern, and observe any AI agent</strong>, regardless of where it was built. Four parts: <strong>Registry</strong> (catalog), <strong>Broker</strong> (routing), <strong>Governance</strong> (guardrails), <strong>Visualizer</strong> (observability). It tackles "agent sprawl" the way MuleSoft tackled API sprawl.</p>
+<p><strong>Q: Where does API-led connectivity fit now?</strong>
+A: Underneath. Agents route through the <strong>API Catalog</strong> to approved APIs, which still sit on <strong>System / Process / Experience</strong> layers. The layered model is the safe, reusable foundation agents call into.</p>
+<p><strong>Q: What is MuleSoft Composer and who is it for?</strong>
+A: A <strong>no-code</strong> integration tool inside Salesforce for <strong>business users</strong> (citizen integrators). Clicks, not code, with connectors for Slack, Jira, NetSuite, and more, building on IT-provided assets. Great for SaaS-to-SaaS automations, not a replacement for full Anypoint work.</p>
+<p><strong>Q: An agent should only call approved APIs. How?</strong>
+A: Publish them in the <strong>API Catalog</strong> (with MuleSoft Sync) as the governed registry, and enforce policy through <strong>Agent Governance</strong> and the <strong>AI Gateway</strong>. The agent discovers sanctioned endpoints rather than arbitrary ones. <strong>API Governance for Salesforce (Beta)</strong> extends those rules onto Salesforce-built APIs.</p>
+<p><strong>Q: Agent Fabric or Salesforce hosted MCP servers?</strong>
+A: Different layers. <strong>Hosted MCP servers</strong> expose one Salesforce org's tools to MCP clients. <strong>Agent Fabric</strong> governs and routes <strong>many agents across many clouds</strong>. They complement each other, and MuleSoft AI Gateway can govern MCP servers centrally.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Companies suddenly have AI agents everywhere, like dozens of new employees nobody hired through HR. MuleSoft is the HR-plus-air-traffic-control: it registers them, decides who handles what, and enforces the rules."</p>
+<hr />
+<h2>6. Key terms</h2>
+<p><strong>Agent Fabric</strong> (govern any agent), <strong>Agent Registry / Broker / Governance / Visualizer</strong> (the four parts), <strong>agent sprawl</strong> (uncontrolled agent growth), <strong>A2A</strong> (agent-to-agent protocol), <strong>MuleSoft Composer</strong> (no-code citizen-integrator tool), <strong>API Catalog</strong> (approved-API registry), <strong>API-led connectivity</strong> (System/Process/Experience layering). iPaaS and middleware basics live in <a href="../10-Tools-Middleware/06-middleware-and-ipaas.md">../10-Tools-Middleware/06-middleware-and-ipaas.md</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://www.salesforce.com/news/stories/mulesoft-agent-fabric-announcement/">Salesforce Launches MuleSoft Agent Fabric - Salesforce News</a></li>
+<li><a href="https://www.mulesoft.com/ai/agent-fabric">MuleSoft Agent Fabric - MuleSoft</a></li>
+<li><a href="https://www.salesforce.com/news/stories/mulesoft-agent-fabric-automated-agent-discovery/">Salesforce Expands MuleSoft Agent Fabric with Automated Discovery</a></li>
+<li><a href="https://www.salesforce.com/mulesoft/composer/">MuleSoft Composer for Salesforce</a></li>
+<li><a href="https://docs.mulesoft.com/agent-fabric/">Get Started with Agent Fabric - MuleSoft Documentation</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-platform-and-api-additions.md</a> - new platform and API capabilities for integration.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - Platform &amp; API Additions (new integration capabilities)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Several APIs matured in 2026: <strong>Named Query API</strong> turns SOQL into a scalable REST resource, <strong>Pub/Sub API</strong> is the default event API with <strong>Managed Event Subscriptions</strong> for server-side replay, and <strong>Data 360 APIs</strong> unify ingestion and query.
+<strong>Why it matters</strong>: These are the building blocks you will reach for in new integrations, and the ones agents call as tools (see <a href="#f02">02-agentforce-mcp-and-integration.md</a>).
+<strong>Status</strong>: API <strong>v67.0</strong> (Summer '26). Named Query API is <strong>GA</strong> (after Winter '26 Beta). Managed Event Subscriptions is <strong>Beta</strong>. Data 360 APIs are GA. Flags below. <strong>Note</strong>: Platform Event / CDC retention is <strong>72 hours</strong>, the "96 hours" you may see elsewhere is wrong.</p>
+</blockquote>
+<p>This is Module 13, awareness depth. For deeper coverage see <a href="../08-Modern-APIs/03-data-cloud-apis.md">Data Cloud APIs</a>, <a href="../06-Event-Driven/02-platform-events.md">Event-Driven</a>, and the <a href="../08-Modern-APIs/04-modern-api-landscape.md">modern API landscape</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Three retrieval-and-events building blocks got better, and the reason is the same as everywhere in 2026: things must be <strong>callable by apps and by agents</strong>, securely and at scale.</p>
+<ul>
+<li>Need to <strong>read data</strong>? A new <strong>Named Query API</strong> lets you define a SOQL query once and expose it as a fast REST resource, no Apex, no Flow.</li>
+<li>Need <strong>events</strong>? The <strong>Pub/Sub API</strong> is now the default subscriber API, and it can track your replay position for you.</li>
+<li>Need <strong>unified customer data</strong>? <strong>Data 360</strong> (formerly Data Cloud) has a full API surface for ingestion, query, profiles, and insights.</li>
+</ul>
+<hr />
+<h2>2. What's new (the specifics)</h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is</th>
+<th>Status (June 2026)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Named Query API</strong></td>
+<td>Define a SOQL query, expose it as a <strong>REST resource</strong> and an <strong>agent action</strong>, no code</td>
+<td><strong>GA</strong> (Beta in Winter '26)</td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>gRPC event API for publish and subscribe, the <strong>default</strong> event API</td>
+<td><strong>GA</strong></td>
+</tr>
+<tr>
+<td><strong>Managed Event Subscriptions</strong></td>
+<td>Server-side replay tracking, Salesforce keeps your Replay ID</td>
+<td><strong>Beta</strong></td>
+</tr>
+<tr>
+<td><strong>Streaming API (CometD)</strong></td>
+<td>Legacy event subscriber API</td>
+<td>Legacy, avoid for new builds</td>
+</tr>
+<tr>
+<td><strong>Data 360 APIs</strong></td>
+<td>Ingestion, Query, Profile, Calculated Insights, Connect</td>
+<td>GA</td>
+</tr>
+<tr>
+<td><strong>Platform Events capacity</strong></td>
+<td>Higher daily delivery on top tiers, <strong>72-hour</strong> retention</td>
+<td>GA</td>
+</tr>
+<tr>
+<td><strong>GraphQL chained mutations</strong></td>
+<td>Reference an earlier operation's fields in one request</td>
+<td><strong>GA</strong> (v67.0)</td>
+</tr>
+<tr>
+<td><strong>LWC State Managers / API v67.0</strong></td>
+<td>State lives outside components, <code>lightning/accApi</code> drives Agentforce panel</td>
+<td><strong>GA</strong> (v67.0)</td>
+</tr>
+</tbody>
+</table>
+<h3>Named Query API</h3>
+<p>You provide a <strong>label</strong>, an <strong>API version</strong>, and a <strong>SOQL query</strong>, and bind parameters from the query string, for example <code>WHERE Name = :name</code> and <code>LIMIT :maxrecords</code>. Salesforce validates it and surfaces it as a <strong>reusable REST resource</strong>. It is <strong>faster than Flow or Apex for retrieval</strong> because it is a thin, optimized query path, no automation overhead. The same definition can be <strong>viewed in the API Catalog</strong>, invoked as a REST API, downloaded as an <strong>OpenAPI</strong> document, and turned into an <strong>agent action</strong>. This is the cleanest way to give apps and agents safe, parameterized read access without writing code.</p>
+<h3>Pub/Sub API and Managed Event Subscriptions</h3>
+<p><strong>Pub/Sub API</strong> is the modern gRPC API for both publishing and subscribing to <strong>Platform Events</strong> and <strong>Change Data Capture</strong>, with efficient binary <strong>Avro</strong> payloads. It is now the <strong>default</strong>, <strong>Streaming API (CometD) is legacy</strong>, keep it only for existing subscribers.</p>
+<p>Historically a subscriber had to <strong>store its own Replay ID</strong> to resume after a disconnect. <strong>Managed Event Subscriptions (Beta)</strong> flips that: you define a <code>ManagedEventSubscription</code> (via Tooling or Metadata API) with a topic and a <code>defaultReplay</code> position, and <strong>Salesforce maintains the replay store</strong> on the server side. Your client can be <strong>truly stateless</strong>, no replay bookkeeping.</p>
+<h3>Data 360 APIs</h3>
+<p><strong>Data 360</strong> (rebranded from <strong>Data Cloud</strong> in Oct 2025) unifies customer data and exposes it through a full API surface:</p>
+<ul>
+<li><strong>Ingestion API</strong> - stream or batch data <strong>into</strong> Data 360.</li>
+<li><strong>Query API</strong> - run <strong>Data 360 SQL</strong> against unified data (the new <code>SET OPTIONS</code> clause sets the dataspace and <code>NULL</code>-handling for data lake objects).</li>
+<li><strong>Profile API</strong> - read unified customer profiles.</li>
+<li><strong>Calculated Insights API</strong> - query precomputed metrics (dimensions and measures).</li>
+<li><strong>Connect API</strong> - high-performance ingest plus query and insight management.</li>
+</ul>
+<p>Deeper treatment lives in <a href="../08-Modern-APIs/03-data-cloud-apis.md">../08-Modern-APIs/03-data-cloud-apis.md</a>.</p>
+<h3>Platform Events capacity, and the 72-hour fact</h3>
+<p>Top tiers get <strong>higher daily event delivery</strong> allocations in 2026 for high-volume event-driven apps. The number to <strong>memorize correctly</strong>:</p>
+<blockquote>
+<p><strong>Platform Events and Change Data Capture are retained for 72 hours.</strong> This is the window in which Pub/Sub API can replay events. You will see "96 hours / 4 days" in some blog posts (and this vault's old README) - that is <strong>incorrect</strong>. The official Pub/Sub API "Event Message Durability" doc states <strong>72 hours</strong>.</p>
+</blockquote>
+<hr />
+<h2>3. How it works (retrieval and events)</h2>
+<div class="mermaid">
+flowchart LR
+    subgraph CALLERS[Callers]
+        APP[App or Service]
+        AGENT[AI Agent via MCP]
+    end
+
+    subgraph READ[Read path]
+        NQ[Named Query API&lt;br/&gt;parameterized SOQL]
+        D360[Data 360 Query API&lt;br/&gt;Data 360 SQL]
+    end
+
+    subgraph EVENTS[Event path]
+        PS[Pub/Sub API&lt;br/&gt;gRPC plus Avro]
+        MES[Managed Event Subscription&lt;br/&gt;server-side replay]
+    end
+
+    APP --&gt; NQ
+    AGENT --&gt; NQ
+    APP --&gt; PS
+    NQ --&gt; SF[(Salesforce Data)]
+    D360 --&gt; DATA[(Data 360 unified data)]
+    PS --&gt; BUS{{Event Bus&lt;br/&gt;72h retention}}
+    MES --&gt; BUS
+    BUS --&gt; SUB[Subscribers]
+
+    style NQ fill:#00a1e0,color:#fff
+    style PS fill:#0d9dda,color:#fff
+    style MES fill:#ff9900,color:#fff
+    style BUS fill:#9c27b0,color:#fff
+
+</div>
+<p><strong>Read path</strong>: callers (apps or agents) hit a <strong>Named Query</strong> for parameterized SOQL, or the <strong>Data 360 Query API</strong> for unified data. <strong>Event path</strong>: publishers and subscribers use <strong>Pub/Sub API</strong>, the <strong>event bus retains messages 72 hours</strong>, and a <strong>Managed Event Subscription</strong> lets Salesforce track the replay position so the subscriber stays stateless.</p>
+<hr />
+<h2>4. What it means for integration work</h2>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Reach for</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parameterized read for an app or agent</td>
+<td><strong>Named Query API</strong></td>
+<td>No code, faster than Flow/Apex, OpenAPI + agent action for free</td>
+</tr>
+<tr>
+<td>Subscribe to events (new build)</td>
+<td><strong>Pub/Sub API</strong></td>
+<td>The default, efficient gRPC + Avro, Streaming API is legacy</td>
+</tr>
+<tr>
+<td>Resume events without client state</td>
+<td><strong>Managed Event Subscriptions</strong> (Beta)</td>
+<td>Salesforce keeps your Replay ID</td>
+</tr>
+<tr>
+<td>Unified customer data in or out</td>
+<td><strong>Data 360 APIs</strong></td>
+<td>One surface for ingest, query, profile, insights</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Quick dev-improvement notes relevant to integration</strong> (all v67.0, GA unless flagged): <strong>GraphQL chained mutations</strong> create linked records in one round trip, cutting callouts. <strong>Apex now defaults to user mode</strong> and <code>with sharing</code>, so callout-and-DML logic enforces the running user's permissions by default, exactly the posture agent-called actions need. <strong>LWC State Managers</strong> move state out of components, and the new <code>lightning/accApi</code> module lets an LWC open and drive the <strong>Agentforce</strong> side panel.</p>
+<p><strong>Net</strong>: new integrations should default to <strong>Named Query for reads</strong>, <strong>Pub/Sub for events</strong>, and <strong>Data 360 APIs for unified data</strong>, all of which double as <strong>agent tools</strong> via hosted MCP servers.</p>
+<hr />
+<h2>5. Interview Q&amp;A</h2>
+<p><strong>Q: What is the Named Query API and when would you use it over Flow or Apex?</strong>
+A: It exposes a <strong>predefined, parameterized SOQL query as a REST resource</strong> with no code. Use it for <strong>retrieval</strong> when you would otherwise write a Flow or Apex just to return records, it is faster, comes with an OpenAPI doc, appears in the API Catalog, and can be an <strong>agent action</strong>.</p>
+<p><strong>Q: Pub/Sub API or Streaming API for a new subscriber?</strong>
+A: <strong>Pub/Sub API</strong>. It is the <strong>default</strong> modern gRPC API with efficient Avro payloads for Platform Events and CDC. <strong>Streaming API (CometD) is legacy</strong>, only keep it for existing integrations.</p>
+<p><strong>Q: What problem do Managed Event Subscriptions solve?</strong>
+A: Clients no longer have to <strong>store their own Replay ID</strong>. With a <code>ManagedEventSubscription</code>, <strong>Salesforce maintains the replay store</strong> server-side, so the subscriber can be stateless and resume cleanly. It is <strong>Beta</strong>.</p>
+<p><strong>Q: How long are Platform Events retained?</strong>
+A: <strong>72 hours.</strong> That is the Pub/Sub API replay window. (Some sources say 96, that is wrong.)</p>
+<p><strong>Q: What are the main Data 360 APIs?</strong>
+A: <strong>Ingestion</strong> (data in), <strong>Query</strong> (Data 360 SQL out), <strong>Profile</strong> (unified profiles), <strong>Calculated Insights</strong> (precomputed metrics), and the high-performance <strong>Connect API</strong>. Data 360 is the Oct 2025 rebrand of Data Cloud.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "We made the common jobs one-liners. Reading data is a saved query you call by name, listening for changes is a single modern pipe that remembers where you left off, and all of it doubles as a tool an AI agent can use."</p>
+<hr />
+<h2>6. Key terms</h2>
+<p><strong>Named Query API</strong> (SOQL as a REST resource and action), <strong>Pub/Sub API</strong> (default gRPC event API), <strong>Managed Event Subscription</strong> (server-side replay tracking), <strong>Replay ID</strong> (event position marker), <strong>Avro</strong> (binary payload format), <strong>Data 360</strong> (unified data platform, ex-Data Cloud), <strong>72-hour retention</strong> (event replay window). Events are covered in <a href="../06-Event-Driven/02-platform-events.md">Module 06</a>, Data 360 APIs in <a href="../08-Modern-APIs/03-data-cloud-apis.md">Module 08</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_named_query_intro.htm">Named Query APIs for SOQL Queries - REST API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2025/06/named-query-api-simplifies-data-access-for-agents-and-apps">Named Query API Simplifies Data Access for Agents and Apps - Salesforce Developers Blog</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Event Message Durability (72-hour retention) - Pub/Sub API Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/managed-sub.html">Managed Event Subscriptions (Beta) - Pub/Sub API Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2026/06/the-salesforce-developers-guide-to-the-summer-26-release">The Salesforce Developer's Guide to the Summer '26 Release</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README.md</a> for the full Module 13 map.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 13 What's New 2026 · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

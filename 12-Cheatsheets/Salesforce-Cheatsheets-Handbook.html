@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Cheatsheets Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Cheatsheets</h1>
+  <div class="sub">Single-page quick references for every module: patterns, APIs, OAuth, limits, errors, and debugging.</div>
+  <div>
+    <span class="pill">OAuth flows</span><span class="pill">Patterns &amp; API picker</span>
+    <span class="pill">Callout limits</span><span class="pill">Status &amp; error codes</span>
+    <span class="pill">Named Credentials</span><span class="pill">Debug checklist</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#fap">API Picker One-Pager (Spring '26)</a></li>
+<li class=""><a href="#fca">Callout & Async Limits One-Pager (v66.0)</a></li>
+<li class=""><a href="#fde">Callout Debug Checklist One-Pager (Spring '26, v66.0)</a></li>
+<li class=""><a href="#fer">Integration Errors & Exceptions One-Pager (v66.0)</a></li>
+<li class=""><a href="#fev">Event Mechanisms One-Pager (Spring '26)</a></li>
+<li class=""><a href="#fna">Named Credentials Syntax One-Pager (Spring '26, v66.0)</a></li>
+<li class=""><a href="#foa">OAuth Flows One-Pager (Spring '26)</a></li>
+<li class=""><a href="#fpa">Integration Patterns One-Pager (Spring '26)</a></li>
+<li class=""><a href="#fpo">Postman + Salesforce Setup One-Pager (Spring '26, v66.0)</a></li>
+<li class=""><a href="#fst">REST API HTTP Status Codes One-Pager (v66.0)</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 12 - Cheatsheets (Quick Reference)</h1>
+<blockquote>
+<p><strong>Goal</strong>: Single-page references you keep open during real work and skim right before an interview.
+<strong>API version</strong>: v66.0 (Spring '26). When you're stuck mid-task, find the answer in 10 seconds, not 10 minutes.</p>
+</blockquote>
+<p>These condense Modules 01-11 into dense, scannable cards. Each links back to its full module for the deep dive.</p>
+<hr />
+<h2>The cheat sheets</h2>
+<table>
+<thead>
+<tr>
+<th>Card</th>
+<th>What it gives you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="oauth-flows.md">oauth-flows</a></td>
+<td>Every OAuth flow, grant type, tokens, decision tree</td>
+</tr>
+<tr>
+<td><a href="patterns.md">patterns</a></td>
+<td>The 6 integration patterns in one table + picker</td>
+</tr>
+<tr>
+<td><a href="api-picker.md">api-picker</a></td>
+<td>Which API for which use case (12 APIs compared)</td>
+</tr>
+<tr>
+<td><a href="event-comparison.md">event-comparison</a></td>
+<td>Platform Events vs CDC vs Outbound vs Streaming vs Pub/Sub</td>
+</tr>
+<tr>
+<td><a href="callout-limits.md">callout-limits</a></td>
+<td>Every callout and async governor limit</td>
+</tr>
+<tr>
+<td><a href="status-codes.md">status-codes</a></td>
+<td>HTTP status codes Salesforce returns + causes</td>
+</tr>
+<tr>
+<td><a href="error-codes.md">error-codes</a></td>
+<td>Common exceptions and API errors with fixes</td>
+</tr>
+<tr>
+<td><a href="named-credentials-syntax.md">named-credentials-syntax</a></td>
+<td>Copy-paste Named Credential / callout snippets</td>
+</tr>
+<tr>
+<td><a href="postman-setup.md">postman-setup</a></td>
+<td>One-time Postman + Salesforce OAuth setup</td>
+</tr>
+<tr>
+<td><a href="debug-checklist.md">debug-checklist</a></td>
+<td>"My callout failed, now what?" triage flow</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The numbers worth memorizing</h2>
+<table>
+<thead>
+<tr>
+<th>Thing</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Callouts per transaction</td>
+<td><strong>100</strong></td>
+</tr>
+<tr>
+<td>Callout request/response</td>
+<td><strong>6 MB</strong> sync, <strong>12 MB</strong> async</td>
+</tr>
+<tr>
+<td>Callout timeout</td>
+<td><strong>120 s</strong> max</td>
+</tr>
+<tr>
+<td>Event retention (high-volume PE + CDC)</td>
+<td><strong>72 hours</strong></td>
+</tr>
+<tr>
+<td>Composite subrequests</td>
+<td><strong>25</strong></td>
+</tr>
+<tr>
+<td>sObject Collections records</td>
+<td><strong>200</strong></td>
+</tr>
+<tr>
+<td>Bulk API 2.0</td>
+<td><strong>100M</strong> records/24h, <strong>150 MB</strong>/job</td>
+</tr>
+<tr>
+<td><code>@future</code> / Queueable per transaction</td>
+<td><strong>50</strong></td>
+</tr>
+<tr>
+<td>Batch Apex concurrent jobs</td>
+<td><strong>5</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>How to use</h2>
+<p>Skim the relevant card before you build or before an interview round. For the "why" behind any line, follow the link to the full module. Start anywhere, these are reference, not a sequence.</p>
+<hr />
+<p><em>These cards summarize official Salesforce documentation. Each card cites its specific source.</em></p>
+</section>
+<section id="fap" class="doc">
+<h1>API Picker One-Pager (Spring '26)</h1>
+<blockquote>
+<p>Which Salesforce API for which job, by purpose, sync vs async, format, and volume. Full detail in <strong><a href="../08-Modern-APIs/04-modern-api-landscape.md">../08-Modern-APIs/04-modern-api-landscape.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>The full comparison table</h2>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Purpose</th>
+<th>Sync / Async</th>
+<th>Format</th>
+<th>Volume</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td>General CRUD + SOQL, the workhorse</td>
+<td>Sync</td>
+<td>JSON / XML</td>
+<td>1 record per call</td>
+<td>Default for most app integrations</td>
+</tr>
+<tr>
+<td><strong>SOAP API</strong></td>
+<td>Legacy, strongly typed, WSDL contract</td>
+<td>Sync</td>
+<td>XML</td>
+<td>1-200 per call</td>
+<td>Old / enterprise clients needing a WSDL</td>
+</tr>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td>Mass load / extract, job-based</td>
+<td><strong>Async</strong></td>
+<td>CSV / JSON</td>
+<td><strong>Thousands to millions</strong></td>
+<td>Large data loads you can poll</td>
+</tr>
+<tr>
+<td><strong>GraphQL</strong></td>
+<td>Pick exact fields across related objects</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Read-shaped, paged</td>
+<td>Avoid over / under-fetching. Dashboards</td>
+</tr>
+<tr>
+<td><strong>Composite</strong></td>
+<td>Chain several <strong>different</strong> ops in one trip</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Up to <strong>25</strong> subrequests</td>
+<td>Dependent calls, all-or-none</td>
+</tr>
+<tr>
+<td><strong>sObject Collections</strong></td>
+<td>Same op on <strong>many records, one object</strong></td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Up to <strong>200</strong> records</td>
+<td>50-200 records, need it now</td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>Publish + subscribe to events over gRPC</td>
+<td>Async stream</td>
+<td>Avro / gRPC</td>
+<td>Event stream</td>
+<td>Modern event-driven, CDC, replay</td>
+</tr>
+<tr>
+<td><strong>Streaming API</strong> (legacy)</td>
+<td>CometD push (PushTopic, generic)</td>
+<td>Async stream</td>
+<td>JSON</td>
+<td>Event stream</td>
+<td>Older event subscribers. Being superseded</td>
+</tr>
+<tr>
+<td><strong>Connect REST API</strong></td>
+<td>Chatter, Experience Cloud, Files, feeds</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>Feature-scoped</td>
+<td>Social, communities, files programmatically</td>
+</tr>
+<tr>
+<td><strong>UI API</strong></td>
+<td>Build Salesforce-like UIs, FLS + layout aware</td>
+<td>Sync</td>
+<td>JSON</td>
+<td>UI-scoped</td>
+<td>Custom UIs needing layout / FLS metadata</td>
+</tr>
+<tr>
+<td><strong>Metadata API</strong></td>
+<td>Deploy / retrieve <strong>config and metadata</strong></td>
+<td><strong>Async</strong></td>
+<td>XML</td>
+<td>Org metadata</td>
+<td>CI/CD, deployments, org setup</td>
+</tr>
+<tr>
+<td><strong>Tooling API</strong></td>
+<td>Developer tooling, fine-grained metadata</td>
+<td>Sync</td>
+<td>JSON / XML</td>
+<td>Dev artifacts</td>
+<td>IDEs, code analysis, debug logs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>What do you need? (decision flowchart)</h2>
+<div class="mermaid">
+flowchart TD
+    START["What are you trying to do?"] --&gt; KIND{Move records,&lt;br/&gt;stream events,&lt;br/&gt;or deploy metadata?}
+
+    KIND --&gt;|Deploy / retrieve config| META["Metadata API async&lt;br/&gt;Tooling API dev tooling"]
+    KIND --&gt;|React to live events| EV{Modern or legacy?}
+    KIND --&gt;|Move record data| DATA{How many records?}
+
+    EV --&gt;|Modern, gRPC, replay| PS[Pub/Sub API]
+    EV --&gt;|Legacy CometD| STR[Streaming API]
+
+    DATA --&gt;|"Millions, async OK"| BULK[Bulk API 2.0]
+    DATA --&gt;|"Up to 200, one object, now"| COLL[sObject Collections]
+    DATA --&gt;|"A few, different chained ops"| COMP[Composite API]
+    DATA --&gt;|"One record or simple CRUD"| ONE{Special need?}
+
+    ONE --&gt;|Exact fields, nested objects| GQL[GraphQL]
+    ONE --&gt;|Chatter / Files / Community| CONN[Connect REST]
+    ONE --&gt;|Layout + FLS aware UI| UIAPI[UI API]
+    ONE --&gt;|Plain CRUD / SOQL| REST[REST API]
+
+    style PS fill:#9C27B0,color:#fff
+    style BULK fill:#ff9900,color:#fff
+    style COLL fill:#00A1E0,color:#fff
+    style COMP fill:#9C27B0,color:#fff
+    style GQL fill:#00A1E0,color:#fff
+    style REST fill:#4CAF50,color:#fff
+    style META fill:#607D8B,color:#fff
+    style START fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>The three-scale spine (the core of every answer)</h2>
+<table>
+<thead>
+<tr>
+<th>Scale</th>
+<th>Records</th>
+<th>API</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>One</strong></td>
+<td>1 at a time</td>
+<td><strong>REST API</strong></td>
+<td>Simple, synchronous, one call per record</td>
+</tr>
+<tr>
+<td><strong>Some</strong></td>
+<td>up to <strong>200</strong>, one object, sync</td>
+<td><strong>sObject Collections</strong></td>
+<td>One round-trip, one API call, immediate</td>
+</tr>
+<tr>
+<td><strong>Many</strong></td>
+<td><strong>thousands to millions</strong>, async</td>
+<td><strong>Bulk API 2.0</strong></td>
+<td>Job-based, parallelized, poll for results</td>
+</tr>
+</tbody>
+</table>
+<p>Then layer the <strong>shape</strong> exceptions: GraphQL for field selection, Composite for chaining different ops with all-or-none, Pub/Sub for events, Metadata / Tooling for config.</p>
+<hr />
+<h2>Gotchas</h2>
+<ul>
+<li><strong>Sync vs async first</strong>. It splits the toolbox in two. Async (Bulk, Metadata, Pub/Sub) unlocks scale.</li>
+<li><strong>API limits</strong>. Every sync call counts against the daily allocation. Batch with Collections / Composite. Offload volume to Bulk. See <a href="../09-Security-Limits/README.md">../09-Security-Limits/README.md</a>.</li>
+<li><strong>Events: modern over legacy</strong>. Pick <strong>Pub/Sub</strong> for new event work. Streaming API (CometD) is legacy.</li>
+<li><strong>GraphQL is read-shaped</strong>, not a bulk loader. Use it to shape reads, not mass-writes.</li>
+<li><strong>Metadata vs data</strong>. Metadata API moves <strong>config</strong>, not rows. Never cross the two.</li>
+<li><strong>Pin the version</strong>. Use <strong>v66.0</strong> consistently across the integration.</li>
+</ul>
+<blockquote>
+<p>Note: <strong>Data Cloud APIs</strong> also exist (ingest / query / profile, massive volume) but require a Data Cloud license. See <a href="../08-Modern-APIs/03-data-cloud-apis.md">../08-Modern-APIs/03-data-cloud-apis.md</a>.</p>
+</blockquote>
+<p><em>Source: <a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_which_api.htm">Which API Do I Use? — REST API Developer Guide</a>. Full module: <a href="../08-Modern-APIs/04-modern-api-landscape.md">../08-Modern-APIs/04-modern-api-landscape.md</a>. Verified June 2026.</em></p>
+</section>
+<section id="fca" class="doc">
+<h1>Callout &amp; Async Limits One-Pager (v66.0)</h1>
+<blockquote>
+<p>Every callout and async governor limit in one place. Full detail in <strong><a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">../05-Outbound-Callouts/07-callout-limits-and-testing.md</a></strong> and <strong><a href="../09-Security-Limits/05-governor-and-api-limits.md">../09-Security-Limits/05-governor-and-api-limits.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>Per-transaction callout limits</h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Callouts per transaction</strong></td>
+<td><strong>100</strong></td>
+<td style="text-align: left;">Combined HTTP + Web service calls, sync <strong>and</strong> async</td>
+</tr>
+<tr>
+<td><strong>Request + response size (sync)</strong></td>
+<td><strong>6 MB</strong></td>
+<td style="text-align: left;">Counts against the <strong>6 MB sync heap</strong>; body + headers</td>
+</tr>
+<tr>
+<td><strong>Request + response size (async)</strong></td>
+<td><strong>12 MB</strong></td>
+<td style="text-align: left;">Counts against the <strong>12 MB async heap</strong></td>
+</tr>
+<tr>
+<td><strong>Default callout timeout</strong></td>
+<td><strong>10 s</strong></td>
+<td style="text-align: left;">Per single callout if <code>setTimeout</code> not set</td>
+</tr>
+<tr>
+<td><strong>Max timeout per single callout</strong></td>
+<td><strong>120 s</strong></td>
+<td style="text-align: left;">Set via <code>req.setTimeout(ms)</code>; range <strong>1 - 120,000 ms</strong></td>
+</tr>
+<tr>
+<td><strong>Total callout time per transaction</strong></td>
+<td><strong>120 s</strong></td>
+<td style="text-align: left;">Cumulative across <strong>all</strong> callouts in the transaction</td>
+</tr>
+<tr>
+<td><strong>Callout after uncommitted DML</strong></td>
+<td><strong>Not allowed</strong></td>
+<td style="text-align: left;">Throws <code>You have uncommitted work pending</code>; do DML-then-callout split or use async</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Concurrency limits (org-wide, not per-transaction)</h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Concurrent long-running sync requests</strong></td>
+<td><strong>10</strong></td>
+<td style="text-align: left;">A sync request counts once it runs <strong>&gt; 5 s</strong></td>
+</tr>
+<tr>
+<td>Scales by user licenses</td>
+<td>up to <strong>~50</strong></td>
+<td style="text-align: left;">+1 per license bucket above the base; org-wide cap</td>
+</tr>
+<tr>
+<td>Synchronous callouts</td>
+<td><strong>excluded</strong> from the long-running limit</td>
+<td style="text-align: left;">A sync request waiting on a callout does <strong>not</strong> count (Spring '20+)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Continuation (long-running async callout)</h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parallel callouts per Continuation</strong></td>
+<td><strong>3</strong></td>
+<td style="text-align: left;">Run simultaneously, suspend the request</td>
+</tr>
+<tr>
+<td><strong>Timeout per callout</strong></td>
+<td><strong>120 s</strong></td>
+<td style="text-align: left;">Applies regardless of how many callouts</td>
+</tr>
+<tr>
+<td><strong>Chained Continuations</strong></td>
+<td><strong>3</strong></td>
+<td style="text-align: left;">Max 3 Continuation objects in a chain</td>
+</tr>
+<tr>
+<td><strong>Max request/response size</strong></td>
+<td><strong>1 MB</strong></td>
+<td style="text-align: left;">Per Continuation callout</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Async Apex resource limits (vs synchronous)</h2>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th style="text-align: center;">Synchronous</th>
+<th style="text-align: center;"><strong>Asynchronous</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Heap size</strong></td>
+<td style="text-align: center;">6 MB</td>
+<td style="text-align: center;"><strong>12 MB</strong></td>
+</tr>
+<tr>
+<td><strong>CPU time</strong></td>
+<td style="text-align: center;">10,000 ms</td>
+<td style="text-align: center;"><strong>60,000 ms</strong></td>
+</tr>
+<tr>
+<td><strong>Total callouts</strong></td>
+<td style="text-align: center;">100</td>
+<td style="text-align: center;">100</td>
+</tr>
+<tr>
+<td>Single callout timeout</td>
+<td style="text-align: center;">120 s</td>
+<td style="text-align: center;">120 s</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Async invocation limits per transaction</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th style="text-align: center;">Limit per transaction</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>@future</strong></td>
+<td style="text-align: center;"><strong>50</strong></td>
+<td style="text-align: left;">No sObject/object params; primitives only</td>
+</tr>
+<tr>
+<td><strong>Queueable (<code>System.enqueueJob</code>)</strong></td>
+<td style="text-align: center;"><strong>50</strong></td>
+<td style="text-align: left;">From sync context; only <strong>1</strong> from another Queueable/async</td>
+</tr>
+<tr>
+<td><strong>Batch (<code>Database.executeBatch</code>)</strong></td>
+<td style="text-align: center;"><strong>5</strong> concurrent</td>
+<td style="text-align: left;">Org-wide; holding (queued) jobs limited to 100</td>
+</tr>
+<tr>
+<td>@future + Queueable + ScheduleBatch</td>
+<td style="text-align: center;">50 combined-type caps</td>
+<td style="text-align: left;">Each type capped at 50 per transaction</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Quick gotchas</h2>
+<ul>
+<li><strong>DML before callout = error.</strong> Split into separate transactions, or move the callout to <code>@future(callout=true)</code> / Queueable / Continuation.</li>
+<li><strong><code>@future(callout=true)</code></strong> is required for any callout from a <code>@future</code> method.</li>
+<li><strong>Test classes</strong> must use <code>HttpCalloutMock</code> / <code>WebServiceMock</code> and wrap in <code>Test.startTest()</code> / <code>Test.stopTest()</code>; real callouts in tests throw.</li>
+<li><strong>6 MB / 12 MB</strong> is the heap, and request + response share it. Stream or chunk large payloads.</li>
+</ul>
+<p><em>Source: <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Apex Developer Guide - Callout Limits and Limitations</a> and <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits</a>. Verified June 2026. See <a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">../05-Outbound-Callouts/07-callout-limits-and-testing.md</a>.</em></p>
+</section>
+<section id="fde" class="doc">
+<h1>Callout Debug Checklist One-Pager (Spring '26, v66.0)</h1>
+<blockquote>
+<p>"My callout failed — now what?" Work top to bottom. Limits + testing in <strong><a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">../05-Outbound-Callouts/07-callout-limits-and-testing.md</a></strong>; security layers in <strong><a href="../09-Security-Limits/README.md">../09-Security-Limits/README.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>Decision flowchart</h2>
+<div class="mermaid">
+flowchart TD
+    START[Callout failed] --&gt; EX{Exception or&lt;br/&gt;bad status code?}
+    EX --&gt;|CalloutException| MSG{Read the message}
+    EX --&gt;|HTTP 2xx not returned| CODE{Status code?}
+
+    MSG --&gt;|Unauthorized endpoint| RSS[Add host to Named Credential&lt;br/&gt;or Remote Site Settings]
+    MSG --&gt;|uncommitted work pending| DML[Move callout BEFORE DML&lt;br/&gt;or run it async]
+    MSG --&gt;|Read timed out| TMO[Raise setTimeout max 120s&lt;br/&gt;or go async / Continuation]
+    MSG --&gt;|do not support callouts| MOCK[Test context: add Test.setMock]
+
+    CODE --&gt;|401 or 403| AUTH[Token expired or no perms&lt;br/&gt;check External Credential + perm set]
+    CODE --&gt;|404| URL[Wrong path or base URL]
+    CODE --&gt;|429 or 5xx| RETRY[Throttled or server down&lt;br/&gt;retry with backoff]
+
+    AUTH --&gt; FLS{Writing to SF data?}
+    FLS --&gt;|Yes| PERM[Check FLS / CRUD / sharing&lt;br/&gt;USER_MODE]
+    FLS --&gt;|No| LOG[Open the debug log&lt;br/&gt;filter Callout + Apex]
+
+    style START fill:#F44336,color:#fff
+    style RSS fill:#00A1E0,color:#fff
+    style DML fill:#ff9900,color:#fff
+    style TMO fill:#9C27B0,color:#fff
+    style AUTH fill:#ff9900,color:#fff
+    style RETRY fill:#607D8B,color:#fff
+    style PERM fill:#4CAF50,color:#fff
+    style LOG fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>Checklist (in order)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Check</th>
+<th>Symptom / error</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Status code</strong></td>
+<td>401/403 vs 404 vs 429/5xx tells you the layer</td>
+<td>Triage by class: 4xx = your request, 5xx = their server</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Host allowlisted</strong></td>
+<td><code>Unauthorized endpoint, please check Setup-&gt;Security-&gt;Remote site settings</code></td>
+<td>Prefer <strong>Named Credential</strong>; else add the host to <strong>Remote Site Settings</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Uncommitted DML</strong></td>
+<td><code>You have uncommitted work pending. Please commit or rollback before calling out</code></td>
+<td>Call out <strong>before</strong> any DML, or move it <strong>async</strong> (Queueable/@future)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Timeout</strong></td>
+<td><code>Read timed out</code> / <code>CalloutException</code> after a hang</td>
+<td><code>req.setTimeout(ms)</code> (max <strong>120000</strong>); slow UI → <strong>Continuation</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Auth / token</strong></td>
+<td>401, <code>INVALID_SESSION_ID</code>, expired token</td>
+<td>Check <strong>External Credential</strong> principal + <strong>perm-set mapping</strong>; token may need refresh/rotate</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>IP / CORS</strong></td>
+<td>Inbound browser blocked, or LWC fetch blocked</td>
+<td>Inbound browser → <strong>CORS allowlist</strong>; LWC outbound → <strong>CSP Trusted Site</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>FLS / object perms</strong></td>
+<td>Callout OK but the <strong>DML</strong> after it fails</td>
+<td>Enforce + verify CRUD/FLS/sharing (<code>WITH USER_MODE</code>, <code>stripInaccessible</code>)</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Governor limits</strong></td>
+<td><code>Too many callouts: 100</code>, or heap/size error</td>
+<td>Bulkify (100/txn cap); payload <strong>6 MB sync / 12 MB async</strong>; total callout time <strong>120 s/txn</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Concurrent long-running</strong></td>
+<td>New sync callouts rejected under load</td>
+<td>Sync calls <strong>&gt;5 s</strong> count vs org pool (<strong>10</strong>, scales by license) → go async/Continuation</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Test context</strong></td>
+<td><code>Methods defined as TestMethod do not support Web service callouts</code></td>
+<td>Real calls blocked in tests → <code>Test.setMock(HttpCalloutMock.class, ...)</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Debug log</strong></td>
+<td>Nothing obvious above</td>
+<td>Setup → <strong>Debug Logs</strong>; set a trace flag, raise <strong>Callout</strong> + <strong>Apex Code</strong> to FINEST, re-run, read request/response</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Fast reminders</h2>
+<ul>
+<li><strong>4xx</strong> = don't blindly retry (fix the request / auth). <strong>5xx + timeouts</strong> = bounded retry with <strong>backoff</strong> + <strong>idempotency key</strong>.</li>
+<li><strong><code>callout:Named_Credential/path</code></strong> skips Remote Site Settings entirely and injects auth — the secret-free default.</li>
+<li><strong>Async ≠ free pass</strong>: still subject to limits, just a higher payload ceiling and outside the concurrent-sync pool.</li>
+<li><strong>Never log secrets</strong> when persisting request/response for traceability.</li>
+</ul>
+<hr />
+<p><em>Source: <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations — Apex Developer Guide (v66.0)</a> · <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits</a>. Verified June 2026. Full modules: <a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">../05-Outbound-Callouts/07-callout-limits-and-testing.md</a> · <a href="../09-Security-Limits/README.md">../09-Security-Limits/README.md</a>.</em></p>
+</section>
+<section id="fer" class="doc">
+<h1>Integration Errors &amp; Exceptions One-Pager (v66.0)</h1>
+<blockquote>
+<p>Common integration errors and exceptions, with cause and fix. Full detail in <strong><a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">../05-Outbound-Callouts/07-callout-limits-and-testing.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>Apex callout / runtime exceptions</h2>
+<table>
+<thead>
+<tr>
+<th>Error</th>
+<th style="text-align: left;">Cause</th>
+<th style="text-align: left;">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>CalloutException: Unauthorized endpoint</code></strong></td>
+<td style="text-align: left;">Endpoint not whitelisted; no Remote Site Setting or Named Credential covers the URL</td>
+<td style="text-align: left;">Add a <strong>Named Credential</strong> (preferred) or <strong>Remote Site Setting</strong>; call via <code>callout:My_Named_Cred/path</code></td>
+</tr>
+<tr>
+<td><strong><code>You have uncommitted work pending</code></strong></td>
+<td style="text-align: left;">Callout attempted <strong>after</strong> a DML in the same transaction</td>
+<td style="text-align: left;">Do the <strong>callout before DML</strong>, or move the callout to <code>@future(callout=true)</code> / Queueable / Continuation</td>
+</tr>
+<tr>
+<td><strong><code>System.LimitException</code></strong></td>
+<td style="text-align: left;">A governor limit was hit (callouts, heap, CPU, SOQL, DML rows)</td>
+<td style="text-align: left;">Bulkify, reduce loops, move to async (<strong>12 MB</strong> heap, <strong>60,000 ms</strong> CPU), check <code>Limits</code> methods</td>
+</tr>
+<tr>
+<td><strong><code>CalloutException: Read timed out</code></strong></td>
+<td style="text-align: left;">Remote endpoint slower than the timeout</td>
+<td style="text-align: left;">Raise <code>req.setTimeout(ms)</code> up to <strong>120,000 ms</strong>; use <strong>Continuation</strong> for long-running calls</td>
+</tr>
+<tr>
+<td><strong><code>System.JSONException</code></strong></td>
+<td style="text-align: left;">Malformed JSON, or <code>JSON.deserialize</code> type mismatch with the response</td>
+<td style="text-align: left;">Validate response shape; use <code>JSONParser</code> / typed wrapper classes; null-check before parse</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>API errors (REST / SOAP / Bulk) - returned in <code>errorCode</code></h2>
+<table>
+<thead>
+<tr>
+<th>Error</th>
+<th style="text-align: left;">Cause</th>
+<th style="text-align: left;">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>INVALID_SESSION_ID</code></strong></td>
+<td style="text-align: left;">Session/token expired or invalid (HTTP <strong>401</strong>)</td>
+<td style="text-align: left;">Re-authenticate; refresh the OAuth access token, then retry</td>
+</tr>
+<tr>
+<td><strong><code>REQUEST_LIMIT_EXCEEDED</code></strong></td>
+<td style="text-align: left;">Org exceeded its <strong>24-hour API request</strong> allocation (HTTP <strong>403</strong>)</td>
+<td style="text-align: left;">Throttle, batch records, use Composite/Bulk API; monitor in <strong>Setup &gt; System Overview</strong></td>
+</tr>
+<tr>
+<td><strong><code>INVALID_FIELD</code></strong></td>
+<td style="text-align: left;">SOQL/DML references a field that does not exist or is not accessible</td>
+<td style="text-align: left;">Check spelling, API name, FLS, and object access for the integration user</td>
+</tr>
+<tr>
+<td><strong><code>MALFORMED_QUERY</code></strong></td>
+<td style="text-align: left;">SOQL syntax error (bad clause, invalid number/date format)</td>
+<td style="text-align: left;">Fix the query; test in <strong>Developer Console</strong> / Query Editor first</td>
+</tr>
+<tr>
+<td><strong><code>DUPLICATE_VALUE</code></strong></td>
+<td style="text-align: left;">Value collides with a <strong>unique field</strong>, external ID, or duplicate rule</td>
+<td style="text-align: left;">Dedupe before insert; use <strong>upsert</strong> on the external ID; review duplicate rules</td>
+</tr>
+<tr>
+<td><strong><code>INSUFFICIENT_ACCESS_OR_READONLY</code></strong></td>
+<td style="text-align: left;">No CRUD/FLS/sharing rights, or field is read-only/formula</td>
+<td style="text-align: left;">Grant via permission set, check <strong>OWD / sharing / role hierarchy</strong>; do not write formula fields</td>
+</tr>
+<tr>
+<td><strong><code>UNABLE_TO_LOCK_ROW</code></strong></td>
+<td style="text-align: left;">Row-lock contention; another process holds the lock (waits up to <strong>10 s</strong>)</td>
+<td style="text-align: left;">Serialize updates, reduce batch size/concurrency, retry with backoff; avoid parent-record contention</td>
+</tr>
+<tr>
+<td><strong><code>STORAGE_LIMIT_EXCEEDED</code></strong></td>
+<td style="text-align: left;">Org <strong>data or file storage</strong> allocation is full</td>
+<td style="text-align: left;">Purge/archive data, raise storage, or delete attachments/files</td>
+</tr>
+<tr>
+<td><strong><code>JSON_PARSER_ERROR</code></strong></td>
+<td style="text-align: left;">Request body is not valid JSON, or null input to the parser</td>
+<td style="text-align: left;">Send well-formed JSON; set correct <code>Content-Type: application/json</code>; null-check input</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Triage cheat</h2>
+<ul>
+<li><strong><code>Unauthorized endpoint</code></strong> = setup gap, not code. Named Credential first.</li>
+<li><strong><code>uncommitted work pending</code></strong> = the classic <strong>DML-then-callout</strong> ordering bug. Reorder or go async.</li>
+<li><strong>401 / <code>INVALID_SESSION_ID</code></strong> = refresh token. <strong>403 / <code>REQUEST_LIMIT_EXCEEDED</code></strong> = back off, do not just retry.</li>
+<li><strong><code>UNABLE_TO_LOCK_ROW</code></strong> and <strong>5xx</strong> = transient. Retry with <strong>exponential backoff</strong>.</li>
+<li>Always log the <strong><code>errorCode</code></strong> + <code>message</code> from the response body, not just the HTTP status.</li>
+</ul>
+<p><em>Source: <a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/errorcodes.htm">REST API Developer Guide - Status Codes and Error Responses</a> and <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Apex Developer Guide - Callout Limits and Limitations</a>. Verified June 2026. See <a href="../05-Outbound-Callouts/07-callout-limits-and-testing.md">../05-Outbound-Callouts/07-callout-limits-and-testing.md</a>.</em></p>
+</section>
+<section id="fev" class="doc">
+<h1>Event Mechanisms One-Pager (Spring '26)</h1>
+<blockquote>
+<p>Platform Events vs CDC vs Outbound Messages vs Streaming API vs Pub/Sub API. Full detail in <strong><a href="../06-Event-Driven/README.md">../06-Event-Driven/README.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>The comparison table</h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Who creates the event</th>
+<th>Schema</th>
+<th>Transport</th>
+<th>Retention</th>
+<th>Subscribers</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Platform Events</strong></td>
+<td>You (deliberate business signal)</td>
+<td>Custom fields you define (<code>__e</code>)</td>
+<td>Event bus (Pub/Sub, empApi, CometD)</td>
+<td><strong>72h</strong> (high-volume)</td>
+<td>Apex, Flow, empApi, Pub/Sub API</td>
+<td><strong>Modern</strong></td>
+</tr>
+<tr>
+<td><strong>Change Data Capture</strong></td>
+<td>Salesforce (auto on record change)</td>
+<td>Fixed: <code>ChangeEventHeader</code> + changed fields</td>
+<td>Event bus (Pub/Sub, empApi, CometD)</td>
+<td><strong>72h</strong></td>
+<td>Apex, Flow, empApi, Pub/Sub API</td>
+<td><strong>Modern</strong></td>
+</tr>
+<tr>
+<td><strong>Outbound Messages</strong></td>
+<td>Workflow Rule / Flow (declarative)</td>
+<td>Configured field set</td>
+<td>SOAP XML to one endpoint</td>
+<td>Auto-retry up to <strong>24h</strong> (7 days via Support)</td>
+<td>One SOAP endpoint</td>
+<td><strong>Legacy</strong></td>
+</tr>
+<tr>
+<td><strong>Streaming API</strong></td>
+<td>PushTopic (SOQL) / generic channel</td>
+<td>JSON (PushTopic row or custom payload)</td>
+<td>CometD long-polling (Bayeux)</td>
+<td><strong>24h</strong> (PushTopic)</td>
+<td>CometD clients</td>
+<td><strong>Legacy</strong></td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>n/a (transport for PE + CDC)</td>
+<td>Avro per topic</td>
+<td>gRPC over HTTP/2</td>
+<td><strong>72h</strong> (carries PE / CDC)</td>
+<td>External apps, microservices</td>
+<td><strong>Modern</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Pick a mechanism</h2>
+<div class="mermaid">
+flowchart TD
+    Start([Need event-driven integration]) --&gt; Q1{What is the source?}
+    Q1 --&gt;|Any record create/update/delete| Q2{Custom payload needed?}
+    Q2 --&gt;|No - mirror the change| CDC[Change Data Capture]
+    Q2 --&gt;|Yes - business signal| PE1[Platform Event]
+    Q1 --&gt;|An app, Flow, or Apex action| PE2[Platform Event]
+    Q1 --&gt;|Legacy, already built| LEG[Streaming API / Outbound Messages]
+    CDC --&gt; SUB{Who subscribes?}
+    PE1 --&gt; SUB
+    PE2 --&gt; SUB
+    SUB --&gt;|External app / microservice| PUB[Pub/Sub API]
+    SUB --&gt;|Inside Salesforce| INT[Apex trigger / Flow / empApi]
+
+    style CDC fill:#00A1E0,color:#fff
+    style PE1 fill:#ff9900,color:#fff
+    style PE2 fill:#ff9900,color:#fff
+    style PUB fill:#9C27B0,color:#fff
+    style INT fill:#4CAF50,color:#fff
+    style LEG fill:#F44336,color:#fff
+
+</div>
+<hr />
+<h2>Platform Events vs CDC (the classic question)</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Platform Events</th>
+<th>CDC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who creates the event?</td>
+<td><strong>You</strong> (a deliberate signal)</td>
+<td>Salesforce (automatic)</td>
+</tr>
+<tr>
+<td>Schema</td>
+<td>You define the fields</td>
+<td>Fixed: <code>ChangeEventHeader</code> + changed fields</td>
+</tr>
+<tr>
+<td>Customizable payload?</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Business events (<code>OrderShipped</code>)</td>
+<td>Replicating record changes to a store</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Must-knows</h2>
+<ul>
+<li><strong>Retention is 72 hours</strong> for high-volume Platform Events and CDC. The "96 hours" figure is a <strong>myth</strong>. Legacy standard-volume events were 24h and are <strong>retired</strong>.</li>
+<li><strong>PushTopic / Streaming API events retain for 24h</strong>, shorter than the 72h event-bus window.</li>
+<li><strong>Replay IDs</strong>: store the last one and resubscribe within the window. <code>-1</code> = new only, <code>-2</code> = all retained, or a specific ID to resume.</li>
+<li><strong>Delivery is at-least-once</strong>, not exactly-once. Subscribers must be <strong>idempotent</strong>.</li>
+<li><strong>Transport, not source</strong>: the <strong>Pub/Sub API</strong> (gRPC + Avro) is the modern subscriber for both Platform Events and CDC. The CometD <strong>Streaming API</strong> is legacy for new builds.</li>
+<li><strong>Outbound Messages</strong> still work but Workflow Rules / Process Builder get no enhancements. Build new declarative push in <strong>Flow</strong>, or prefer Platform Events.</li>
+</ul>
+<p><em>Source: <a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/event-message-durability.html">Pub/Sub API — Event Message Durability</a> and <a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_intro.htm">Platform Events Developer Guide</a>. Full module: <a href="../06-Event-Driven/README.md">../06-Event-Driven/README.md</a>. Verified June 2026.</em></p>
+</section>
+<section id="fna" class="doc">
+<h1>Named Credentials Syntax One-Pager (Spring '26, v66.0)</h1>
+<blockquote>
+<p>Copy-paste outbound auth reference. <strong>Never hardcode secrets</strong> — reference <code>callout:Name</code>. Full detail in <strong><a href="../03-Authentication/14-named-credentials-and-external-credentials.md">../03-Authentication/14-named-credentials-and-external-credentials.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>The model in one line</h2>
+<p><strong>Named Credential</strong> = <em>where</em> (endpoint URL). <strong>External Credential</strong> = <em>how</em> (auth protocol + principals + permission-set mappings). Split since <strong>Winter '23</strong>; one External Credential backs many Named Credentials.</p>
+<div class="mermaid">
+flowchart LR
+    APX[Apex / Flow&lt;br/&gt;callout:My_NC/path] --&gt; NC[Named Credential&lt;br/&gt;endpoint URL]
+    NC --&gt; EC[External Credential&lt;br/&gt;protocol + principal]
+    EC --&gt; API[External API&lt;br/&gt;auth header injected]
+    style APX fill:#607D8B,color:#fff
+    style NC fill:#00A1E0,color:#fff
+    style EC fill:#9C27B0,color:#fff
+    style API fill:#4CAF50,color:#fff
+
+</div>
+<hr />
+<h2>Apex callout — the whole point</h2>
+<pre><code class="language-apex">HttpRequest req = new HttpRequest();
+req.setEndpoint('callout:My_Named_Cred/v1/orders'); // 'callout:' + NC name + path
+req.setMethod('GET');
+HttpResponse res = new Http().send(req);
+System.debug(res.getStatusCode() + ' ' + res.getBody());
+</code></pre>
+<p>Salesforce swaps <code>callout:My_Named_Cred</code> for the real URL <strong>and</strong> injects the auth header at send time. Your code, repo, logs, and packages stay secret-free. Rotating a credential is a config change — zero deploys.</p>
+<p><strong>POST with a merge field</strong> (only if <em>Allow Formulas in HTTP Body</em> is enabled on the NC):</p>
+<pre><code class="language-apex">HttpRequest req = new HttpRequest();
+req.setEndpoint('callout:My_Named_Cred/v1/tickets');
+req.setMethod('POST');
+req.setHeader('Content-Type', 'application/json');
+req.setBody('{&quot;agent&quot;:&quot;{!$Credential.My_External_Cred.Username}&quot;}');
+HttpResponse res = new Http().send(req);
+</code></pre>
+<p><strong>Custom header / API key merge field</strong> (define on the NC, every callout carries it):</p>
+<pre><code class="language-apex">// Header value references a field stored in the External Credential at runtime
+req.setHeader('X-API-Key', '{!$Credential.My_External_Cred.ApiKey}');
+</code></pre>
+<blockquote>
+<p>Merge-field syntax: <code>{!$Credential.&lt;ExternalCredential&gt;.&lt;field&gt;}</code>. Standard fields: <code>.Username</code>, <code>.Password</code>. Custom auth params are referenced by their configured name.</p>
+</blockquote>
+<hr />
+<h2>Named Principal vs Per-User</h2>
+<table>
+<thead>
+<tr>
+<th>Principal type</th>
+<th>Identities</th>
+<th>Use when</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Named Principal</strong></td>
+<td><strong>One shared</strong> for all users</td>
+<td>External system does not care <em>which</em> SF user</td>
+<td>Nightly sync under one service account</td>
+</tr>
+<tr>
+<td><strong>Per-User Principal</strong></td>
+<td><strong>Each user</strong> authenticates individually</td>
+<td>External system needs the real end user</td>
+<td>User connects their own DocuSign/Google</td>
+</tr>
+<tr>
+<td><strong>Client Credentials</strong></td>
+<td>The <strong>app's own</strong> client identity</td>
+<td>OAuth Client Credentials, no user context</td>
+<td>Backend service under app client id/secret</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Per-User</strong>: each user must self-authenticate via <strong>Authenticate</strong> in their personal settings. Multiple mappings on one user → lowest <strong>sequence number</strong> wins.</p>
+</blockquote>
+<hr />
+<h2>Permission-set mapping is REQUIRED</h2>
+<p>A principal is <strong>inert</strong> until mapped to a <strong>permission set</strong> (or PS group / profile) and that set assigned to the running user. No mapping = auth failure, even for an admin.</p>
+<pre><code>External Credential -&gt; Principal -&gt; mapped to Permission Set -&gt; assigned to User
+</code></pre>
+<hr />
+<h2>Auth protocols (External Credential)</h2>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Authenticates with</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OAuth 2.0 — Browser Flow</strong></td>
+<td>User logs in via browser callback</td>
+<td>Per-user SaaS needing consent</td>
+</tr>
+<tr>
+<td><strong>OAuth 2.0 — JWT / JWT Bearer</strong></td>
+<td>Signed JWT (org cert) → token</td>
+<td>Server-to-server, no browser</td>
+</tr>
+<tr>
+<td><strong>OAuth 2.0 — Client Credentials</strong></td>
+<td>Client id + secret → token</td>
+<td>Backend, one system identity</td>
+</tr>
+<tr>
+<td><strong>Basic</strong></td>
+<td>Static username + password</td>
+<td>Legacy Basic-auth APIs</td>
+</tr>
+<tr>
+<td><strong>AWS Signature v4</strong></td>
+<td>AWS key + secret sign each request</td>
+<td>S3, API Gateway (also STS Roles Anywhere via cert)</td>
+</tr>
+<tr>
+<td><strong>API Key</strong></td>
+<td>Secret in a <strong>Custom</strong> header</td>
+<td>APIs using a static key</td>
+</tr>
+<tr>
+<td><strong>Custom</strong></td>
+<td>Your own headers / params</td>
+<td>Anything non-standard</td>
+</tr>
+<tr>
+<td><strong>mTLS</strong></td>
+<td>Client + server certificates</td>
+<td>High-security APIs requiring client certs</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Gotcha</strong>: <em>API Key</em> is not its own dropdown — implement it as a <strong>Custom</strong> external credential with a <strong>custom header</strong> carrying the key.</p>
+</blockquote>
+<hr />
+<h2>Setup order (do auth first)</h2>
+<ol>
+<li><strong>Setup → Named Credentials → External Credentials → New</strong> → pick protocol.</li>
+<li>Add a <strong>Principal</strong> (Named, Per-User, or Client Credentials) + enter secrets.</li>
+<li><strong>Map the principal to a permission set</strong> <em>(mandatory)</em>.</li>
+<li><strong>Named Credentials → New</strong> → set <strong>URL</strong> + select the External Credential.</li>
+<li>Callout options: <strong>Generate Authorization Header</strong> (usually on); <strong>Allow Formulas in HTTP Header/Body</strong> only if you need merge fields.</li>
+<li><strong>Assign the permission set</strong> to users who run the callout.</li>
+</ol>
+<hr />
+<p><em>Source: <a href="https://help.salesforce.com/s/articleView?id=xcloud.nc_auth_protocols.htm&amp;type=5">Authentication Protocols for Named Credentials — Salesforce Help</a> · <a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm">Named Credentials as Callout Endpoints — Apex Developer Guide</a>. Verified June 2026. Full module: <a href="../03-Authentication/14-named-credentials-and-external-credentials.md">../03-Authentication/14-named-credentials-and-external-credentials.md</a>.</em></p>
+</section>
+<section id="foa" class="doc">
+<h1>OAuth Flows One-Pager (Spring '26)</h1>
+<blockquote>
+<p>Fast pre-interview cram sheet. Full detail in <strong><a href="../03-Authentication/README.md">../03-Authentication/</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>Pick a flow in 10 seconds</h2>
+<div class="mermaid">
+flowchart TD
+    Q{Human user&lt;br/&gt;logging in?}
+    Q --&gt;|No - system to system| S{Proof of identity?}
+    S --&gt;|Secret + run-as user| CC[Client Credentials]
+    S --&gt;|Certificate| JWT[JWT Bearer]
+    Q --&gt;|Yes - has backend| WS[Web Server]
+    Q --&gt;|Yes - mobile/SPA| PK[Web Server + PKCE]
+    Q --&gt;|Yes - no browser| DV[Device Flow]
+    Q --&gt;|SF calls OUT| NC[Named Credential]
+    style CC fill:#4CAF50,color:#fff
+    style JWT fill:#4CAF50,color:#fff
+    style WS fill:#4CAF50,color:#fff
+    style PK fill:#4CAF50,color:#fff
+    style NC fill:#00A1E0,color:#fff
+    style DV fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>All flows at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Flow</th>
+<th><code>grant_type</code></th>
+<th style="text-align: center;">User?</th>
+<th style="text-align: center;">Refresh?</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Server</td>
+<td><code>authorization_code</code></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td>Web app, user login (default)</td>
+</tr>
+<tr>
+<td>Web Server + PKCE</td>
+<td><code>authorization_code</code> + <code>code_challenge</code></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td>Mobile / SPA / public client</td>
+</tr>
+<tr>
+<td>JWT Bearer</td>
+<td><code>urn:ietf:params:oauth:grant-type:jwt-bearer</code></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td>Server-to-server, certificate, CI/CD</td>
+</tr>
+<tr>
+<td>Client Credentials</td>
+<td><code>client_credentials</code></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td><strong>Modern</strong> server-to-server, secret</td>
+</tr>
+<tr>
+<td>Device</td>
+<td><code>device</code> (after <code>response_type=device_code</code>)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td>TV, CLI, IoT</td>
+</tr>
+<tr>
+<td>Refresh Token</td>
+<td><code>refresh_token</code></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">reuses</td>
+<td>Renew an expired access token</td>
+</tr>
+<tr>
+<td>SAML Bearer</td>
+<td><code>urn:ietf:params:oauth:grant-type:saml2-bearer</code></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td>Server-to-server, existing SAML</td>
+</tr>
+<tr>
+<td>SAML Assertion</td>
+<td><code>assertion</code> (SSO browser)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td>API access after web SSO</td>
+</tr>
+<tr>
+<td>Asset Token</td>
+<td><code>urn:ietf:params:oauth:grant-type:token-exchange</code></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">n/a</td>
+<td>IoT device/asset binding</td>
+</tr>
+<tr>
+<td>Auth Code &amp; Credentials</td>
+<td><code>authorization_code</code> (headless)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td>Headless / branded customer login</td>
+</tr>
+<tr>
+<td>⛔ Username-Password</td>
+<td><code>password</code></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td><strong>Retiring — do not use</strong></td>
+</tr>
+<tr>
+<td>⚠️ User-Agent</td>
+<td><code>response_type=token</code></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">opt</td>
+<td><strong>Legacy — avoid</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Tokens</h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>What</th>
+<th>Sent as</th>
+<th>Refresh-returning flows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Access</strong></td>
+<td>API key (= session id), ~2h</td>
+<td><code>Authorization: Bearer ...</code></td>
+<td>all</td>
+</tr>
+<tr>
+<td><strong>Refresh</strong></td>
+<td>Renew access silently</td>
+<td><code>POST /token grant_type=refresh_token</code></td>
+<td>Web Server, Device, Auth Code &amp; Creds</td>
+</tr>
+<tr>
+<td><strong>ID token</strong></td>
+<td>OIDC JWT describing the user</td>
+<td>returned when <code>openid</code> requested</td>
+<td>flows with <code>openid</code> scope</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Common scopes</strong>: <code>api</code> (data APIs) · <code>refresh_token</code>/<code>offline_access</code> (refresh) · <code>openid</code> (ID token) · <code>web</code> (<code>frontdoor.jsp</code>) · <code>full</code> (everything, but still add <code>refresh_token</code>).</p>
+<hr />
+<h2>Endpoints (under your My Domain <code>/services/oauth2/</code>)</h2>
+<p><code>/authorize</code> (browser login) · <code>/token</code> (app exchange) · <code>/revoke</code> (logout/kill) · <code>/introspect</code> (is it valid?) · <code>/userinfo</code> (OIDC profile).</p>
+<hr />
+<h2>Outbound (Salesforce → external)</h2>
+<p>Always a <strong>Named Credential + External Credential</strong>. Apex: <code>req.setEndpoint('callout:My_Named_Credential/path')</code>. No hardcoded secrets. Principal = <strong>Named</strong> (one shared identity) or <strong>Per-User</strong>.</p>
+<hr />
+<h2>2025-26 must-knows</h2>
+<ul>
+<li><strong>Username-Password retiring</strong> (Winter '27; blocked by default for orgs created Summer '23+).</li>
+<li><strong>External Client Apps</strong> replace Connected Apps (new Connected App creation disabled by default in <strong>Spring '26</strong>).</li>
+<li><strong>Client Credentials</strong> = server-to-server default. <strong>PKCE</strong> = recommended for all interactive flows.</li>
+<li><strong>Device Flow</strong> removed from Data Loader's auto-installed app (<strong>Sept 2, 2025</strong>).</li>
+</ul>
+<hr />
+<h2>30-second talking points</h2>
+<ul>
+<li><em>AuthN vs AuthZ</em>: identity vs permission. OAuth = authorization; OpenID Connect = the authentication layer (ID token).</li>
+<li><em>Why code-then-token?</em>: keeps the access token off the browser/URL.</li>
+<li><em>Machine flows have no refresh token</em>: no user session to keep alive, just re-run.</li>
+<li><em>Never hardcode credentials</em>: Named Credentials centralize and rotate them.</li>
+</ul>
+<p><em>Source: <a href="https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_flows.htm&amp;type=5">Salesforce Help — OAuth Authorization Flows</a>. Verified June 2026.</em></p>
+</section>
+<section id="fpa" class="doc">
+<h1>Integration Patterns One-Pager (Spring '26)</h1>
+<blockquote>
+<p>The <strong>6 official Salesforce integration patterns</strong> at a glance. Full detail in <strong><a href="../02-Integration-Patterns/README.md">../02-Integration-Patterns/README.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>The 6 patterns (memorize this)</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Direction</th>
+<th>Timing</th>
+<th>Volume</th>
+<th>Salesforce tech</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Request &amp; Reply</strong></td>
+<td>SF → External</td>
+<td>Sync</td>
+<td>Low</td>
+<td>HTTP callout, External Services</td>
+<td>You need the answer <strong>now</strong> to continue.</td>
+</tr>
+<tr>
+<td><strong>Fire &amp; Forget</strong></td>
+<td>SF → External</td>
+<td>Async</td>
+<td>Low-Med</td>
+<td>Platform Events, Outbound Messages</td>
+<td>You announce an event and <strong>don't wait</strong>.</td>
+</tr>
+<tr>
+<td><strong>Batch Data Sync</strong></td>
+<td>Both ways</td>
+<td>Scheduled / async</td>
+<td>High</td>
+<td>Bulk API 2.0, ETL / MuleSoft</td>
+<td><strong>Large</strong> volumes on a schedule.</td>
+</tr>
+<tr>
+<td><strong>Remote Call-In</strong></td>
+<td>External → SF</td>
+<td>Sync or async</td>
+<td>Any</td>
+<td>REST / SOAP API, Apex REST</td>
+<td>An <strong>external system</strong> drives the CRUD.</td>
+</tr>
+<tr>
+<td><strong>Data Virtualization</strong></td>
+<td>SF reads External</td>
+<td>Real-time read</td>
+<td>Low-Med</td>
+<td>Salesforce Connect (OData)</td>
+<td><strong>View</strong> external data without copying it.</td>
+</tr>
+<tr>
+<td><strong>UI Update on Change</strong></td>
+<td>SF → subscribers</td>
+<td>Async push</td>
+<td>Med</td>
+<td>CDC, Pub/Sub API, empApi</td>
+<td>UI must <strong>auto-refresh</strong> on a change.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Pick a pattern in 10 seconds</h2>
+<div class="mermaid">
+flowchart TD
+    Start([New integration requirement]) --&gt; Dir{Who initiates,&lt;br/&gt;and what is needed?}
+    Dir --&gt;|External system calls Salesforce| RCI[Remote Call-In&lt;br/&gt;REST / SOAP / Apex REST]
+    Dir --&gt;|Show external data without storing it| DV[Data Virtualization&lt;br/&gt;Salesforce Connect]
+    Dir --&gt;|UI must refresh when data changes| UI[UI Update on Change&lt;br/&gt;CDC / Pub-Sub API]
+    Dir --&gt;|Salesforce calls out| Vol{Volume and&lt;br/&gt;response need?}
+    Vol --&gt;|High volume, scheduled| BATCH[Batch Data Sync&lt;br/&gt;Bulk API 2.0 / ETL]
+    Vol --&gt;|Real-time, need the answer| RR[Request and Reply&lt;br/&gt;HTTP callout]
+    Vol --&gt;|Real-time, no answer needed| FF[Fire and Forget&lt;br/&gt;Platform Events]
+
+    style RCI fill:#9C27B0,color:#fff
+    style DV fill:#4CAF50,color:#fff
+    style UI fill:#ff9900,color:#fff
+    style BATCH fill:#9C27B0,color:#fff
+    style RR fill:#00A1E0,color:#fff
+    style FF fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>Scenario → pattern (rapid mapping)</h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Check a credit score before saving the loan."</td>
+<td><strong>Request &amp; Reply</strong></td>
+</tr>
+<tr>
+<td>"Tell the ERP an order shipped."</td>
+<td><strong>Fire &amp; Forget</strong></td>
+</tr>
+<tr>
+<td>"Sync 2M accounts from SAP every night."</td>
+<td><strong>Batch Data Sync</strong></td>
+</tr>
+<tr>
+<td>"Our website must create Leads in Salesforce."</td>
+<td><strong>Remote Call-In</strong></td>
+</tr>
+<tr>
+<td>"Show SAP invoices on the Account, don't store them."</td>
+<td><strong>Data Virtualization</strong></td>
+</tr>
+<tr>
+<td>"The agent console must update the moment a Case changes."</td>
+<td><strong>UI Update on Change</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>30-second talking points</h2>
+<ul>
+<li><strong>Request &amp; Reply vs Fire &amp; Forget</strong>: Reply <strong>waits</strong> for and uses the response (sync). Forget sends and <strong>moves on</strong> (async). Choose by whether the result drives the next step.</li>
+<li><strong>Sync first decision</strong>: if you can wait, async unlocks scale (Bulk, Platform Events). If a user is blocked, stay sync and keep payloads small.</li>
+<li><strong>Remote Call-In</strong> is the only pattern where the <strong>external system</strong> is the client. Authenticate with a Connected App / External Client App + OAuth.</li>
+<li><strong>Data Virtualization</strong> triggers a callout on <strong>every view</strong>, so it reads live but does not scale to heavy traffic. Use for low-to-medium read volume.</li>
+<li><strong>Never loop synchronous callouts</strong> for bulk. That is a Batch Data Sync, not many Request &amp; Reply calls.</li>
+</ul>
+<p><em>Source: <a href="https://developer.salesforce.com/docs/atlas.en-us.integration_patterns_and_practices.meta/integration_patterns_and_practices/integ_pat_intro_overview.htm">Integration Patterns and Practices (v66.0, Spring '26)</a>. Full module: <a href="../02-Integration-Patterns/README.md">../02-Integration-Patterns/README.md</a>. Verified June 2026.</em></p>
+</section>
+<section id="fpo" class="doc">
+<h1>Postman + Salesforce Setup One-Pager (Spring '26, v66.0)</h1>
+<blockquote>
+<p>One-time setup to hit Salesforce REST APIs by hand. Full detail in <strong><a href="../10-Tools-Middleware/01-postman.md">../10-Tools-Middleware/01-postman.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>What Postman does</h2>
+<p>Runs the OAuth dance, captures <code>access_token</code> + <code>instance_url</code> into environment variables, then sends <code>Authorization: Bearer {{access_token}}</code> against <code>{{instance_url}}</code>.</p>
+<div class="mermaid">
+flowchart LR
+    PM[Postman] --&gt; OA[POST /services/oauth2/token]
+    OA --&gt; TOK[access_token + instance_url&lt;br/&gt;stored as variables]
+    TOK --&gt; API[GET instance_url/services/data/v66.0/...]
+    style PM fill:#ff9900,color:#fff
+    style OA fill:#00A1E0,color:#fff
+    style TOK fill:#9C27B0,color:#fff
+    style API fill:#4CAF50,color:#fff
+
+</div>
+<hr />
+<h2>Setup steps</h2>
+<ol>
+<li><strong>Install Postman</strong> (desktop or web) and sign in.</li>
+<li><strong>Fork the official "Salesforce Platform APIs" collection</strong> from the Salesforce Developers workspace on Postman (right side → <strong>Fork</strong>). You get ready-made query/CRUD/composite/bulk requests with variables wired up.</li>
+<li><strong>Create a Connected App or External Client App</strong> in Setup (App Manager → New):
+   - Enable OAuth Settings.
+   - <strong>Callback URL</strong>: <code>https://oauth.pstmn.io/v1/callback</code>
+   - <strong>Scopes</strong>: <code>api refresh_token</code> (add <code>refresh_token</code> so the token can renew).
+   - Save → copy the <strong>Consumer Key</strong> and <strong>Consumer Secret</strong> (wait ~10 min for activation).</li>
+<li><strong>Select an environment</strong> and set variables:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>login_url</code></td>
+<td>Your <strong>My Domain</strong> URL, e.g. <code>https://mydomain.my.salesforce.com</code></td>
+</tr>
+<tr>
+<td><code>client_id</code></td>
+<td>Consumer Key</td>
+</tr>
+<tr>
+<td><code>client_secret</code></td>
+<td>Consumer Secret</td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td>(per flow) integration username</td>
+</tr>
+</tbody>
+</table>
+<ol start="5">
+<li><strong>Run an OAuth flow</strong> on the collection's <strong>Authorization</strong> tab → <strong>Configure New Token</strong>:
+   - <strong>Logged-in user</strong> → <strong>Authorization Code</strong> (browser consent via the <code>pstmn.io</code> callback).
+   - <strong>Server-to-server</strong> → <strong>Client Credentials</strong> (no user; the app's run-as identity).
+   - Click <strong>Get New Access Token</strong> → <strong>Use Token</strong>. Postman stores <code>access_token</code> (and usually <code>instance_url</code>).</li>
+<li><strong>Send a query</strong>:</li>
+</ol>
+<pre><code>GET {{instance_url}}/services/data/v66.0/query?q=SELECT+Id,Name+FROM+Account+LIMIT+5
+Authorization: Bearer {{access_token}}
+</code></pre>
+<blockquote>
+<p>Use <code>+</code> for spaces in the <code>q</code> param, or let Postman URL-encode the value.</p>
+</blockquote>
+<hr />
+<h2>Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>401 INVALID_SESSION_ID</code></td>
+<td>Token expired → <strong>Get New Access Token</strong> again, or use refresh token.</td>
+</tr>
+<tr>
+<td><code>redirect_uri_mismatch</code></td>
+<td>Callback must be exactly <code>https://oauth.pstmn.io/v1/callback</code>.</td>
+</tr>
+<tr>
+<td>Data call hits <code>login.salesforce.com</code></td>
+<td>Use <strong>My Domain</strong> / <code>{{instance_url}}</code>, never the login host, for data.</td>
+</tr>
+<tr>
+<td><code>invalid_client_id</code> / <code>invalid_client</code></td>
+<td>Wrong key/secret, or app not yet active (wait ~10 min).</td>
+</tr>
+<tr>
+<td>Client Credentials returns no token</td>
+<td>App needs a <strong>run-as user</strong> set under OAuth policies for that flow.</td>
+</tr>
+<tr>
+<td>Username-Password flow fails</td>
+<td>It's <strong>blocked/retiring</strong> — use Authorization Code or Client Credentials.</td>
+</tr>
+<tr>
+<td><code>Session expired</code> after some time</td>
+<td>Re-auth; consider <code>refresh_token</code> scope for silent renew.</td>
+</tr>
+<tr>
+<td>Forgot API version</td>
+<td>Pin <code>v66.0</code> in the path.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Source: <a href="https://www.postman.com/salesforce-developers/salesforce-developers/collection/b32utmu/salesforce-platform-apis">Salesforce Platform APIs — Postman Collection</a> · <a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart.htm">Quick Start: Connected App for the REST API</a>. Verified June 2026. Full module: <a href="../10-Tools-Middleware/01-postman.md">../10-Tools-Middleware/01-postman.md</a>.</em></p>
+</section>
+<section id="fst" class="doc">
+<h1>REST API HTTP Status Codes One-Pager (v66.0)</h1>
+<blockquote>
+<p>HTTP status codes Salesforce REST APIs return, what each means, and the common Salesforce cause. Full detail in <strong><a href="../04-Inbound-APIs/01-standard-rest-api.md">../04-Inbound-APIs/01-standard-rest-api.md</a></strong>.</p>
+</blockquote>
+<hr />
+<h2>Success (2xx)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Code</th>
+<th>Meaning</th>
+<th style="text-align: left;">Typical Salesforce cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>200</strong></td>
+<td>OK</td>
+<td style="text-align: left;"><code>GET</code> / <code>PATCH</code> / <code>HEAD</code> succeeded; body returned</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>201</strong></td>
+<td>Created</td>
+<td style="text-align: left;"><code>POST</code> created a record; <code>Location</code> + new <code>Id</code> returned</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>204</strong></td>
+<td>No Content</td>
+<td style="text-align: left;"><code>DELETE</code> or <code>PATCH</code> succeeded with no body to return</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Redirection (3xx)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Code</th>
+<th>Meaning</th>
+<th style="text-align: left;">Typical Salesforce cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>300</strong></td>
+<td>Multiple Choices</td>
+<td style="text-align: left;">External ID in upsert matched <strong>more than one</strong> record</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>304</strong></td>
+<td>Not Modified</td>
+<td style="text-align: left;">Conditional <code>GET</code> with <code>If-Modified-Since</code> / <code>If-None-Match</code>; resource unchanged, use cache</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Client errors (4xx)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Code</th>
+<th>Meaning</th>
+<th style="text-align: left;">Typical Salesforce cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>400</strong></td>
+<td>Bad Request</td>
+<td style="text-align: left;">Malformed request, invalid field/SOQL, bad JSON/XML, validation rule failure</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>401</strong></td>
+<td>Unauthorized</td>
+<td style="text-align: left;">Session expired or invalid OAuth token (<code>INVALID_SESSION_ID</code>); re-authenticate</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>403</strong></td>
+<td>Forbidden</td>
+<td style="text-align: left;">Valid session but no permission, or <code>REQUEST_LIMIT_EXCEEDED</code> (24h API cap)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>404</strong></td>
+<td>Not Found</td>
+<td style="text-align: left;">Record/resource gone, wrong <code>Id</code>, wrong API version, or no object access</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>405</strong></td>
+<td>Method Not Allowed</td>
+<td style="text-align: left;">HTTP verb not supported on that resource (e.g. <code>POST</code> to a record URL)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>409</strong></td>
+<td>Conflict</td>
+<td style="text-align: left;">Concurrent update conflict; cannot complete due to a conflicting change</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>412</strong></td>
+<td>Precondition Failed</td>
+<td style="text-align: left;">An <code>If-*</code> header condition was not met</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>415</strong></td>
+<td>Unsupported Media Type</td>
+<td style="text-align: left;">Bad <code>Content-Type</code> / entity format; sent XML where JSON expected (or vice versa)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>431</strong></td>
+<td>Request Header Fields Too Large</td>
+<td style="text-align: left;">Headers (often the auth/cookie header) exceed the allowed size</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Server errors (5xx)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Code</th>
+<th>Meaning</th>
+<th style="text-align: left;">Typical Salesforce cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>500</strong></td>
+<td>Internal Server Error</td>
+<td style="text-align: left;">Salesforce-side error, often an unhandled Apex exception in a trigger/REST class</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>503</strong></td>
+<td>Service Unavailable</td>
+<td style="text-align: left;">Server busy / too many requests; back off and retry with exponential backoff</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Quick reading guide</h2>
+<ul>
+<li><strong>2xx</strong> = done. <strong>204</strong> means success but check there is no body before parsing.</li>
+<li><strong>300</strong> on upsert = your external ID is <strong>not unique</strong>; fix the data or the matching field.</li>
+<li><strong>401 vs 403</strong>: 401 = <em>who are you</em> (bad/expired token); 403 = <em>not allowed</em> or <em>over your limit</em>.</li>
+<li><strong>4xx</strong> = fix the request (yours). <strong>5xx</strong> = retry (theirs), with backoff.</li>
+<li>Error body returns an array of <code>{ "message", "errorCode", "fields" }</code> - log the <code>errorCode</code>, not just the HTTP status.</li>
+</ul>
+<p><em>Source: <a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/errorcodes.htm">REST API Developer Guide - Status Codes and Error Responses</a>. Verified June 2026. See <a href="../04-Inbound-APIs/01-standard-rest-api.md">../04-Inbound-APIs/01-standard-rest-api.md</a>.</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 12 Cheatsheets · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>

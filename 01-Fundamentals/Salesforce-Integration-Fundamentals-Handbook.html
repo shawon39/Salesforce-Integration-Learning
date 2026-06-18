@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Integration — Fundamentals Handbook</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
+.wrap{max-width:920px;margin:0 auto;background:var(--bg);}
+.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
+.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
+.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
+.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
+.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
+nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
+nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
+nav.toc li{margin:5px 0;break-inside:avoid;}
+nav.toc li.top{font-weight:700;}
+nav.toc a{color:var(--navy);text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.content{padding:10px 60px 70px;}
+section.doc{padding:30px 0 10px;border-top:1px solid var(--line);}
+section.doc:first-child{border-top:none;}
+h1{font-size:30px;color:var(--navy);margin:.4em 0 .5em;font-weight:800;letter-spacing:-.3px;}
+h2{font-size:21px;color:var(--navy);margin:1.5em 0 .5em;padding-bottom:5px;border-bottom:2px solid var(--blue);}
+h3{font-size:16px;color:#0b3b66;margin:1.3em 0 .4em;}
+p{margin:.55em 0;}
+a{color:#0a6ebd;}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.88em;color:#a3306e;}
+pre{background:#0b1726;color:#e6edf3;padding:16px 18px;border-radius:9px;overflow-x:auto;font-size:13px;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1em 0;padding:12px 18px;background:#f0f8ff;border-left:4px solid var(--blue);border-radius:0 7px 7px 0;color:#23323d;}
+blockquote p{margin:.3em 0;}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:14px;display:block;overflow-x:auto;}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tr:nth-child(even) td{background:#f7fafc;}
+hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
+.mermaid{background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px;margin:1.2em 0;text-align:center;}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
+@media print{
+  body{background:#fff;} .wrap{max-width:none;}
+  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  nav.toc{page-break-after:always;}
+  section.doc{page-break-before:always;border-top:none;}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre,blockquote,.mermaid,table,tr,h1,h2,h3{page-break-inside:avoid;}
+  a{color:var(--ink);}
+}
+</style></head>
+<body><div class="wrap">
+<header class="cover">
+  <h1>Salesforce Integration<br>Fundamentals</h1>
+  <div class="sub">The mental model: every term, concept, and picture you need before writing a line of integration code.</div>
+  <div>
+    <span class="pill">What &amp; why</span><span class="pill">Core vocabulary</span>
+    <span class="pill">REST/SOAP · JSON/XML</span><span class="pill">Sync/Async · In/Out</span>
+    <span class="pill">Push/Pull · Webhooks</span><span class="pill">Middleware · Platform</span>
+  </div>
+  <div class="meta">Prepared for Shakhawat · API v66.0 (Spring '26) · Sources verified June 18, 2026<br>
+  Diagrams render live in any browser. To save as PDF: open this file, then Print → Save as PDF.</div>
+</header>
+<nav class="toc"><h2>Contents</h2><ol><li class="top"><a href="#overview">Module Overview</a></li>
+<li class=""><a href="#f01">01 - What Integration Is (and Why Salesforce Needs It)</a></li>
+<li class=""><a href="#f02">02 - Core Vocabulary (The Words You Must Know)</a></li>
+<li class=""><a href="#f03">03 - REST vs SOAP (The Two API Styles)</a></li>
+<li class=""><a href="#f04">04 - JSON vs XML (The Two Data Formats)</a></li>
+<li class=""><a href="#f05">05 - Synchronous vs Asynchronous</a></li>
+<li class=""><a href="#f06">06 - Inbound vs Outbound</a></li>
+<li class=""><a href="#f07">07 - Push, Pull, and Webhooks</a></li>
+<li class=""><a href="#f08">08 - Middleware and the ESB (the glue layer)</a></li>
+<li class=""><a href="#f09">09 - The Three Layers: Transport, Format, Auth</a></li>
+<li class=""><a href="#f10">10 - Salesforce as a Platform (why it changes integration)</a></li></ol></nav>
+<main class="content">
+<section id="overview" class="doc">
+<h1>Module 01 - Fundamentals</h1>
+<blockquote>
+<p><strong>Goal</strong>: Build the mental model. Just vocabulary and pictures, so every later module makes sense.
+<strong>API version</strong>: v66.0 (Spring '26). <strong>Outcome</strong>: you can explain integration to a non-technical person in <strong>one minute</strong> and define every core term without hesitating.</p>
+</blockquote>
+<p>This module is the foundation for the whole vault. Read the files in order (01 → 10), or jump to a concept via the map below. Everything later (Authentication, APIs, Events, Bulk) assumes the words and ideas defined here.</p>
+<hr />
+<h2>How to use this module</h2>
+<ol>
+<li>Start with <strong><a href="#f01">01-what-and-why-of-integration.md</a></strong> for the big picture and the three questions every integration answers.</li>
+<li>Lock in the vocabulary with <strong><a href="#f02">02-core-vocabulary.md</a></strong>, then work through the "vs" files (they are short and high-yield).</li>
+<li>Finish with <strong><a href="#f09">09</a></strong> (the capstone model) and <strong><a href="#f10">10</a></strong> (why Salesforce is special).</li>
+<li>Use the <strong>glossary table</strong> below as your quick-reference cheat sheet.</li>
+</ol>
+<hr />
+<h2>Map of this module</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td><a href="#f01">what-and-why-of-integration</a></td>
+<td>What integration is, why integrate Salesforce, the 3 questions</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#f02">core-vocabulary</a></td>
+<td>API, endpoint, payload, request/response, HTTP methods, status codes</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#f03">rest-vs-soap</a></td>
+<td>The two API styles + the SOAP <code>login()</code> retirement</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#f04">json-vs-xml</a></td>
+<td>The two data formats, side by side</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#f05">synchronous-vs-asynchronous</a></td>
+<td>Wait-for-it vs fire-and-continue</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#f06">inbound-vs-outbound</a></td>
+<td>Who calls whom, relative to Salesforce</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="#f07">push-pull-and-webhooks</a></td>
+<td>How data moves, and what a webhook is</td>
+</tr>
+<tr>
+<td>08</td>
+<td><a href="#f08">middleware-and-esb</a></td>
+<td>The glue layer: ESB vs iPaaS / MuleSoft</td>
+</tr>
+<tr>
+<td>09</td>
+<td><a href="#f09">three-layers-transport-format-auth</a></td>
+<td>The capstone model behind every integration</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="#f10">salesforce-as-a-platform</a></td>
+<td>Multitenant, API-first, governor limits</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The one model that ties it all together</h2>
+<p>Every integration is just <strong>one choice from each of three layers</strong>. Pin this picture and the rest is detail.</p>
+<div class="mermaid">
+flowchart TD
+    subgraph L1[Layer 1 - TRANSPORT: how bytes travel]
+        T1[HTTP / HTTPS]
+        T2[gRPC]
+        T3[CometD / long-poll]
+    end
+    subgraph L2[Layer 2 - FORMAT: how data is shaped]
+        F1[JSON]
+        F2[XML]
+        F3[Protobuf]
+    end
+    subgraph L3[Layer 3 - AUTH: how identity is proven]
+        A1[OAuth 2.0]
+        A2[API key]
+        A3[mTLS]
+    end
+    L1 --&gt; L2 --&gt; L3
+    style L1 fill:#00A1E0,color:#fff
+    style L2 fill:#ff9900,color:#fff
+    style L3 fill:#9C27B0,color:#fff
+
+</div>
+<p>Example: a <strong>Salesforce REST API call = HTTPS + JSON + OAuth 2.0 Bearer token</strong>. Full detail in <a href="#f09">09-three-layers-transport-format-auth.md</a>.</p>
+<hr />
+<h2>Vocabulary quick-reference (glossary)</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One-line meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API</strong></td>
+<td>A contract that lets one system request data or actions from another.</td>
+</tr>
+<tr>
+<td><strong>Endpoint</strong></td>
+<td>The specific URL an API request is sent to.</td>
+</tr>
+<tr>
+<td><strong>Instance / Base URL</strong></td>
+<td>Your org's host, e.g. <code>https://MyDomain.my.salesforce.com</code>.</td>
+</tr>
+<tr>
+<td><strong>Request / Response</strong></td>
+<td>The message you send, and the answer you get back.</td>
+</tr>
+<tr>
+<td><strong>Payload</strong></td>
+<td>The body of a request or response (the actual data).</td>
+</tr>
+<tr>
+<td><strong>Header</strong></td>
+<td>Metadata on a request, e.g. <code>Authorization</code>, <code>Content-Type</code>.</td>
+</tr>
+<tr>
+<td><strong>HTTP method</strong></td>
+<td>The verb: GET (read), POST (create), PATCH/PUT (update), DELETE (remove).</td>
+</tr>
+<tr>
+<td><strong>Status code</strong></td>
+<td>Result of a call: 2xx success, 4xx your fault, 5xx server fault.</td>
+</tr>
+<tr>
+<td><strong>REST</strong></td>
+<td>Lightweight, resource-based API style, usually JSON. The modern default.</td>
+</tr>
+<tr>
+<td><strong>SOAP</strong></td>
+<td>Strict XML-envelope API style with a WSDL contract. Mature, heavier.</td>
+</tr>
+<tr>
+<td><strong>JSON</strong></td>
+<td>Compact key/value data format, native to the web.</td>
+</tr>
+<tr>
+<td><strong>XML</strong></td>
+<td>Verbose tag-based data format, used by SOAP and Metadata.</td>
+</tr>
+<tr>
+<td><strong>Synchronous</strong></td>
+<td>The caller waits for the response before continuing.</td>
+</tr>
+<tr>
+<td><strong>Asynchronous</strong></td>
+<td>The caller fires the request and continues; result comes later.</td>
+</tr>
+<tr>
+<td><strong>Inbound</strong></td>
+<td>An external system calls <strong>into</strong> Salesforce.</td>
+</tr>
+<tr>
+<td><strong>Outbound</strong></td>
+<td>Salesforce calls <strong>out</strong> to an external system.</td>
+</tr>
+<tr>
+<td><strong>Pull</strong></td>
+<td>The consumer asks for data when it wants it (polling).</td>
+</tr>
+<tr>
+<td><strong>Push</strong></td>
+<td>The producer sends data the moment something changes.</td>
+</tr>
+<tr>
+<td><strong>Webhook</strong></td>
+<td>An HTTP callback fired to a registered URL (a push).</td>
+</tr>
+<tr>
+<td><strong>Middleware</strong></td>
+<td>Software between systems that connects, translates, and routes.</td>
+</tr>
+<tr>
+<td><strong>ESB / iPaaS</strong></td>
+<td>Old on-prem hub (ESB) vs modern cloud integration platform (iPaaS, e.g. MuleSoft).</td>
+</tr>
+<tr>
+<td><strong>Multitenant</strong></td>
+<td>Many customers share infrastructure; metadata makes each org unique.</td>
+</tr>
+<tr>
+<td><strong>Governor limit</strong></td>
+<td>A cap Salesforce enforces so no tenant hogs shared resources.</td>
+</tr>
+<tr>
+<td><strong>API allocation</strong></td>
+<td>Your org's quota of API calls per rolling 24 hours.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>What changed worth knowing (2025-2026)</h2>
+<ul>
+<li><strong>SOAP API <code>login()</code> is retiring</strong> in <strong>Summer '27</strong> (not available in API v65.0+, disabled by default in new orgs). Migrate API authentication to <strong>OAuth</strong> via External Client Apps. Detail in <a href="#f03">03-rest-vs-soap.md</a> and Module 03.</li>
+<li><strong>REST + JSON</strong> is the default for new builds; SOAP + XML is legacy-but-supported.</li>
+<li>For real-time event push, <strong>Pub/Sub API</strong> is the modern choice over older Streaming API.</li>
+</ul>
+<hr />
+<h2>Where this leads</h2>
+<div class="mermaid">
+flowchart LR
+    M1[01 Fundamentals&lt;br/&gt;you are here] --&gt; M2[02 Integration Patterns]
+    M2 --&gt; M3[03 Authentication]
+    M3 --&gt; M4[04+ APIs, Events, Bulk]
+    style M1 fill:#4CAF50,color:#fff
+    style M3 fill:#ff9900,color:#fff
+
+</div>
+<p>After this module you have the vocabulary. <strong>Module 02 (Integration Patterns)</strong> teaches when to use each style, and <strong>Module 03 (Authentication)</strong> is already built out in full.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/integration-patterns.html">Integration Patterns and Practices (v66.0) — Salesforce Architect</a></li>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/platform-multitenant-architecture.html">Platform Multitenant Architecture — Salesforce Architect</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=005132110&amp;type=1">SOAP API login() Retirement — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/apis">Salesforce Developers — API documentation</a></li>
+</ul>
+<p><em>Each topic file has its own Sources section with the specific official docs.</em></p>
+</section>
+<section id="f01" class="doc">
+<h1>01 - What Integration Is (and Why Salesforce Needs It)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Integration is just <strong>two systems talking to each other</strong> so data and actions flow between them instead of being re-typed by hand.
+<strong>Why it matters</strong>: Salesforce is almost never the only system a business runs. Its value multiplies when it shares data with the website, the ERP, the payment gateway, the data warehouse, and the phone system.
+<strong>Goal of this file</strong>: Be able to explain integration to a non-technical person in <strong>one minute</strong>.</p>
+</blockquote>
+<p>This is Module 01. No deep code yet, just the mental model and vocabulary. Each later file builds on the picture drawn here.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Picture two people who speak different languages trying to do business. They need three things: a <strong>way to reach each other</strong> (a phone line), a <strong>shared language</strong> (so the words mean the same thing), and <strong>proof of who they are</strong> (so neither gets scammed). Software systems are exactly the same. Salesforce and an external system each store their own data in their own shapes. Integration is the agreed-upon phone call between them.</p>
+<p>Without integration, a human becomes the integration: someone exports a CSV from the website, opens Salesforce, and re-types 200 leads. That is slow, error-prone, and always out of date. <strong>An integration replaces that human with an automatic, reliable connection.</strong></p>
+<div class="mermaid">
+flowchart LR
+    SF[Salesforce] &lt;--&gt;|API call| EXT[External System&lt;br/&gt;ERP, website, payments]
+    SF -.-&gt;|publishes an event| BUS{{Event Bus}}
+    BUS -.-&gt;|notifies| SUBS[Other apps]
+    EXT --&gt;|inbound webhook| SF
+    style SF fill:#00A1E0,color:#fff
+    style BUS fill:#ff9900,color:#fff
+    style EXT fill:#9C27B0,color:#fff
+
+</div>
+<hr />
+<h2>2. Why integrate Salesforce? (the business drivers)</h2>
+<p>Every integration exists to serve one of a few goals. In an interview, name the driver, not just the tech.</p>
+<table>
+<thead>
+<tr>
+<th>Driver</th>
+<th>What it means</th>
+<th>Real example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single source of truth</strong></td>
+<td>One trusted place for a piece of data, synced everywhere.</td>
+<td>Customer address lives in SAP, mirrored into Salesforce so reps see it.</td>
+</tr>
+<tr>
+<td><strong>Automation</strong></td>
+<td>Remove manual re-keying between systems.</td>
+<td>A web form creates a Lead in Salesforce automatically.</td>
+</tr>
+<tr>
+<td><strong>Real-time experience</strong></td>
+<td>Show fresh data or react instantly.</td>
+<td>A rep sees live order status from the ERP inside the Account page.</td>
+</tr>
+<tr>
+<td><strong>Reach / capability</strong></td>
+<td>Use a service Salesforce does not provide.</td>
+<td>Call a credit-scoring API or a payment gateway.</td>
+</tr>
+<tr>
+<td><strong>Scale / offload</strong></td>
+<td>Move heavy work to the right system.</td>
+<td>Push millions of records to a data warehouse nightly for analytics.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. The shape of every integration (3 questions)</h2>
+<p>Before choosing any API or auth method, answer these three questions. The rest of this vault is just detailed answers to them.</p>
+<div class="mermaid">
+flowchart TD
+    Q1{1. WHO is talking?} --&gt; Q2{2. HOW do they&lt;br/&gt;prove identity?}
+    Q2 --&gt; Q3{3. WHAT style of&lt;br/&gt;conversation?}
+    Q1 -.- A1[Salesforce out, external in,&lt;br/&gt;or both - see file 06]
+    Q2 -.- A2[Authentication -&lt;br/&gt;see Module 03]
+    Q3 -.- A3[Pattern + API -&lt;br/&gt;sync/async, REST/SOAP]
+    style Q1 fill:#00A1E0,color:#fff
+    style Q2 fill:#ff9900,color:#fff
+    style Q3 fill:#9C27B0,color:#fff
+
+</div>
+<ol>
+<li><strong>Who is talking?</strong> Salesforce calling out, an external system calling in, or both. (See <a href="#f06">06-inbound-vs-outbound.md</a>.)</li>
+<li><strong>How do they prove identity?</strong> The authentication layer. (Whole of Module 03.)</li>
+<li><strong>What style of conversation?</strong> Real-time or batch, request/reply or fire-and-forget, REST or SOAP. (Files <a href="#f03">03</a>, <a href="#f05">05</a>, <a href="#f07">07</a>.)</li>
+</ol>
+<hr />
+<h2>4. How it shows up in Salesforce</h2>
+<p>Concrete examples you can name in an interview:</p>
+<ul>
+<li><strong>Website → Salesforce</strong>: a "Contact Us" form posts to the Salesforce <strong>REST API</strong> and creates a Lead. (Inbound, request/reply.)</li>
+<li><strong>Salesforce → Payment gateway</strong>: Apex makes an <strong>HTTP callout</strong> through a Named Credential to charge a card. (Outbound, request/reply.)</li>
+<li><strong>Salesforce → ERP</strong>: when an Opportunity closes, Salesforce <strong>publishes a Platform Event</strong> that the ERP subscribes to. (Outbound, fire-and-forget.)</li>
+<li><strong>Nightly sync</strong>: an ETL tool loads 2 million records via <strong>Bulk API 2.0</strong>. (Batch, async.)</li>
+<li><strong>Live data</strong>: an Account page shows SAP invoices through <strong>Salesforce Connect</strong> without copying them. (Data virtualization.)</li>
+</ul>
+<blockquote>
+<p><strong>Platform note</strong>: Salesforce is <strong>API-first</strong> — almost everything you can do in the UI, you can do through an API. That is why integration is a first-class skill, not an afterthought.</p>
+</blockquote>
+<hr />
+<h2>5. Common confusions and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Integration = API."</td>
+<td>An API is one <em>tool</em> for integration. Integration is the broader goal; it can also use events, files, or middleware.</td>
+</tr>
+<tr>
+<td>"It's all real-time."</td>
+<td>Most enterprise integration is <strong>batch/async</strong>. Real-time is a deliberate choice with trade-offs.</td>
+</tr>
+<tr>
+<td>"Salesforce just stores data."</td>
+<td>Salesforce is a <strong>platform</strong>: it exposes APIs, runs code (Apex), and publishes events. See <a href="#f10">10-salesforce-as-a-platform.md</a>.</td>
+</tr>
+<tr>
+<td>"More integration is better."</td>
+<td>Each connection adds coupling and failure points. Integrate with a clear driver, not by default.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Explain integration to a non-technical stakeholder.</strong>
+A: It is an automatic, reliable connection that lets two systems share data and trigger actions, so people don't have to copy information between them by hand.</p>
+<p><strong>Q: Why would a company integrate Salesforce instead of just using it standalone?</strong>
+A: To keep one source of truth across systems, automate manual work, give users real-time data, reach capabilities Salesforce lacks (payments, scoring), and offload heavy processing. The driver should be a business need, not the technology.</p>
+<p><strong>Q: What are the first questions you ask when scoping an integration?</strong>
+A: Who initiates (inbound vs outbound), how identity is proven (auth), and the conversation style (real-time vs batch, request/reply vs event). Those three decisions drive the API and pattern choice.</p>
+<p><strong>Q: Is integration always real-time?</strong>
+A: No. Much of it is scheduled batch or asynchronous events. Real-time adds cost and tighter coupling, so you choose it only when the use case truly needs a fresh response.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's the difference between emailing a coworker a spreadsheet to retype, versus the two apps just texting each other automatically."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>API, endpoint, payload, request/response, inbound/outbound, synchronous/asynchronous, webhook, middleware — all defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/integration-patterns.html">Integration Patterns and Practices (v66.0, Spring '26) — Salesforce Architect</a></li>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/platform-multitenant-architecture.html">Platform Multitenant Architecture — Salesforce Architect</a></li>
+<li><a href="https://developer.salesforce.com/docs/apis">Salesforce Developers — API overview</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f02">02-core-vocabulary.md</a> — the words you must know before anything else makes sense.</em></p>
+</section>
+<section id="f02" class="doc">
+<h1>02 - Core Vocabulary (The Words You Must Know)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Eight or nine words — <strong>API, endpoint, request, response, payload, methods, headers, status codes</strong> — unlock almost every integration conversation.
+<strong>Why it matters</strong>: Every later topic (REST, SOAP, auth, events) reuses these terms. Get them wrong in an interview and the rest sounds shaky.
+<strong>Goal of this file</strong>: Read one real Salesforce REST call and name every part of it.</p>
+</blockquote>
+<p>New here? Start with <a href="#f01">01-what-and-why-of-integration.md</a> for the big picture.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think of ordering at a <strong>restaurant</strong>. You don't walk into the kitchen and cook. You talk to a <strong>waiter</strong> through a fixed routine: you give an order (a <strong>request</strong>), the kitchen does the work, and the waiter brings back a plate (a <strong>response</strong>). The menu tells you what you're allowed to ask for. You never touch the stove.</p>
+<p>An <strong>API</strong> is that waiter. It is the agreed set of things one system will do for another, and the exact way to ask. You send a request to a specific address, the system does the work, and it sends a response back. Everything below is just naming the parts of that exchange.</p>
+<div class="mermaid">
+flowchart LR
+    REQ["Request&lt;br/&gt;method + URL + headers + payload"] --&gt; NET{HTTP}
+    NET --&gt; SF[Salesforce]
+    SF --&gt; RESP["Response&lt;br/&gt;status code + headers + body"]
+    RESP --&gt; REQ
+    style REQ fill:#00A1E0,color:#fff
+    style SF fill:#00A1E0,color:#fff
+    style RESP fill:#4CAF50,color:#fff
+    style NET fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>2. The vocabulary, one term at a time</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Plain meaning</th>
+<th>Restaurant analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API</strong> (Application Programming Interface)</td>
+<td>The contract: what you can ask a system to do, and how.</td>
+<td>The waiter + the menu.</td>
+</tr>
+<tr>
+<td><strong>Endpoint</strong></td>
+<td>The specific URL you send a request to. One API has many endpoints.</td>
+<td>The exact table/counter you order from.</td>
+</tr>
+<tr>
+<td><strong>Base URL / Instance URL</strong></td>
+<td>The root address of the server. In Salesforce it is your <strong>My Domain</strong> instance host. Endpoints hang off it.</td>
+<td>The restaurant's street address.</td>
+</tr>
+<tr>
+<td><strong>Request</strong></td>
+<td>The message you send asking for something.</td>
+<td>Placing your order.</td>
+</tr>
+<tr>
+<td><strong>Response</strong></td>
+<td>The message that comes back.</td>
+<td>The plate the waiter returns.</td>
+</tr>
+<tr>
+<td><strong>Payload (body)</strong></td>
+<td>The actual data carried in a request or response. Often JSON.</td>
+<td>The food on the plate (or the order written on the ticket).</td>
+</tr>
+<tr>
+<td><strong>HTTP method (verb)</strong></td>
+<td>The kind of action you want: read, create, update, delete.</td>
+<td>"I'd like to order / change / cancel."</td>
+</tr>
+<tr>
+<td><strong>Headers</strong></td>
+<td>Metadata about the message: who you are, what format you're sending.</td>
+<td>Notes to the kitchen: allergies, who's paying.</td>
+</tr>
+<tr>
+<td><strong>Status code</strong></td>
+<td>A 3-digit number saying how the request went.</td>
+<td>"Order's up" vs "We're out of that" vs "Kitchen's on fire."</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Endpoint vs Base URL</strong>: the <strong>base URL</strong> is <code>https://MyDomainName.my.salesforce.com</code>. The <strong>endpoint</strong> is the full path you hit, e.g. <code>https://MyDomainName.my.salesforce.com/services/data/v66.0/sobjects/Account</code>. Salesforce returns your base URL as <code>instance_url</code> when you authenticate.</p>
+</blockquote>
+<hr />
+<h2>3. HTTP methods (what each verb does in REST)</h2>
+<p>REST maps the four basic data operations (often called <strong>CRUD</strong> — Create, Read, Update, Delete) onto HTTP verbs. Memorize this table.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Means</th>
+<th>CRUD</th>
+<th>Salesforce REST example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GET</strong></td>
+<td>Read. Never changes data (it is <strong>safe</strong> and <strong>idempotent</strong>).</td>
+<td>Read</td>
+<td><code>GET /sobjects/Account/001...</code> retrieves one Account.</td>
+</tr>
+<tr>
+<td><strong>POST</strong></td>
+<td>Create a new resource. <strong>Not</strong> idempotent — call it twice, get two records.</td>
+<td>Create</td>
+<td><code>POST /sobjects/Account</code> creates an Account.</td>
+</tr>
+<tr>
+<td><strong>PATCH</strong></td>
+<td>Partial update — change only the fields you send.</td>
+<td>Update</td>
+<td><code>PATCH /sobjects/Account/001...</code> updates a field.</td>
+</tr>
+<tr>
+<td><strong>PUT</strong></td>
+<td>Full replace / upsert of a resource. Salesforce uses it for <strong>upsert by external ID</strong>.</td>
+<td>Update/Upsert</td>
+<td><code>PUT /sobjects/Account/ExtId__c/12345</code>.</td>
+</tr>
+<tr>
+<td><strong>DELETE</strong></td>
+<td>Remove the resource.</td>
+<td>Delete</td>
+<td><code>DELETE /sobjects/Account/001...</code> deletes the Account.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Interview note</strong>: Salesforce updates use <strong>PATCH</strong>, not PUT. PUT in the Salesforce REST API is reserved for <strong>upsert by external ID</strong> (create-or-update). Mixing these up is a common slip. <strong>Idempotent</strong> means repeating the same call leaves the system in the same state — GET, PATCH, PUT, and DELETE are idempotent; POST is not.</p>
+</blockquote>
+<hr />
+<h2>4. Headers (the two that matter most)</h2>
+<p>Headers are <code>Name: Value</code> lines that travel with the request. For integrations, two are non-negotiable:</p>
+<table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Purpose</th>
+<th>Example value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Authorization</strong></td>
+<td>Proves who you are. Carries the access token.</td>
+<td><code>Authorization: Bearer 00D5g...!AQEA...</code></td>
+</tr>
+<tr>
+<td><strong>Content-Type</strong></td>
+<td>Tells the server the format of your <strong>payload</strong>.</td>
+<td><code>Content-Type: application/json</code></td>
+</tr>
+<tr>
+<td><strong>Accept</strong></td>
+<td>Tells the server the format you want <strong>back</strong>.</td>
+<td><code>Accept: application/json</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Bearer token</strong>: "Bearer" means <em>whoever holds this token gets access</em>, like cash. That is why tokens live in a header over HTTPS and are guarded like passwords. The token itself comes from Module 03 (authentication).</p>
+</blockquote>
+<hr />
+<h2>5. HTTP status codes (the three families)</h2>
+<p>The first digit tells you the family. Learn the family first, then the common members.</p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Meaning</th>
+<th>Common members you must know</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>2xx — Success</strong></td>
+<td>The request worked.</td>
+<td><strong>200 OK</strong> (read/update succeeded), <strong>201 Created</strong> (new record made), <strong>204 No Content</strong> (success, nothing to return — e.g. after DELETE).</td>
+</tr>
+<tr>
+<td><strong>4xx — Client error</strong></td>
+<td><em>You</em> sent something wrong. Fix the request; don't retry blindly.</td>
+<td><strong>400 Bad Request</strong> (malformed body/field), <strong>401 Unauthorized</strong> (missing/expired token), <strong>403 Forbidden</strong> (no permission, or API limit exceeded), <strong>404 Not Found</strong> (bad endpoint or deleted record), <strong>415 Unsupported Media Type</strong> (wrong/missing <code>Content-Type</code>).</td>
+</tr>
+<tr>
+<td><strong>5xx — Server error</strong></td>
+<td>The <em>server</em> failed. Often safe to retry with backoff.</td>
+<td><strong>500 Internal Server Error</strong>, <strong>503 Service Unavailable</strong> (overloaded / maintenance).</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The mental rule</strong>: 2xx = "great." 4xx = "your fault." 5xx = "their fault." In Salesforce, an expired session shows up as <strong>401 INVALID_SESSION_ID</strong>, and hitting your daily API limit shows up as <strong>403 REQUEST_LIMIT_EXCEEDED</strong>.</p>
+</blockquote>
+<hr />
+<h2>6. A real Salesforce request and response</h2>
+<p>Putting every term together. Here we <strong>create an Account</strong> via the REST API (API version <strong>v66.0</strong>, Spring '26).</p>
+<p><strong>The request</strong> (POST = create):</p>
+<pre><code class="language-http">POST /services/data/v66.0/sobjects/Account HTTP/1.1
+Host: MyDomainName.my.salesforce.com
+Authorization: Bearer 00D5g000004...!AQEAQ...
+Content-Type: application/json
+
+{
+  &quot;Name&quot;: &quot;Acme Corp&quot;,
+  &quot;Industry&quot;: &quot;Technology&quot;,
+  &quot;NumberOfEmployees&quot;: 250
+}
+</code></pre>
+<ul>
+<li><strong>Method</strong> = <code>POST</code> (create). <strong>Endpoint</strong> = <code>/services/data/v66.0/sobjects/Account</code>.</li>
+<li><strong>Headers</strong> = <code>Authorization</code> (the token) and <code>Content-Type</code> (the payload is JSON).</li>
+<li><strong>Payload</strong> = the JSON object with the field values.</li>
+</ul>
+<p><strong>The response</strong> — status <strong>201 Created</strong>:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;001gK000004xZpQQAU&quot;,
+  &quot;success&quot;: true,
+  &quot;errors&quot;: []
+}
+</code></pre>
+<ul>
+<li><strong>Status code</strong> <code>201</code> = a new record was created.</li>
+<li><strong>Payload</strong> = the new record's <code>id</code>, a <code>success</code> flag, and an empty <code>errors</code> array.</li>
+</ul>
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant App as Client App
+    participant SF as Salesforce REST API
+    Note over App,SF: 1. Build and send the request
+    App-&gt;&gt;SF: POST /services/data/v66.0/sobjects/Account
+    Note right of App: Headers Authorization + Content-Type&lt;br/&gt;Payload {Name Acme Corp}
+    Note over App,SF: 2. Salesforce creates the record
+    SF--&gt;&gt;App: 201 Created {id, success true, errors []}
+    Note over App,SF: 3. Read it back to confirm
+    App-&gt;&gt;SF: GET /services/data/v66.0/sobjects/Account/001...
+    SF--&gt;&gt;App: 200 OK + full record JSON
+
+</div>
+<hr />
+<h2>7. How it shows up in Salesforce</h2>
+<ul>
+<li>The <strong>base URL</strong> is your <strong>My Domain</strong> instance (e.g. <code>acme.my.salesforce.com</code>), returned as <code>instance_url</code> after login.</li>
+<li>Almost every data endpoint sits under <code>/services/data/vXX.X/</code>. The <code>vXX.X</code> is the <strong>API version</strong> — <strong>v66.0</strong> is Spring '26.</li>
+<li><code>Authorization: Bearer &lt;token&gt;</code> is on nearly every call; the token is a temporary <strong>Session ID</strong>.</li>
+<li>A <strong>201</strong> means a record was created; the response gives you its 15- or 18-character <strong>record Id</strong>.</li>
+<li>A <strong>401</strong> mid-session almost always means the token expired — refresh it. A <strong>403</strong> often means a <strong>permission</strong> problem or an <strong>API limit</strong>.</li>
+</ul>
+<hr />
+<h2>8. Common confusions and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Endpoint and base URL are the same."</td>
+<td>Base URL is the root host; the endpoint is the full path you call.</td>
+</tr>
+<tr>
+<td>"Use PUT to update a record."</td>
+<td>In Salesforce REST, <strong>PATCH</strong> updates; <strong>PUT</strong> is upsert by external ID.</td>
+</tr>
+<tr>
+<td>"401 and 403 are the same."</td>
+<td><strong>401</strong> = not authenticated (bad/expired token). <strong>403</strong> = authenticated but not allowed (permission or limit).</td>
+</tr>
+<tr>
+<td>"POST is idempotent."</td>
+<td>No. Two identical POSTs create two records. GET/PUT/PATCH/DELETE are idempotent.</td>
+</tr>
+<tr>
+<td>"Content-Type and Accept are interchangeable."</td>
+<td><code>Content-Type</code> describes what you <strong>send</strong>; <code>Accept</code> describes what you want <strong>back</strong>.</td>
+</tr>
+<tr>
+<td>"A 200 always means data changed."</td>
+<td>200 just means success. A GET returns 200 and changes nothing.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Interview Q&amp;A</h2>
+<p><strong>Q: What is an API, in one sentence?</strong>
+A: A contract that defines what one system can ask another to do, and exactly how to ask — like a waiter taking a structured order to the kitchen and bringing back the plate.</p>
+<p><strong>Q: Difference between an endpoint and a base URL?</strong>
+A: The base (instance) URL is the server's root address, like <code>https://acme.my.salesforce.com</code>. An endpoint is the full path you actually call, like <code>.../services/data/v66.0/sobjects/Account</code>. One base URL exposes many endpoints.</p>
+<p><strong>Q: Which HTTP method updates a record in Salesforce REST, and what's the trap?</strong>
+A: <strong>PATCH</strong> for a partial field update. The trap is assuming PUT — in the Salesforce REST API, PUT is used for <strong>upsert by external ID</strong>, not a normal update.</p>
+<p><strong>Q: A call returns 401. What does it mean and what do you do?</strong>
+A: The request isn't authenticated — usually an expired or missing access token (<code>INVALID_SESSION_ID</code>). You get a fresh token (refresh flow) and retry. A 403, by contrast, means you're authenticated but lack permission or hit an API limit.</p>
+<p><strong>Q: What's in an HTTP request versus a response?</strong>
+A: A request has a method, an endpoint URL, headers (auth, content type), and an optional payload/body. A response has a status code, headers, and a body. The status code's first digit tells you the outcome family: 2xx success, 4xx client error, 5xx server error.</p>
+<p><strong>Q: What does <code>Authorization: Bearer</code> mean?</strong>
+A: It carries an access token where possession equals access. The server trusts whoever presents a valid token, so it must travel over HTTPS and be protected like a password.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It's a restaurant order. You ask the waiter (the API) for something specific (the endpoint), hand over your details and your order (headers and payload), and get back a plate with a note saying how it went (the response and its status code)."</p>
+<hr />
+<h2>10. Key terms</h2>
+<p>API, endpoint, base/instance URL, request/response, payload, HTTP methods, headers, status codes — cross-referenced in the <a href="#overview">README glossary</a>. Next we use them to compare the two API styles.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_create.htm">REST API Developer Guide — Create a Record (v66.0)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_working_with_records.htm">REST API Developer Guide — Working with Records (HTTP methods)</a></li>
+<li><a href="https://developer.salesforce.com/docs/apis">Salesforce Developers — API overview</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">HTTP response status codes — MDN</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">HTTP request methods — MDN</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f03">03-rest-vs-soap.md</a> — the two API styles, and why new Salesforce builds favor REST.</em></p>
+</section>
+<section id="f03" class="doc">
+<h1>03 - REST vs SOAP (The Two API Styles)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: REST and SOAP are two ways to build a web API — REST is lightweight and resource-based, SOAP is a strict, contract-driven XML protocol.
+<strong>The core difference</strong>: <strong>REST</strong> uses plain HTTP verbs on resources and usually speaks <strong>JSON</strong>; <strong>SOAP</strong> wraps every message in a rigid <strong>XML envelope</strong> defined by a <strong>WSDL</strong> contract.
+<strong>Why it matters</strong>: Salesforce ships both. New builds default to REST, but SOAP is still everywhere in older integrations — and one big SOAP auth change is landing in 2026-2027.</p>
+</blockquote>
+<p>Need the words first? See <a href="#f02">02-core-vocabulary.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Two ways to send a parcel.</p>
+<p><strong>REST</strong> is like <strong>standard post</strong>. You write the address on the box (the URL), drop it in (a verb like GET or POST), and the system knows what to do. Light, flexible, everyone supports it.</p>
+<p><strong>SOAP</strong> is like <strong>registered mail with a notarized form</strong>. Every parcel must go inside a specific envelope, with a strictly formatted form attached (the XML envelope), and a master rulebook (the <strong>WSDL</strong>) defines exactly what every field must look like. More ceremony, but the contract is ironclad and machine-readable — tools can auto-generate client code from the WSDL.</p>
+<p>Neither is "better" everywhere. SOAP is a <strong>protocol</strong> with built-in rules; REST is an <strong>architectural style</strong> that leans on HTTP itself.</p>
+<hr />
+<h2>2. The core difference, side by side</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>REST</th>
+<th>SOAP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it is</strong></td>
+<td>Architectural style over HTTP.</td>
+<td>Strict messaging protocol (XML).</td>
+</tr>
+<tr>
+<td><strong>Data format</strong></td>
+<td>Usually <strong>JSON</strong> (can do XML).</td>
+<td><strong>XML only</strong>, wrapped in a SOAP envelope.</td>
+</tr>
+<tr>
+<td><strong>Contract</strong></td>
+<td>Optional/loose (OpenAPI is nice-to-have).</td>
+<td><strong>Mandatory WSDL</strong> — a machine-readable contract.</td>
+</tr>
+<tr>
+<td><strong>Transport</strong></td>
+<td>HTTP/HTTPS, uses verbs (GET/POST/PATCH/DELETE).</td>
+<td>Usually HTTP, but transport-agnostic; almost always <strong>POST</strong>.</td>
+</tr>
+<tr>
+<td><strong>Verbosity</strong></td>
+<td>Compact. Less overhead per call.</td>
+<td>Verbose — envelope + namespaces add weight.</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>HTTP <strong>status codes</strong> (200/201/4xx/5xx) + JSON error body.</td>
+<td>A <strong>SOAP Fault</strong> element inside a 200-wrapped envelope.</td>
+</tr>
+<tr>
+<td><strong>Tooling / codegen</strong></td>
+<td>Hand-rolled or OpenAPI generators.</td>
+<td>Strong: import the WSDL, auto-generate a typed client.</td>
+</tr>
+<tr>
+<td><strong>State / standards</strong></td>
+<td>Stateless, minimal.</td>
+<td>Rich WS-* standards (WS-Security, etc.).</td>
+</tr>
+<tr>
+<td><strong>Best fit</strong></td>
+<td>Web/mobile, microservices, modern integrations.</td>
+<td>Legacy enterprise, formal contracts, strict typing.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>One-line interview answer</strong>: "REST is lightweight, resource-and-verb based, and usually JSON. SOAP is a heavier XML protocol with a strict WSDL contract and built-in standards. New work goes REST; SOAP lives on in mature enterprise systems."</p>
+</blockquote>
+<hr />
+<h2>3. The same call in both styles</h2>
+<p><strong>REST — create an Account</strong> (compact, JSON, verb in the method):</p>
+<pre><code class="language-http">POST /services/data/v66.0/sobjects/Account
+Content-Type: application/json
+
+{ &quot;Name&quot;: &quot;Acme Corp&quot; }
+</code></pre>
+<p><strong>SOAP — create an Account</strong> (envelope, namespaces, everything is XML):</p>
+<pre><code class="language-xml">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;
+                  xmlns:urn=&quot;urn:partner.soap.sforce.com&quot;&gt;
+  &lt;soapenv:Header&gt;
+    &lt;urn:SessionHeader&gt;&lt;urn:sessionId&gt;00D...!AQ...&lt;/urn:sessionId&gt;&lt;/urn:SessionHeader&gt;
+  &lt;/soapenv:Header&gt;
+  &lt;soapenv:Body&gt;
+    &lt;urn:create&gt;
+      &lt;urn:sObjects xsi:type=&quot;Account&quot;&gt;
+        &lt;Name&gt;Acme Corp&lt;/Name&gt;
+      &lt;/urn:sObjects&gt;
+    &lt;/urn:create&gt;
+  &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+</code></pre>
+<p>Same outcome, very different weight. Note SOAP carries the session in a <code>SessionHeader</code> <em>inside the envelope</em>, while REST carries it in the <code>Authorization</code> HTTP header.</p>
+<div class="mermaid">
+flowchart TD
+    subgraph REST["REST style"]
+        R1["Verb + URL&lt;br/&gt;POST /sobjects/Account"] --&gt; R2["JSON body&lt;br/&gt;{Name: Acme}"]
+        R2 --&gt; R3["HTTP status&lt;br/&gt;201 Created"]
+    end
+    subgraph SOAP["SOAP style"]
+        S1["WSDL contract&lt;br/&gt;defines every operation"] --&gt; S2["XML envelope&lt;br/&gt;Header + Body"]
+        S2 --&gt; S3["SOAP Fault or result&lt;br/&gt;inside a 200 response"]
+    end
+    style R1 fill:#4CAF50,color:#fff
+    style R2 fill:#4CAF50,color:#fff
+    style R3 fill:#4CAF50,color:#fff
+    style S1 fill:#607D8B,color:#fff
+    style S2 fill:#607D8B,color:#fff
+    style S3 fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>4. How it shows up in Salesforce</h2>
+<p>Salesforce exposes both, and you should be able to name them:</p>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Style</th>
+<th>Format</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td>REST</td>
+<td>JSON (XML optional)</td>
+<td>The <strong>modern default</strong> for most app and mobile integration.</td>
+</tr>
+<tr>
+<td><strong>SOAP API</strong></td>
+<td>SOAP</td>
+<td>XML + WSDL</td>
+<td>Mature, fully supported; common in older middleware and tools that import a WSDL.</td>
+</tr>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td>REST</td>
+<td>CSV/JSON</td>
+<td>Large data loads (millions of records).</td>
+</tr>
+<tr>
+<td><strong>Metadata API</strong></td>
+<td>SOAP</td>
+<td>XML + WSDL</td>
+<td>Deploy/retrieve metadata (config), used by tooling.</td>
+</tr>
+</tbody>
+</table>
+<p>Salesforce publishes two WSDLs for the SOAP API: the <strong>Enterprise WSDL</strong> (strongly typed to one org's schema) and the <strong>Partner WSDL</strong> (loosely typed, works across orgs). <strong>New builds favor REST</strong> for its simplicity and lighter footprint.</p>
+<blockquote>
+<p><strong>Platform note</strong>: this is <em>which style to call Salesforce with</em>. It is separate from authentication (Module 03) and from data format (next file). A SOAP API call still needs a session; a REST call still needs a bearer token.</p>
+</blockquote>
+<hr />
+<h2>5. CURRENT and important — SOAP API <code>login()</code> is being retired</h2>
+<p>This is a live, exam-worthy change. Say it precisely:</p>
+<ul>
+<li>The <strong>SOAP API <code>login()</code> call</strong> (the old way of trading username + password for a session) is <strong>being retired in Summer '27</strong> for SOAP API versions <strong>31.0 through 64.0</strong>. After that release, those <code>login()</code> calls stop working and every dependent integration fails to authenticate.</li>
+<li><code>login()</code> is <strong>not available in API version 65.0 and later</strong> at all.</li>
+<li>From the <strong>Summer '26</strong> release, in <strong>newly created orgs</strong> the SOAP <code>login()</code> call is <strong>disabled by default</strong>; an admin must enable it, and once enabled, users need the new <strong>"Use Any API Auth"</strong> user permission to authenticate this way.</li>
+<li>Salesforce's guidance: <strong>migrate to OAuth</strong> — <strong>Web Server flow</strong>, <strong>JWT Bearer flow</strong>, or <strong>Client Credentials flow</strong> — configured through <strong>External Client Apps</strong>, well before the cutoff.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What's retiring</strong></td>
+<td>SOAP API <code>login()</code> in versions 31.0-64.0</td>
+</tr>
+<tr>
+<td><strong>When</strong></td>
+<td><strong>Summer '27</strong> (the SOAP API itself is not being removed — only the <code>login()</code> auth call)</td>
+</tr>
+<tr>
+<td><strong>Already gone</strong></td>
+<td><code>login()</code> absent in <strong>v65.0+</strong></td>
+</tr>
+<tr>
+<td><strong>New control (Summer '26)</strong></td>
+<td>Disabled by default in new orgs; <strong>Use Any API Auth</strong> permission required</td>
+</tr>
+<tr>
+<td><strong>Migrate to</strong></td>
+<td>OAuth via External Client Apps: Web Server, JWT Bearer, or Client Credentials</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Interview gold</strong>: "SOAP isn't dying — the SOAP <code>login()</code> <em>authentication</em> call is. Salesforce is pushing everyone onto OAuth and External Client Apps. If I owned a legacy SOAP integration that calls <code>login()</code>, I'd plan a migration to JWT Bearer or Client Credentials before Summer '27." See Module 03 for those flows.</p>
+</blockquote>
+<hr />
+<h2>6. When to use which</h2>
+<table>
+<thead>
+<tr>
+<th>Choose REST when...</th>
+<th>Choose SOAP when...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Building web/mobile/microservice integrations.</td>
+<td>Integrating with older middleware that imports a WSDL.</td>
+</tr>
+<tr>
+<td>You want compact JSON and minimal overhead.</td>
+<td>You need a strict, machine-readable contract and strong typing.</td>
+</tr>
+<tr>
+<td>You're starting something new in Salesforce.</td>
+<td>You must use a Salesforce API that is SOAP-only (e.g. parts of Metadata API).</td>
+</tr>
+<tr>
+<td>You want easy debugging (curl, Postman).</td>
+<td>The existing system already speaks SOAP and rewriting isn't worth it.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Common confusions and traps</strong></p>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"SOAP is dead in Salesforce."</td>
+<td>The SOAP <strong>API</strong> is fully supported. Only the SOAP <strong><code>login()</code> auth call</strong> is being retired (Summer '27).</td>
+</tr>
+<tr>
+<td>"REST always uses JSON, SOAP always uses XML."</td>
+<td>SOAP is XML-only; REST <em>usually</em> JSON but can return XML. The format is a separate choice — see <a href="#f04">04-json-vs-xml.md</a>.</td>
+</tr>
+<tr>
+<td>"SOAP errors come back as HTTP 500."</td>
+<td>A SOAP <strong>Fault</strong> is typically returned inside a <strong>200</strong> envelope; you parse the body, not just the status.</td>
+</tr>
+<tr>
+<td>"REST has no contract."</td>
+<td>It can (OpenAPI), but it's optional. SOAP's WSDL is mandatory.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What's the core difference between REST and SOAP?</strong>
+A: REST is a lightweight architectural style that uses HTTP verbs on resources and usually returns JSON. SOAP is a strict protocol where every message is an XML envelope defined by a mandatory WSDL contract. REST is lighter and dominant for new work; SOAP offers a rigid, strongly typed contract favored in legacy enterprise systems.</p>
+<p><strong>Q: Which does Salesforce recommend for new integrations, and why?</strong>
+A: REST. It's simpler, less verbose, JSON-friendly, easy to test and debug, and fits web/mobile and microservice patterns. SOAP remains supported for existing systems and WSDL-based tooling.</p>
+<p><strong>Q: How does error handling differ?</strong>
+A: REST uses HTTP status codes (201, 400, 401, 500) plus a JSON error body. SOAP returns a SOAP Fault element, usually inside an HTTP 200 response, so you must parse the envelope rather than rely on the status code alone.</p>
+<p><strong>Q: What's the SOAP <code>login()</code> retirement about?</strong>
+A: The SOAP API <code>login()</code> call — username/password for a session — is being retired in Summer '27 for API versions 31.0-64.0 and is already absent in v65.0+. From Summer '26 it's disabled by default in new orgs and gated by the "Use Any API Auth" permission. Salesforce wants migration to OAuth (Web Server, JWT Bearer, or Client Credentials) via External Client Apps. The SOAP API itself stays; only that auth call goes away.</p>
+<p><strong>Q: When would you still pick SOAP today?</strong>
+A: When integrating with middleware or partners that consume a WSDL, when a strict typed contract is required, or when the only Salesforce API for the job is SOAP-based (parts of Metadata API). Otherwise REST.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "REST is standard post — write the address, drop it in. SOAP is registered mail with a notarized form: more paperwork, but the contract is airtight."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>REST, SOAP, WSDL, envelope, SOAP Fault, JSON, XML, OAuth — see <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>. Auth flows live in Module 03.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=005132110&amp;type=1">Platform SOAP API login() Retirement — Salesforce Help</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=release-notes.rn_api_upcoming_retirement_258rn.htm&amp;type=5">SOAP API login() Call in Versions 31.0-64.0 Is Being Retired — Release Notes</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/api_eol_soap.htm">SOAP API End-of-Life Policy — SOAP API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.integrate_what_is_api.htm&amp;type=5">Which API Do I Use? — Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide — Introduction</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f04">04-json-vs-xml.md</a> — the two data formats these APIs carry.</em></p>
+</section>
+<section id="f04" class="doc">
+<h1>04 - JSON vs XML (The Two Data Formats)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: JSON and XML are two ways to write structured data as text so two systems can exchange it.
+<strong>The core difference</strong>: <strong>JSON</strong> is compact key/value data, native to web/JavaScript; <strong>XML</strong> is verbose tag-based markup with namespaces, attributes, and schemas.
+<strong>Why it matters</strong>: REST and most modern Salesforce APIs speak <strong>JSON</strong>; SOAP API and Metadata API speak <strong>XML</strong>. Knowing which goes where avoids a lot of confusion.</p>
+</blockquote>
+<p>Coming from the API styles? See <a href="#f03">03-rest-vs-soap.md</a>. New words live in <a href="#f02">02-core-vocabulary.md</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Both are just <strong>text that carries structured data</strong> — a way to write down "this record has these fields with these values" so another program can read it back exactly.</p>
+<p><strong>JSON</strong> (JavaScript Object Notation) is like a <strong>packing list</strong>: short labels and values, <code>Name: Acme</code>, with curly braces grouping things. Minimal punctuation, easy for a human to skim and for a browser to parse.</p>
+<p><strong>XML</strong> (eXtensible Markup Language) is like a <strong>legal form</strong>: every field is wrapped in an opening and closing tag, <code>&lt;Name&gt;Acme&lt;/Name&gt;</code>, and you can attach extra notes (attributes), declare which rulebook applies (namespaces), and validate against a schema. More words on the page, but very explicit.</p>
+<p>Neither is "the data" — they are two <strong>spellings</strong> of the same data. A record is a record; JSON and XML are just how you write it down on the wire.</p>
+<hr />
+<h2>2. The same record in both formats</h2>
+<p>A single <strong>Contact</strong> — first name, last name, email, and whether they're active — written both ways.</p>
+<p><strong>JSON:</strong></p>
+<pre><code class="language-json">{
+  &quot;FirstName&quot;: &quot;Ada&quot;,
+  &quot;LastName&quot;: &quot;Lovelace&quot;,
+  &quot;Email&quot;: &quot;ada@example.com&quot;,
+  &quot;IsActive&quot;: true
+}
+</code></pre>
+<p><strong>XML:</strong></p>
+<pre><code class="language-xml">&lt;Contact&gt;
+  &lt;FirstName&gt;Ada&lt;/FirstName&gt;
+  &lt;LastName&gt;Lovelace&lt;/LastName&gt;
+  &lt;Email&gt;ada@example.com&lt;/Email&gt;
+  &lt;IsActive&gt;true&lt;/IsActive&gt;
+&lt;/Contact&gt;
+</code></pre>
+<p>Same four fields. JSON is <strong>~80 characters lighter</strong> here, and the structure is implied by braces and quotes rather than repeated tags. XML repeats every field name twice (open and close) but can carry extra metadata JSON cannot express as cleanly.</p>
+<div class="mermaid">
+flowchart LR
+    REC["One Contact record&lt;br/&gt;Ada Lovelace"] --&gt; J["JSON&lt;br/&gt;key: value, braces&lt;br/&gt;compact"]
+    REC --&gt; X["XML&lt;br/&gt;open/close tags&lt;br/&gt;verbose, typed"]
+    J --&gt; WIRE{Sent over HTTP}
+    X --&gt; WIRE
+    style REC fill:#00A1E0,color:#fff
+    style J fill:#4CAF50,color:#fff
+    style X fill:#607D8B,color:#fff
+    style WIRE fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>3. The core difference, side by side</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>JSON</th>
+<th>XML</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shape</strong></td>
+<td>Key/value pairs, arrays, nested objects.</td>
+<td>Nested elements wrapped in tags.</td>
+</tr>
+<tr>
+<td><strong>Verbosity</strong></td>
+<td>Compact — no closing tags.</td>
+<td>Verbose — every element opens and closes.</td>
+</tr>
+<tr>
+<td><strong>Data types</strong></td>
+<td>Native: string, number, boolean, null, array, object.</td>
+<td>Everything is text; types come from a schema (XSD).</td>
+</tr>
+<tr>
+<td><strong>Attributes</strong></td>
+<td>No attributes — only keys and values.</td>
+<td>Supports <strong>attributes</strong> (<code>&lt;tag id="1"&gt;</code>) and elements.</td>
+</tr>
+<tr>
+<td><strong>Namespaces</strong></td>
+<td>None (keys are plain).</td>
+<td><strong>Namespaces</strong> prevent name clashes across vocabularies.</td>
+</tr>
+<tr>
+<td><strong>Schema / validation</strong></td>
+<td>JSON Schema (optional).</td>
+<td><strong>XSD / DTD</strong> — mature, strict validation.</td>
+</tr>
+<tr>
+<td><strong>Comments</strong></td>
+<td>Not allowed in standard JSON.</td>
+<td>Allowed (<code>&lt;!-- ... --&gt;</code>).</td>
+</tr>
+<tr>
+<td><strong>Readability</strong></td>
+<td>Easy for web developers; maps to objects.</td>
+<td>Explicit but heavier to read.</td>
+</tr>
+<tr>
+<td><strong>Native home</strong></td>
+<td>JavaScript / web / REST.</td>
+<td>Enterprise, config, SOAP, documents.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>One-line interview answer</strong>: "JSON is compact key/value data that maps straight to objects and dominates REST and the web. XML is verbose tag-based markup with namespaces, attributes, and strong schema validation — the language of SOAP, Metadata API, and config files."</p>
+</blockquote>
+<hr />
+<h2>4. How it shows up in Salesforce</h2>
+<p>The mapping is clean and worth memorizing:</p>
+<table>
+<thead>
+<tr>
+<th>Salesforce API / artifact</th>
+<th>Format</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td><strong>JSON</strong> (XML optional)</td>
+<td>Modern default; lightweight for apps and mobile.</td>
+</tr>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td><strong>JSON</strong> / CSV</td>
+<td>Large data loads.</td>
+</tr>
+<tr>
+<td><strong>Connect (Chatter) REST API</strong></td>
+<td><strong>JSON</strong></td>
+<td>Web/feed data.</td>
+</tr>
+<tr>
+<td><strong>SOAP API</strong></td>
+<td><strong>XML</strong></td>
+<td>Every message is a SOAP envelope (XML).</td>
+</tr>
+<tr>
+<td><strong>Metadata API</strong></td>
+<td><strong>XML</strong></td>
+<td>Component definitions; <code>package.xml</code> and <code>*-meta.xml</code> files are XML.</td>
+</tr>
+<tr>
+<td><strong>Tooling API</strong></td>
+<td><strong>JSON</strong> or XML</td>
+<td>Developer tooling; commonly JSON over REST.</td>
+</tr>
+</tbody>
+</table>
+<p>So in practice: when you call the <strong>REST API</strong> you send and receive <strong>JSON</strong>; when you deploy metadata or call the <strong>SOAP API</strong>, you're in <strong>XML</strong>. Every Salesforce metadata file on disk (<code>CustomObject</code>, <code>Flow</code>, <code>ApexClass</code> meta) is XML.</p>
+<blockquote>
+<p><strong>Platform note</strong>: a <code>package.xml</code> manifest for a Metadata API deploy is pure XML with namespaces. A record returned from <code>GET /services/data/v66.0/sobjects/Contact/003...</code> is JSON. Same platform, two formats, chosen by the API.</p>
+</blockquote>
+<hr />
+<h2>5. When to use which</h2>
+<table>
+<thead>
+<tr>
+<th>Reach for JSON when...</th>
+<th>Reach for XML when...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Calling or building a <strong>REST</strong> API.</td>
+<td>Calling the <strong>SOAP</strong> API or <strong>Metadata API</strong>.</td>
+</tr>
+<tr>
+<td>Talking to web or mobile front ends.</td>
+<td>A system or partner requires a strict <strong>schema (XSD)</strong>.</td>
+</tr>
+<tr>
+<td>You want compact payloads and fast parsing.</td>
+<td>You need <strong>namespaces</strong> or <strong>attributes</strong> to model the data.</td>
+</tr>
+<tr>
+<td>Working in JavaScript/Apex with simple objects.</td>
+<td>Authoring Salesforce <strong>config/metadata</strong> files.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Common confusions and traps</strong></p>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"JSON is better than XML."</td>
+<td>Neither is better universally. JSON is lighter; XML is richer (namespaces, attributes, validation). Pick per use case.</td>
+</tr>
+<tr>
+<td>"REST can only return JSON."</td>
+<td>REST <em>usually</em> uses JSON but the Salesforce REST API can return XML if you set the <code>Accept</code> header.</td>
+</tr>
+<tr>
+<td>"The format determines the API style."</td>
+<td>No. Format (JSON/XML) and style (REST/SOAP) are separate choices. SOAP is always XML; REST is usually JSON.</td>
+</tr>
+<tr>
+<td>"XML attributes and elements are the same."</td>
+<td>Attributes (<code>id="1"</code>) live on a tag; elements are nested nodes. JSON has neither — only keys.</td>
+</tr>
+<tr>
+<td>"Metadata API uses JSON."</td>
+<td>Metadata API is <strong>XML</strong> (so are the <code>*-meta.xml</code> files in your repo).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What's the core difference between JSON and XML?</strong>
+A: JSON is a compact key/value format with native data types that maps directly to objects — dominant in REST and the web. XML is verbose, tag-based markup that supports namespaces, attributes, and strict schema validation — the language of SOAP and config. They're two spellings of the same structured data.</p>
+<p><strong>Q: In Salesforce, which APIs use which format?</strong>
+A: REST API, Bulk API 2.0, and Connect API use JSON. SOAP API and Metadata API use XML. Tooling API is typically JSON. As a rule: REST means JSON, SOAP and metadata mean XML.</p>
+<p><strong>Q: Can the Salesforce REST API return XML?</strong>
+A: Yes. JSON is the default, but you can request XML via the <code>Accept</code> header. The point is that format and API style are independent choices — REST just defaults to the lighter format.</p>
+<p><strong>Q: Why is JSON usually preferred for new web integrations?</strong>
+A: It's compact, parses natively in JavaScript and most languages, maps cleanly to objects, and has less overhead than XML's open/close tags. That makes it faster and simpler for app and mobile work.</p>
+<p><strong>Q: When does XML still win?</strong>
+A: When you need namespaces to avoid name clashes, attributes to attach metadata, comments, or rigorous XSD validation — and whenever you're in SOAP, Metadata API, or Salesforce config files, which are XML by design.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "JSON is a packing list — short labels and values. XML is a legal form — every field wrapped in a labeled box, with room for stamps and rules. Same information, different amount of paperwork."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>JSON, XML, key/value, tag/element, attribute, namespace, schema (XSD/JSON Schema), envelope — see <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>. API styles are in <a href="#f03">03-rest-vs-soap.md</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide — Introduction (JSON default)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_intro.htm">Metadata API Developer Guide — Introduction (XML)</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_quickstart_intro.htm">SOAP API Developer Guide — Introduction (XML/WSDL)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON">JSON — MDN Web Docs</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction">XML introduction — MDN Web Docs</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f05">05-synchronous-vs-asynchronous.md</a> — request/reply now vs fire-and-forget later.</em></p>
+</section>
+<section id="f05" class="doc">
+<h1>05 - Synchronous vs Asynchronous</h1>
+<blockquote>
+<p><strong>One-liner</strong>: <strong>Synchronous</strong> = the caller <strong>waits</strong> for the answer before doing anything else. <strong>Asynchronous</strong> = the caller <strong>fires the request and moves on</strong>, getting the result later via a poll, callback, or event.
+<strong>Why it matters</strong>: This single choice decides your user experience, your throughput, and how you handle failure. Pick wrong and you either freeze a screen for 30 seconds or lose track of work that finished in the background.
+<strong>Core difference in one line</strong>: Sync <strong>blocks</strong> and gives you an immediate answer. Async <strong>doesn't block</strong> and hands you the answer later.</p>
+</blockquote>
+<p>New here? Skim <a href="#f01">01-what-and-why-of-integration.md</a> first for the big picture.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine ordering food two ways.</p>
+<p><strong>Synchronous</strong> is a <strong>phone call to a busy hotline</strong>. You dial, you stay on the line, you cannot do anything else, and you hang up only once you have your answer. Fast when the other side answers quickly. Painful when they put you on hold.</p>
+<p><strong>Asynchronous</strong> is <strong>texting the restaurant</strong>. You send "one large pizza," put your phone in your pocket, and go water the plants. A while later a text pings back: "Ready for pickup." You were never stuck waiting.</p>
+<p>In software, <strong>synchronous</strong> means the calling code pauses on that line until a response arrives. <strong>Asynchronous</strong> means the call returns instantly with a "got it, I'll handle it," and the real result shows up later through a callback, a status you poll, or an event you subscribe to.</p>
+<div class="mermaid">
+flowchart LR
+    subgraph SYNC[Synchronous]
+        A1[Caller sends request] --&gt; A2[Caller WAITS&lt;br/&gt;blocked]
+        A2 --&gt; A3[Response arrives] --&gt; A4[Caller continues]
+    end
+    subgraph ASYNC[Asynchronous]
+        B1[Caller sends request] --&gt; B2[Instant ack&lt;br/&gt;caller continues]
+        B2 -.later.-&gt; B3[Result via poll&lt;br/&gt;callback or event]
+    end
+    style A2 fill:#F44336,color:#fff
+    style B2 fill:#4CAF50,color:#fff
+    style B3 fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>2. The core difference + side-by-side comparison</h2>
+<p>The whole distinction is <strong>does the caller block and wait?</strong> Everything else flows from that.</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Synchronous</th>
+<th>Asynchronous</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Blocking</strong></td>
+<td>Caller is <strong>blocked</strong> until the response returns.</td>
+<td>Caller is <strong>not blocked</strong>, continues immediately.</td>
+</tr>
+<tr>
+<td><strong>When you get the result</strong></td>
+<td><strong>Now</strong>, in the same call.</td>
+<td><strong>Later</strong>, via poll, callback, or event.</td>
+</tr>
+<tr>
+<td><strong>Latency felt by user</strong></td>
+<td>You feel the full round-trip time.</td>
+<td>You feel almost nothing up front.</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>Simple. Success or failure returns on the spot, in one place.</td>
+<td>Harder. You must track job status, retries, and out-of-band failures.</td>
+</tr>
+<tr>
+<td><strong>Throughput / volume</strong></td>
+<td>Limited. One slow call ties up a connection and a timeout budget.</td>
+<td>High. Work is queued and processed in bulk in the background.</td>
+</tr>
+<tr>
+<td><strong>User experience</strong></td>
+<td>Great for instant answers, bad if the work is slow.</td>
+<td>Great for big or slow jobs, needs a "we'll notify you" pattern.</td>
+</tr>
+<tr>
+<td><strong>Coupling</strong></td>
+<td>Tighter. Both systems must be up at the same moment.</td>
+<td>Looser. The receiver can be busy or briefly down.</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Small, fast request/reply where the user needs the answer immediately.</td>
+<td>Large volumes, slow work, or fire-and-forget notifications.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. A concrete example</h2>
+<p><strong>Charging a credit card (synchronous).</strong> A user clicks "Pay." Your code calls the payment gateway and <strong>waits</strong> for "approved" or "declined" before it can show the next screen. The user must know the outcome <strong>right now</strong>, so blocking is the correct design. The cost: if the gateway is slow, the user stares at a spinner.</p>
+<p><strong>Loading 2 million records into a warehouse (asynchronous).</strong> An ETL tool submits a job, gets back a <strong>job id</strong> instantly, and walks away. Salesforce processes the records in the background. The tool checks back later, or gets notified, when the job completes. Nobody could sit and wait 40 minutes on a single open connection, so async is the only sane choice.</p>
+<hr />
+<h2>4. How it shows up in Salesforce</h2>
+<p>Salesforce draws this line very clearly. Know which side each tool sits on.</p>
+<div class="mermaid">
+flowchart TD
+    Q{Does the caller need&lt;br/&gt;the answer right now?} --&gt;|Yes, small + fast| SYNC[SYNCHRONOUS]
+    Q --&gt;|No, big or slow&lt;br/&gt;or fire-and-forget| ASYNC[ASYNCHRONOUS]
+    SYNC --&gt; S1[REST API request/reply]
+    SYNC --&gt; S2[SOAP API request/reply]
+    SYNC --&gt; S3[Apex HTTP callout&lt;br/&gt;max 120s timeout]
+    ASYNC --&gt; A1[Bulk API 2.0]
+    ASYNC --&gt; A2[Platform Events / Pub-Sub API]
+    ASYNC --&gt; A3["@future methods"]
+    ASYNC --&gt; A4[Queueable Apex]
+    ASYNC --&gt; A5[Batch Apex]
+    style SYNC fill:#00A1E0,color:#fff
+    style ASYNC fill:#ff9900,color:#fff
+    style Q fill:#607D8B,color:#fff
+
+</div>
+<p><strong>Synchronous in Salesforce:</strong></p>
+<ul>
+<li><strong>REST API</strong> and <strong>SOAP API</strong> request/reply. You call, you wait, you get rows back in the same response. Best for a handful of records.</li>
+<li><strong>Apex HTTP callouts</strong> (outbound). A callout blocks the running transaction. Each callout can run up to a <strong>120-second timeout</strong> (default 10s, set with <code>setTimeout</code>), and a single transaction allows up to <strong>100 callouts</strong>. Synchronous callout response size is capped at <strong>6 MB</strong>.</li>
+</ul>
+<p><strong>Asynchronous in Salesforce:</strong></p>
+<ul>
+<li><strong>Bulk API 2.0</strong>. You submit a job, get a <strong>job id</strong>, and poll for completion. Built for thousands to millions of records, processed in the background. (REST/SOAP, by contrast, are tuned for real-time small batches.)</li>
+<li><strong>Platform Events</strong> and the <strong>Pub/Sub API</strong>. Publish an event and move on. Subscribers receive it later over a streaming channel. Pure fire-and-forget.</li>
+<li><strong><code>@future</code> methods</strong>. Mark an Apex method <code>@future</code> and it runs later in its own background context. The classic way to make a callout from a trigger without blocking.</li>
+<li><strong>Queueable Apex</strong>. Like <code>@future</code> but with chaining and a job id you can monitor. The modern default for background work.</li>
+<li><strong>Batch Apex</strong>. Processes large data sets in chunks asynchronously, ideal for nightly jobs.</li>
+</ul>
+<blockquote>
+<p><strong>Async callouts get more room.</strong> Asynchronous Apex allows a larger callout response (<strong>12 MB</strong> vs 6 MB for synchronous). Another reason heavy work belongs in the background.</p>
+<p><strong>Why a trigger uses <code>@future</code> for callouts.</strong> You cannot make a synchronous callout in the same transaction that has uncommitted DML, and you do not want a user's save to block on a slow external system. So you defer the callout to an async method.</p>
+</blockquote>
+<hr />
+<h2>5. When to use which + common confusions</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion / trap</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Async is always better."</td>
+<td>No. If the user needs the answer to continue (a payment, a validation), sync is correct. Async needs extra machinery to track results.</td>
+</tr>
+<tr>
+<td>"Synchronous means fast."</td>
+<td>Sync means <strong>immediate and blocking</strong>, not fast. A slow sync call is the worst case: you wait <em>and</em> you are stuck.</td>
+</tr>
+<tr>
+<td>"Bulk API is just a faster REST API."</td>
+<td>Different model entirely. Bulk API 2.0 is <strong>asynchronous job-based</strong>. REST/SOAP are <strong>synchronous request/reply</strong>.</td>
+</tr>
+<tr>
+<td>"Platform Events return a result."</td>
+<td>No. Publishing an event is fire-and-forget. There is no synchronous response payload.</td>
+</tr>
+<tr>
+<td>"A callout can run as long as I want."</td>
+<td>A synchronous Apex callout is capped at <strong>120 seconds</strong>. Long work must go async (Queueable, Batch, or a polling pattern).</td>
+</tr>
+<tr>
+<td>"Async means no errors to handle."</td>
+<td>Async has <em>more</em> failure modes: the job can fail after you walked away. You must monitor status and design retries.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: small + fast + user-needs-it-now → <strong>synchronous</strong>. Big + slow + fire-and-forget → <strong>asynchronous</strong>.</p>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Explain synchronous vs asynchronous.</strong>
+A: Synchronous means the caller blocks and waits for the response before continuing. Asynchronous means the caller sends the request, gets an immediate acknowledgement, keeps working, and receives the real result later through a poll, callback, or event.</p>
+<p><strong>Q: Give a Salesforce example of each.</strong>
+A: Synchronous: a REST API query or an Apex HTTP callout to charge a card, where the transaction waits for the response. Asynchronous: Bulk API 2.0 loading millions of records, or publishing a Platform Event that subscribers pick up later.</p>
+<p><strong>Q: Why can't a trigger just make a synchronous callout directly?</strong>
+A: A callout is not allowed in a transaction with pending uncommitted DML, and you do not want the user's save blocked on a slow external system. So you defer it with <code>@future</code> or Queueable Apex, which run asynchronously.</p>
+<p><strong>Q: A callout to a slow partner API keeps timing out. What do you change?</strong>
+A: A synchronous callout maxes out at 120 seconds. Move the work to an asynchronous pattern. Queueable Apex, Batch Apex, or a job-and-poll design, so the user is not blocked and you control retries.</p>
+<p><strong>Q: When would you choose synchronous even though async scales better?</strong>
+A: When the caller cannot continue without the answer. Payments, real-time validations, and "show me this record now" lookups all need a synchronous response.</p>
+<p><strong>Q: What is the trade-off you accept by going asynchronous?</strong>
+A: Looser coupling and higher throughput in exchange for more complex result handling. You no longer get a single success/fail in one place. You must track job status, handle out-of-band failures, and design retries and notifications.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Synchronous is a phone call. You wait on the line for the answer. Asynchronous is a text message. You send it and get on with your day until a reply pings back."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Synchronous, asynchronous, blocking, callback, polling, callout, timeout, fire-and-forget, job id, throughput, latency — all defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0.htm">Bulk API 2.0 — Salesforce Developers (v66.0, Spring '26)</a></li>
+<li><a href="https://architect.salesforce.com/decision-guides/async-processing">Asynchronous Processing — Salesforce Architects Decision Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/overview">Pub/Sub API — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_invoking_future_methods.htm">Future Methods — Apex Developer Guide</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f06">06-inbound-vs-outbound.md</a> — which direction is the call going, into Salesforce or out of it?</em></p>
+</section>
+<section id="f06" class="doc">
+<h1>06 - Inbound vs Outbound</h1>
+<blockquote>
+<p><strong>One-liner</strong>: <strong>Inbound</strong> = an external system calls <strong>into</strong> Salesforce. <strong>Outbound</strong> = Salesforce calls <strong>out</strong> to an external system. The direction is always measured <strong>relative to Salesforce</strong>.
+<strong>Why it matters</strong>: Direction decides who authenticates whom, which APIs and tools you reach for, and which side is the "client" and which is the "server." Get the direction right and the auth and tooling fall into place.
+<strong>Core difference in one line</strong>: Inbound, <strong>someone calls Salesforce</strong>. Outbound, <strong>Salesforce calls someone</strong>.</p>
+</blockquote>
+<p>New here? Read <a href="#f01">01-what-and-why-of-integration.md</a> and <a href="#f05">05-synchronous-vs-asynchronous.md</a> first.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Stand inside Salesforce and watch the front door.</p>
+<p><strong>Inbound</strong> is <strong>someone knocking on your door</strong>. A delivery driver (an external app) shows up, proves who they are, and hands you a package or asks for one. Salesforce is the <strong>host</strong>. It must check the visitor's ID before letting them in.</p>
+<p><strong>Outbound</strong> is <strong>you leaving the house to visit someone else</strong>. Salesforce walks out, knocks on the partner's door, and proves <em>its own</em> identity to <em>them</em>. Now Salesforce is the <strong>visitor</strong>.</p>
+<p>The only thing that flips is <strong>who initiates the call</strong>. The same business integration often has both directions: the website calls in to create a lead (inbound), and later Salesforce calls out to a billing system when a deal closes (outbound).</p>
+<div class="mermaid">
+flowchart LR
+    EXT[External System&lt;br/&gt;website, ERP, billing] --&gt;|INBOUND&lt;br/&gt;calls into SF| SF[Salesforce]
+    SF --&gt;|OUTBOUND&lt;br/&gt;SF calls out| EXT2[External System&lt;br/&gt;payment, ERP, partner API]
+    style SF fill:#00A1E0,color:#fff
+    style EXT fill:#9C27B0,color:#fff
+    style EXT2 fill:#ff9900,color:#fff
+
+</div>
+<hr />
+<h2>2. The core difference + side-by-side comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Inbound</th>
+<th>Outbound</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Who initiates</strong></td>
+<td>The <strong>external system</strong> starts the call.</td>
+<td><strong>Salesforce</strong> starts the call.</td>
+</tr>
+<tr>
+<td><strong>Salesforce's role</strong></td>
+<td><strong>Server</strong> / resource server. It receives.</td>
+<td><strong>Client</strong>. It sends.</td>
+</tr>
+<tr>
+<td><strong>Who must authenticate</strong></td>
+<td>The <strong>external app</strong> proves its identity to Salesforce.</td>
+<td><strong>Salesforce</strong> proves its identity to the external system.</td>
+</tr>
+<tr>
+<td><strong>Where credentials live</strong></td>
+<td>In a <strong>Connected App / External Client App</strong> (Salesforce side) that the external app uses to get a token.</td>
+<td>In a <strong>Named Credential + External Credential</strong> (Salesforce side) that stores how to log in to the partner.</td>
+</tr>
+<tr>
+<td><strong>Typical tools</strong></td>
+<td>REST API, SOAP API, Apex REST / Apex SOAP web services.</td>
+<td>Apex HTTP callouts, Named Credentials, External Services, Outbound Messages (legacy).</td>
+</tr>
+<tr>
+<td><strong>Direction of data</strong></td>
+<td>Data usually flows <strong>into</strong> Salesforce (or is read out by the caller).</td>
+<td>Data usually flows <strong>out to</strong> the partner.</td>
+</tr>
+<tr>
+<td><strong>Auth module</strong></td>
+<td>Salesforce is the <strong>resource server</strong> (see <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>).</td>
+<td>Salesforce is the <strong>OAuth client</strong> using a Named Credential.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Memory hook</strong>: Follow the arrow. If the arrow points <strong>at</strong> Salesforce, it is <strong>inbound</strong>. If it points <strong>away</strong>, it is <strong>outbound</strong>.</p>
+</blockquote>
+<hr />
+<h2>3. A concrete example</h2>
+<p><strong>Inbound: a web form creates a Lead.</strong> A "Contact Us" page on the company website POSTs to the Salesforce <strong>REST API</strong>. The website app first authenticates using a <strong>Connected App</strong> and an OAuth token, then calls <code>POST /services/data/v66.0/sobjects/Lead</code>. Salesforce is the <strong>server</strong> here. It checks the token, then creates the record. The external app had to prove it was allowed in.</p>
+<p><strong>Outbound: Salesforce charges a card.</strong> When an Opportunity closes, Apex makes an <strong>HTTP callout</strong> through a <strong>Named Credential</strong> to the payment gateway. Salesforce is now the <strong>client</strong>. The Named Credential holds the endpoint and the credentials Salesforce uses to authenticate <strong>to the gateway</strong>. Salesforce is the visitor proving who it is.</p>
+<p>Same company, both directions, completely different auth setup on each side.</p>
+<hr />
+<h2>4. How it shows up in Salesforce</h2>
+<div class="mermaid">
+flowchart TD
+    subgraph IN[INBOUND - external calls into Salesforce]
+        E1[External App] --&gt;|OAuth token from&lt;br/&gt;Connected App / ECA| R1[REST API]
+        E1 --&gt; R2[SOAP API]
+        E1 --&gt; R3[Apex REST / Apex SOAP&lt;br/&gt;web services]
+        R1 --&gt; SFIN[Salesforce&lt;br/&gt;= resource server]
+        R2 --&gt; SFIN
+        R3 --&gt; SFIN
+    end
+    subgraph OUT[OUTBOUND - Salesforce calls out]
+        SFOUT[Salesforce&lt;br/&gt;= client] --&gt;|via Named Credential| O1[Apex HTTP Callout]
+        SFOUT --&gt; O2[External Services]
+        SFOUT --&gt; O3[Outbound Messages&lt;br/&gt;legacy SOAP]
+        O1 --&gt; P1[Partner API]
+        O2 --&gt; P1
+        O3 --&gt; P1
+    end
+    style SFIN fill:#00A1E0,color:#fff
+    style SFOUT fill:#00A1E0,color:#fff
+    style E1 fill:#9C27B0,color:#fff
+    style P1 fill:#ff9900,color:#fff
+
+</div>
+<p><strong>Inbound (Salesforce is the destination):</strong></p>
+<ul>
+<li><strong>REST API</strong> and <strong>SOAP API</strong>. The standard front doors for external apps to create, read, update, and delete records.</li>
+<li><strong>Apex REST</strong> (<code>@RestResource</code>) and <strong>Apex SOAP</strong> web services (<code>webservice</code> keyword). Custom endpoints you build in Apex when the standard APIs are not enough, exposing your own URLs and logic.</li>
+<li>Every inbound caller must <strong>authenticate first</strong>. The external app is registered as a <strong>Connected App</strong> or <strong>External Client App</strong>, and uses <strong>OAuth</strong> to get an access token. (See <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>.)</li>
+</ul>
+<p><strong>Outbound (Salesforce is the source):</strong></p>
+<ul>
+<li><strong>Apex HTTP callouts</strong>. Apex code that sends an HTTP request to an external endpoint.</li>
+<li><strong>Named Credentials</strong> (with <strong>External Credentials</strong>). The recommended way to store the endpoint URL and authentication so callout code never hardcodes secrets. Salesforce handles the token for you.</li>
+<li><strong>External Services</strong>. Point Salesforce at an external API's schema and it generates invocable actions you can call from Flow, no code.</li>
+<li><strong>Outbound Messages</strong> (legacy). A workflow/Flow action that sends a <strong>SOAP message</strong> to an endpoint when a record changes. A single message can carry up to <strong>100 notifications</strong>. Mature but dated, covered more in <a href="#f07">07-push-pull-and-webhooks.md</a>.</li>
+</ul>
+<blockquote>
+<p><strong>The auth tie, stated plainly:</strong>
+- <strong>Inbound → Salesforce is the resource server.</strong> The external app holds the credentials and proves itself to Salesforce. Your job is to register the app and grant the right scopes.
+- <strong>Outbound → Salesforce is the client.</strong> Salesforce holds the credentials (in a Named Credential) and proves itself to the partner. Your job is to configure the Named/External Credential.</p>
+</blockquote>
+<hr />
+<h2>5. When to use which + common confusions</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion / trap</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Inbound vs outbound describes the data direction."</td>
+<td>No. It describes <strong>who initiates the call</strong>, relative to Salesforce. Data can flow either way within one call.</td>
+</tr>
+<tr>
+<td>"An Outbound Message is inbound because it sends data out... wait."</td>
+<td>It is <strong>outbound</strong>: Salesforce initiates and pushes a SOAP message out. The name matches the direction for once.</td>
+</tr>
+<tr>
+<td>"Salesforce always authenticates the same way."</td>
+<td>Direction flips the auth. Inbound, the external app authenticates to Salesforce. Outbound, Salesforce authenticates to the partner.</td>
+</tr>
+<tr>
+<td>"Apex callouts are inbound because they are in Salesforce code."</td>
+<td>The code lives in Salesforce, but it <strong>calls out</strong>, so it is <strong>outbound</strong>. Salesforce is the client.</td>
+</tr>
+<tr>
+<td>"Named Credentials are for inbound auth."</td>
+<td>No. Named Credentials are for <strong>outbound</strong> callouts, storing how Salesforce logs in to the partner. Inbound uses Connected Apps / ECAs.</td>
+</tr>
+<tr>
+<td>"REST API is outbound."</td>
+<td>The Salesforce REST API is an <strong>inbound</strong> door. External apps call it. Salesforce calling <em>another system's</em> REST API is the outbound case, done via Apex callout.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: ask "who picked up the phone and dialed?" If it was the external system, <strong>inbound</strong>. If it was Salesforce, <strong>outbound</strong>.</p>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Define inbound and outbound integration in Salesforce.</strong>
+A: Inbound means an external system initiates a call into Salesforce. Salesforce is the server. Outbound means Salesforce initiates a call out to an external system. Salesforce is the client. Direction is measured relative to Salesforce.</p>
+<p><strong>Q: For an inbound integration, who authenticates to whom, and how?</strong>
+A: The external app authenticates to Salesforce. It is registered as a Connected App or External Client App and uses OAuth to obtain an access token, which it sends as a bearer token on each API call. Salesforce acts as the resource server.</p>
+<p><strong>Q: For an outbound callout, where do the credentials live?</strong>
+A: In a Named Credential paired with an External Credential on the Salesforce side. They store the endpoint and how Salesforce authenticates to the partner, so Apex callout code never hardcodes URLs or secrets.</p>
+<p><strong>Q: Name the inbound tools and the outbound tools.</strong>
+A: Inbound: REST API, SOAP API, Apex REST, Apex SOAP web services. Outbound: Apex HTTP callouts, Named Credentials, External Services, and the legacy Outbound Messages.</p>
+<p><strong>Q: A partner needs to push order updates into Salesforce. Inbound or outbound, and what do you set up?</strong>
+A: Inbound. The partner calls the Salesforce REST API (or a custom Apex REST endpoint). You register their app as a Connected App or External Client App, grant the <code>api</code> scope, and they authenticate via OAuth.</p>
+<p><strong>Q: Salesforce needs to notify an ERP when an Opportunity closes. Inbound or outbound?</strong>
+A: Outbound. Salesforce initiates. Options include an Apex HTTP callout through a Named Credential, an External Services action, or a legacy Outbound Message. For event-style delivery you might publish a Platform Event the ERP subscribes to.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Inbound is someone knocking on Salesforce's door. Outbound is Salesforce leaving the house to knock on someone else's. Whoever knocks has to prove who they are."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Inbound, outbound, client, server, resource server, Connected App, External Client App, Named Credential, External Credential, Apex REST, callout — all defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>. Auth roles are detailed in <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03 fundamentals</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/integration-patterns.html">Integration Patterns and Practices (v66.0, Spring '26) — Salesforce Architect</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_rest.htm">REST API Developer Guide — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm">Named Credentials as Callout Endpoints — Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_om_outboundmessaging.htm">Outbound Messaging — SOAP API Developer Guide</a></li>
+<li><a href="https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_authenticate.htm&amp;type=5">Authorize Apps with OAuth — Salesforce Help</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f07">07-push-pull-and-webhooks.md</a> — does the consumer ask for data, or does the producer push it the moment it changes?</em></p>
+</section>
+<section id="f07" class="doc">
+<h1>07 - Push, Pull, and Webhooks</h1>
+<blockquote>
+<p><strong>One-liner</strong>: <strong>Pull</strong> = the consumer asks for data when it wants it. <strong>Push</strong> = the producer sends data the moment something changes. A <strong>webhook</strong> is a push: an HTTP callback the producer fires to a URL the consumer registered in advance.
+<strong>Why it matters</strong>: This is the difference between data that is always a little stale and burns resources, versus data that arrives the instant it changes. Most "why is my integration so slow / so chatty" problems trace back to choosing pull where push belonged.
+<strong>Core difference in one line</strong>: Pull, <strong>you go fetch it</strong>. Push, <strong>it comes to you</strong>.</p>
+</blockquote>
+<p>New here? Read <a href="#f01">01-what-and-why-of-integration.md</a>, then <a href="#f05">05</a> and <a href="#f06">06</a>.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think about how you find out the news.</p>
+<p><strong>Pull</strong> is <strong>refreshing a news website</strong>. Nothing reaches you until you go and ask. To stay current you have to keep hitting refresh, over and over, even when nothing has changed. Most of those refreshes are wasted, and between refreshes your view is out of date.</p>
+<p><strong>Push</strong> is a <strong>breaking-news alert on your phone</strong>. You signed up once, then you do nothing. The moment something happens, the alert lands. No wasted checks, no lag.</p>
+<p>A <strong>webhook</strong> is the breaking-news alert formalized for software. The consumer says, "here is my URL, call it when X happens." The producer keeps that URL and fires an HTTP request to it the instant X happens. The consumer waits passively and reacts.</p>
+<p>Polling (pull) is <strong>wasteful and laggy</strong>: most polls return "nothing new," and real changes wait until the next poll. Push is <strong>efficient and fresh</strong>: a message is sent only when there is something to say, and it arrives immediately.</p>
+<div class="mermaid">
+flowchart LR
+    subgraph PULL[PULL - consumer asks]
+        C1[Consumer] --&gt;|are we there yet?| P1[Producer]
+        P1 --&gt;|nope| C1
+        C1 --&gt;|now?| P1
+        P1 --&gt;|here it is| C1
+    end
+    subgraph PUSH[PUSH - producer sends]
+        P2[Producer] --&gt;|change happened!| C2[Consumer]
+    end
+    style C1 fill:#9C27B0,color:#fff
+    style P1 fill:#607D8B,color:#fff
+    style P2 fill:#4CAF50,color:#fff
+    style C2 fill:#00A1E0,color:#fff
+
+</div>
+<hr />
+<h2>2. The core difference + side-by-side comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Pull (polling)</th>
+<th>Push (incl. webhooks)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Who initiates</strong></td>
+<td>The <strong>consumer</strong> asks.</td>
+<td>The <strong>producer</strong> sends.</td>
+</tr>
+<tr>
+<td><strong>Data freshness</strong></td>
+<td>Stale between polls. Lag = polling interval.</td>
+<td>Fresh. Arrives the moment it changes.</td>
+</tr>
+<tr>
+<td><strong>Efficiency</strong></td>
+<td>Wasteful. Most polls return nothing new.</td>
+<td>Efficient. Traffic only when there is real news.</td>
+</tr>
+<tr>
+<td><strong>Load pattern</strong></td>
+<td>Constant, whether or not data changed.</td>
+<td>Spiky. Matches the rate of actual change.</td>
+</tr>
+<tr>
+<td><strong>Complexity</strong></td>
+<td>Simple to build. Just call on a timer.</td>
+<td>More moving parts. Endpoints, retries, ordering, security.</td>
+</tr>
+<tr>
+<td><strong>Failure handling</strong></td>
+<td>Easy. Missed a poll? Just poll again.</td>
+<td>Harder. If the consumer is down, the push can be missed. Needs retry / replay.</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Infrequent needs, batch syncs, simple jobs.</td>
+<td>Real-time reactions, event-driven systems, instant updates.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>The trade-off in one line</strong>: pull is <strong>simple but laggy and chatty</strong>. Push is <strong>fresh and lean but needs more plumbing</strong> (a live endpoint, retries, and security).</p>
+</blockquote>
+<hr />
+<h2>3. A concrete example</h2>
+<p><strong>Pull: nightly inventory sync.</strong> A reporting tool calls the Salesforce REST API once a night to fetch the day's orders. Freshness does not matter. Yesterday's data is fine in the morning. A scheduled pull is simple and perfectly adequate.</p>
+<p><strong>Push: notify shipping the instant an order is paid.</strong> The moment an Opportunity flips to "Paid," the warehouse needs to know <strong>now</strong>, not at the next nightly poll. Salesforce publishes a <strong>Platform Event</strong> (or fires a callout to the warehouse's webhook URL). The warehouse reacts within seconds. Polling here would mean either an unacceptable delay or hammering the API every few seconds just in case.</p>
+<hr />
+<h2>4. How it shows up in Salesforce</h2>
+<p>Salesforce supports both, and importantly <strong>does not use the word "webhook"</strong> in its product names. It achieves the same outcome with <strong>events</strong> (consumers subscribe) and <strong>callouts</strong> (Salesforce fires an HTTP request to a registered URL).</p>
+<div class="mermaid">
+flowchart TD
+    Q{Do you need it&lt;br/&gt;the instant it changes?} --&gt;|No, periodic is fine| PULL[PULL]
+    Q --&gt;|Yes, react immediately| PUSH[PUSH]
+    PULL --&gt; PL1[REST / SOAP query&lt;br/&gt;on demand]
+    PULL --&gt; PL2[Scheduled jobs&lt;br/&gt;Scheduled Apex, ETL]
+    PUSH --&gt; PS1[Platform Events]
+    PUSH --&gt; PS2[Change Data Capture]
+    PUSH --&gt; PS3[Pub-Sub API]
+    PUSH --&gt; PS4[Outbound Messages&lt;br/&gt;legacy SOAP]
+    PUSH --&gt; PS5[Webhook-style callout&lt;br/&gt;from Flow or Apex]
+    style PULL fill:#607D8B,color:#fff
+    style PUSH fill:#4CAF50,color:#fff
+    style Q fill:#ff9900,color:#fff
+
+</div>
+<p><strong>Pull in Salesforce (the consumer asks):</strong></p>
+<ul>
+<li><strong>REST / SOAP query</strong>. An external system runs a SOQL query or GET request whenever it wants the current data.</li>
+<li><strong>Scheduled jobs</strong>. Scheduled Apex or an external ETL tool polls on a timer (every night, every hour) to fetch what changed.</li>
+</ul>
+<p><strong>Push in Salesforce (the producer sends):</strong></p>
+<ul>
+<li><strong>Platform Events</strong>. Salesforce publishes a custom event. Subscribers receive it over a streaming channel. The event-driven backbone.</li>
+<li><strong>Change Data Capture (CDC)</strong>. Salesforce automatically publishes an event whenever records are created, updated, deleted, or undeleted, carrying the changed fields. No code to publish.</li>
+<li><strong>Pub/Sub API</strong>. The modern, unified, <strong>gRPC-based</strong> API to publish and subscribe to Platform Events, CDC, and real-time event-monitoring events. It uses binary <strong>Avro</strong> payloads over HTTP/2 and is the recommended subscriber interface.</li>
+<li><strong>Outbound Messages</strong> (legacy). A workflow/Flow action that <strong>pushes a SOAP message</strong> to a registered endpoint URL when a record changes, up to <strong>100 notifications</strong> per message. This is the closest classic Salesforce feature to a webhook.</li>
+<li><strong>Webhook-style callouts from Flow or Apex</strong>. To call an <em>external</em> webhook, Salesforce fires an <strong>HTTP callout</strong> (from a record-triggered Flow or Apex) to the URL the partner gave you. Salesforce is the producer pushing out.</li>
+</ul>
+<blockquote>
+<p><strong>Webhook, the Salesforce way</strong>: a webhook is just "producer fires HTTP to a URL the consumer registered." Salesforce does the <strong>inbound</strong> side by <em>being</em> an endpoint (an Apex REST resource an external producer calls) and the <strong>outbound</strong> side by <em>firing</em> a callout or publishing an event. The mechanism has a different name, but the pattern is identical.</p>
+<p><strong>Why push beats polling for freshness.</strong> Polling every 5 minutes means data is up to 5 minutes stale and you make 288 calls a day even on quiet days. A push delivers in seconds and sends nothing when nothing changed. Push trades that efficiency for needing a reliable listener.</p>
+</blockquote>
+<hr />
+<h2>5. When to use which + common confusions</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion / trap</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Salesforce has webhooks."</td>
+<td>Not by that name. It uses <strong>Platform Events / CDC / Pub-Sub API</strong> (subscribe) and <strong>callouts / Outbound Messages</strong> (fire to a URL) to get the same result.</td>
+</tr>
+<tr>
+<td>"Push is always better than pull."</td>
+<td>Push is fresher and leaner, but needs a live, secured, retry-capable listener. For a nightly batch, a simple pull is the right call.</td>
+</tr>
+<tr>
+<td>"Polling is real-time if I poll fast enough."</td>
+<td>Fast polling fakes real-time at the cost of huge wasted load and still has lag. True push is event-driven and immediate.</td>
+</tr>
+<tr>
+<td>"CDC is something I have to code to publish."</td>
+<td>No. CDC publishes change events <strong>automatically</strong> when records change. You only write the subscriber.</td>
+</tr>
+<tr>
+<td>"Platform Events are synchronous request/reply."</td>
+<td>No. They are <strong>push / fire-and-forget</strong>. Publish and move on. The subscriber gets it later. See <a href="#f05">05</a>.</td>
+</tr>
+<tr>
+<td>"Outbound Messages are modern."</td>
+<td>They work and are reliable, but they are <strong>legacy</strong> (SOAP, tied to workflow). New designs prefer Platform Events, CDC, and Pub/Sub API.</td>
+</tr>
+<tr>
+<td>"Pub/Sub API is a database query API."</td>
+<td>No. It is the streaming <strong>publish/subscribe</strong> interface for events (Platform Events, CDC), gRPC-based, not for SOQL queries.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: need it the instant it changes → <strong>push</strong> (events / callouts). Periodic or on-demand is fine → <strong>pull</strong> (query / scheduled job).</p>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: Explain push vs pull.</strong>
+A: Pull means the consumer asks the producer for data when it wants it, often by polling on a timer. Push means the producer sends data to the consumer the moment something changes. Pull is simple but laggy and wasteful. Push is fresh and efficient but needs more infrastructure.</p>
+<p><strong>Q: What is a webhook?</strong>
+A: A webhook is a push delivered over HTTP. The consumer registers a URL with the producer in advance, and the producer fires an HTTP request to that URL whenever the relevant event happens. It is a callback rather than something the consumer polls for.</p>
+<p><strong>Q: Does Salesforce have webhooks?</strong>
+A: Not under that name. Salesforce achieves the same push pattern with Platform Events, Change Data Capture, and the Pub/Sub API for subscribers, and with HTTP callouts or legacy Outbound Messages when Salesforce fires to an external URL.</p>
+<p><strong>Q: When would you poll instead of using events?</strong>
+A: When freshness is not critical and simplicity matters, such as a nightly or hourly batch sync, or when the external system cannot host a reliable listener endpoint. A scheduled pull is easy to build and easy to recover.</p>
+<p><strong>Q: What is the downside of polling, and how does push fix it?</strong>
+A: Polling is laggy (data is stale between polls) and wasteful (most polls return nothing new, yet still consume API calls). Push fixes both by sending a message only when something changes, and delivering it within seconds.</p>
+<p><strong>Q: Compare Outbound Messages with Platform Events.</strong>
+A: Both push data out, but Outbound Messages are legacy. They send a SOAP message to one endpoint, tied to workflow or Flow. Platform Events are the modern event bus. Many subscribers, richer payloads, and consumed over the Pub/Sub API. New designs favor Platform Events and CDC.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Pull is refreshing a website to see if anything changed. Push is a notification that pings you the instant it does. A webhook is just that notification, but for two apps."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Push, pull, polling, webhook, callback, event, publish/subscribe, Platform Event, Change Data Capture, Pub/Sub API, Outbound Message, streaming — all defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/overview">Pub/Sub API — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_intro.htm">Platform Events Developer Guide — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_intro.htm">Change Data Capture Developer Guide — Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_om_outboundmessaging.htm">Outbound Messaging — SOAP API Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/platform_events_subscribe_pubsub_api.htm">Subscribe to Platform Events with Pub/Sub API — Salesforce Developers</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f08">08-middleware-and-esb.md</a> — the broker in the middle that connects many systems without point-to-point spaghetti.</em></p>
+</section>
+<section id="f08" class="doc">
+<h1>08 - Middleware and the ESB (the glue layer)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: <strong>Middleware</strong> is software that sits <em>between</em> two systems and connects, translates, routes, and orchestrates the traffic between them.
+<strong>Why it matters</strong>: As soon as you have more than a couple of systems, wiring them directly to each other becomes a tangle. Middleware is the hub that keeps it clean, and <strong>MuleSoft</strong> (owned by Salesforce) is the name you must know.</p>
+</blockquote>
+<p>New here? Read <a href="#f01">01-what-and-why-of-integration.md</a> first for the big picture.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Imagine an office where everyone needs to talk to everyone else. If each person runs their own phone wire to every other person, you get a wall of spaghetti. Add one new hire and you have to run a wire from them to <em>everybody</em>. Now picture a <strong>switchboard</strong> in the middle instead. Everyone plugs into the switchboard once, and it routes calls, translates languages, and keeps a log. Adding a new hire means <strong>one</strong> wire to the switchboard.</p>
+<p><strong>Middleware is that switchboard for software.</strong> It is the layer in the middle that:</p>
+<ul>
+<li><strong>Connects</strong> systems that speak different protocols.</li>
+<li><strong>Translates</strong> data from one format or shape into another.</li>
+<li><strong>Routes</strong> a message to the right destination based on rules.</li>
+<li><strong>Orchestrates</strong> multi-step flows ("call A, then B, then write to C").</li>
+<li><strong>Throttles</strong> traffic so a slow system is not overwhelmed.</li>
+</ul>
+<p>Without it, every system talks directly to every other system. That works for one or two links. It collapses at scale.</p>
+<div class="mermaid">
+flowchart LR
+    A[App A] --&gt; M{{Middleware&lt;br/&gt;connect, translate,&lt;br/&gt;route, orchestrate}}
+    B[App B] --&gt; M
+    C[App C] --&gt; M
+    M --&gt; SF[Salesforce]
+    M --&gt; ERP[ERP]
+    M --&gt; DW[Data Warehouse]
+    style M fill:#ff9900,color:#fff
+    style SF fill:#00A1E0,color:#fff
+    style ERP fill:#9C27B0,color:#fff
+    style DW fill:#607D8B,color:#fff
+
+</div>
+<hr />
+<h2>2. Point-to-point vs a middleware hub</h2>
+<p>This is the single most important picture in this file. The same six systems, two ways of wiring them.</p>
+<div class="mermaid">
+flowchart TB
+    subgraph PTP[Point-to-point - the spaghetti]
+        direction LR
+        P1[CRM] &lt;--&gt; P2[ERP]
+        P1 &lt;--&gt; P3[Billing]
+        P2 &lt;--&gt; P3
+        P1 &lt;--&gt; P4[Website]
+        P2 &lt;--&gt; P4
+        P3 &lt;--&gt; P4
+    end
+    subgraph HUB[Hub-and-spoke - through middleware]
+        direction TB
+        H{{Middleware hub}}
+        H1[CRM] --&gt; H
+        H2[ERP] --&gt; H
+        H3[Billing] --&gt; H
+        H4[Website] --&gt; H
+    end
+    style H fill:#ff9900,color:#fff
+    style H1 fill:#00A1E0,color:#fff
+    style H2 fill:#9C27B0,color:#fff
+    style H3 fill:#4CAF50,color:#fff
+    style H4 fill:#607D8B,color:#fff
+
+</div>
+<p>In point-to-point, N systems can need up to <strong>N x (N-1) / 2</strong> connections. Six systems means up to 15 brittle links, each with its own auth, format, and error handling. In hub-and-spoke, each system connects <strong>once</strong> to the hub. The hub absorbs the change. Add a seventh system and you add one spoke, not six new wires.</p>
+<hr />
+<h2>3. ESB vs iPaaS (old hub vs new hub)</h2>
+<p>There are two generations of the "hub" idea. Interviewers like to hear that you know the difference and the direction of travel.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>ESB (Enterprise Service Bus)</strong></th>
+<th><strong>iPaaS (Integration Platform as a Service)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Era</strong></td>
+<td>2000s, the classic enterprise hub</td>
+<td>2010s onward, the cloud-native hub</td>
+</tr>
+<tr>
+<td><strong>Where it runs</strong></td>
+<td>Usually <strong>on-premises</strong>, you host and patch it</td>
+<td><strong>Cloud</strong>, the vendor hosts and operates it</td>
+</tr>
+<tr>
+<td><strong>Shape</strong></td>
+<td>Heavy, central <strong>bus</strong> all traffic flows through</td>
+<td>Lighter, often a mesh of managed <strong>connectors</strong> and APIs</td>
+</tr>
+<tr>
+<td><strong>Scaling</strong></td>
+<td>You buy and rack more hardware</td>
+<td>Elastic, you turn a dial</td>
+</tr>
+<tr>
+<td><strong>Cost model</strong></td>
+<td>Big upfront license plus ops staff</td>
+<td>Subscription, pay for what you use</td>
+</tr>
+<tr>
+<td><strong>Strength</strong></td>
+<td>Deep protocol support, mature in legacy estates</td>
+<td>Fast to stand up, pre-built connectors, API management</td>
+</tr>
+<tr>
+<td><strong>Examples</strong></td>
+<td>TIBCO, IBM Integration Bus, older MuleSoft on-prem</td>
+<td><strong>MuleSoft Anypoint Platform</strong>, Boomi, Workato</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Plain version</strong>: an <strong>ESB</strong> is a heavy switchboard you buy, install, and run in your own server room. An <strong>iPaaS</strong> is the same idea rented as a cloud service, so you skip the hardware and get a library of ready-made plugs.</p>
+<blockquote>
+<p><strong>Note</strong>: the line blurs in practice. Modern MuleSoft can run in the cloud, on-prem, or hybrid. The clean exam answer is "ESB = older, heavy, often on-prem hub; iPaaS = modern, cloud, subscription hub."</p>
+</blockquote>
+<hr />
+<h2>4. MuleSoft - the name to know</h2>
+<p><strong>MuleSoft</strong> makes the <strong>Anypoint Platform</strong>, the leading <strong>iPaaS</strong>. Salesforce <strong>acquired MuleSoft in 2018</strong>, so when an interviewer asks "how does Salesforce do enterprise integration at scale?", MuleSoft is the headline answer.</p>
+<p>What to remember:</p>
+<ul>
+<li><strong>API-led connectivity</strong> is MuleSoft's signature methodology. MuleSoft pioneered the idea. Instead of one-off integrations, you build <strong>reusable, purposeful APIs</strong> in three tiers and compose them:</li>
+<li><strong>System APIs</strong> unlock a backend (Salesforce, SAP, a database).</li>
+<li><strong>Process APIs</strong> combine and orchestrate data across systems.</li>
+<li><strong>Experience APIs</strong> shape that data for a specific channel (mobile, web, partner).</li>
+<li><strong>Anypoint Platform</strong> bundles iPaaS <strong>and</strong> full lifecycle <strong>API management</strong> (design, deploy, secure, monitor) in one place.</li>
+<li>It sells reuse as the win: build the "Customer" System API once, reuse it everywhere, instead of re-integrating Salesforce for every project.</li>
+</ul>
+<div class="mermaid">
+flowchart TD
+    E[Experience APIs&lt;br/&gt;mobile, web, partner] --&gt; P[Process APIs&lt;br/&gt;orchestrate + combine]
+    P --&gt; S[System APIs&lt;br/&gt;unlock each backend]
+    S --&gt; SF[Salesforce]
+    S --&gt; SAP[SAP / ERP]
+    S --&gt; DB[(Database)]
+    style E fill:#4CAF50,color:#fff
+    style P fill:#ff9900,color:#fff
+    style S fill:#00A1E0,color:#fff
+    style SF fill:#00A1E0,color:#fff
+    style SAP fill:#9C27B0,color:#fff
+    style DB fill:#607D8B,color:#fff
+
+</div>
+<blockquote>
+<p><strong>Platform note</strong>: from inside Salesforce you can directly invoke MuleSoft APIs and flows, which is why the two are pitched as one connected stack. You do <strong>not</strong> need MuleSoft for every integration. A single Apex callout to one API needs no middleware at all.</p>
+</blockquote>
+<hr />
+<h2>5. When you need middleware (and when you don't)</h2>
+<table>
+<thead>
+<tr>
+<th>Reach for middleware when...</th>
+<th>Direct point-to-point is fine when...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You have <strong>many systems</strong> to connect, not two.</td>
+<td>You have <strong>one or two</strong> simple connections.</td>
+</tr>
+<tr>
+<td>Systems need <strong>data transformation</strong> between formats or shapes.</td>
+<td>Both sides already speak the same format.</td>
+</tr>
+<tr>
+<td>You need <strong>orchestration</strong> across several steps or systems.</td>
+<td>It is a single request to a single endpoint.</td>
+</tr>
+<tr>
+<td>You must <strong>throttle or buffer</strong> to protect a slow downstream.</td>
+<td>Volume is low and steady.</td>
+</tr>
+<tr>
+<td>You are <strong>bridging protocols</strong> (e.g. HTTP to a message queue, SOAP to REST).</td>
+<td>Both sides speak the same protocol.</td>
+</tr>
+<tr>
+<td>You want <strong>central logging, monitoring, and reuse</strong>.</td>
+<td>The link is one-off and unlikely to grow.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb</strong>: middleware buys you decoupling and reuse at the cost of another system to run and pay for. Justify it with the <strong>number of connections and the need to transform or orchestrate</strong>, not because it sounds enterprise-grade.</p>
+<hr />
+<h2>6. Interview Q&amp;A</h2>
+<p><strong>Q: What is middleware?</strong>
+A: Software that sits between two or more systems and connects, translates, routes, and orchestrates the data flowing between them. It is the switchboard in the middle instead of a wire between every pair of systems.</p>
+<p><strong>Q: Point-to-point vs hub-and-spoke. Why does it matter?</strong>
+A: Point-to-point connects every system directly, so connections grow roughly with the square of the number of systems and become brittle spaghetti. A middleware hub has each system connect once to the center, so adding a system adds one spoke. It trades direct simplicity for decoupling and reuse.</p>
+<p><strong>Q: ESB vs iPaaS?</strong>
+A: An ESB is the older, heavy, often on-premises enterprise bus you host yourself. An iPaaS is the modern cloud version, delivered as a subscription with pre-built connectors and API management. MuleSoft's Anypoint Platform is the leading iPaaS.</p>
+<p><strong>Q: What is MuleSoft and how does it relate to Salesforce?</strong>
+A: MuleSoft makes the Anypoint Platform, the leading iPaaS, and is known for API-led connectivity. Salesforce acquired it in 2018, so it is Salesforce's enterprise integration and API management offering. You can invoke MuleSoft APIs directly from Salesforce.</p>
+<p><strong>Q: When would you NOT use middleware?</strong>
+A: When you have only one or two simple connections, both sides speak the same protocol and format, and there is no orchestration or throttling needed. A single Apex callout to one REST API does not need a hub. Adding middleware there is overhead with no payoff.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It is the difference between everyone in the office running a phone wire to everyone else, versus everyone plugging into one switchboard in the middle that routes and translates the calls."</p>
+<hr />
+<h2>7. Key terms</h2>
+<p>Middleware, ESB, iPaaS, MuleSoft, Anypoint Platform, API-led connectivity, hub-and-spoke, point-to-point, orchestration, throttling, protocol bridging - defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://www.salesforce.com/mulesoft/what-is-mulesoft/">What is MuleSoft? - Salesforce</a></li>
+<li><a href="https://www.salesforce.com/mulesoft/anypoint-platform/">MuleSoft Anypoint Platform - Salesforce</a></li>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/integration-patterns.html">Integration Patterns and Practices (v66.0, Spring '26) - Salesforce Architect</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f09">09-three-layers-transport-format-auth.md</a> - the single mental model that every integration is built from.</em></p>
+</section>
+<section id="f09" class="doc">
+<h1>09 - The Three Layers: Transport, Format, Auth</h1>
+<blockquote>
+<p><strong>One-liner</strong>: <strong>Every</strong> integration is built from three layers - how the bytes <strong>travel</strong> (transport), how the data is <strong>structured</strong> (format), and how identity is <strong>proven</strong> (auth).
+<strong>Why it matters</strong>: This is the capstone mental model of Module 01. Once you see it, choosing an integration becomes "pick one from each layer," and any Salesforce API stops being a mystery.</p>
+</blockquote>
+<p>New here? Read <a href="#f01">01-what-and-why-of-integration.md</a> first.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>Think about <strong>mailing a letter</strong>. Three things must be true for it to work:</p>
+<ol>
+<li><strong>A way to travel</strong> - the postal road, a truck, a plane. <em>(Transport)</em></li>
+<li><strong>A language inside the envelope</strong> - English, French, a shared alphabet. <em>(Format)</em></li>
+<li><strong>Proof of who sent it</strong> - a return address, a signature, a wax seal. <em>(Auth)</em></li>
+</ol>
+<p>Change any one and the other two still apply. You can send English by truck or by plane. You can sign a letter written in any language. The three concerns are <strong>independent</strong>, and you choose one option for each.</p>
+<p><strong>Software integration is identical.</strong> Every single integration, no matter the vendor, answers the same three questions:</p>
+<ul>
+<li><strong>TRANSPORT</strong> - how do the bytes physically move between the two systems?</li>
+<li><strong>FORMAT</strong> - how is the data inside structured so both sides understand it?</li>
+<li><strong>AUTH</strong> - how does the caller prove it is allowed to do this?</li>
+</ul>
+<p>Choosing an integration = picking one option from each layer. For example:</p>
+<blockquote>
+<p><strong>A Salesforce REST API call = HTTPS (transport) + JSON (format) + OAuth 2.0 Bearer token (auth).</strong></p>
+</blockquote>
+<p>That one sentence is the whole module in a nutshell.</p>
+<hr />
+<h2>2. The three layers (the signature visual)</h2>
+<div class="mermaid">
+flowchart TB
+    subgraph L1[Layer 1 - TRANSPORT - how bytes travel]
+        T1[HTTP / HTTPS]
+        T2[gRPC]
+        T3[CometD / long-polling]
+    end
+    subgraph L2[Layer 2 - FORMAT - how data is structured]
+        F1[JSON]
+        F2[XML]
+        F3[Protobuf]
+    end
+    subgraph L3[Layer 3 - AUTH - how identity is proven]
+        A1[OAuth 2.0]
+        A2[API key]
+        A3[mTLS]
+        A4[Basic auth]
+    end
+    L1 --&gt; L2 --&gt; L3 --&gt; R[One concrete integration]
+    style L1 fill:#00A1E0,color:#fff
+    style L2 fill:#ff9900,color:#fff
+    style L3 fill:#9C27B0,color:#fff
+    style R fill:#4CAF50,color:#fff
+
+</div>
+<p>Read it top to bottom: <strong>pick a transport, pick a format, pick an auth method</strong>, and the combination <em>is</em> your integration. Different Salesforce APIs simply make different picks.</p>
+<hr />
+<h2>3. The three layers, one at a time</h2>
+<h3>Transport - how the bytes travel</h3>
+<p>The pipe the data flows through.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it is</th>
+<th>Where you see it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HTTP / HTTPS</strong></td>
+<td>The web's request/response protocol. HTTPS is HTTP wrapped in TLS encryption.</td>
+<td>Nearly all Salesforce APIs. The default.</td>
+</tr>
+<tr>
+<td><strong>gRPC</strong></td>
+<td>A fast binary protocol over HTTP/2, great for streaming.</td>
+<td>Salesforce <strong>Pub/Sub API</strong>.</td>
+</tr>
+<tr>
+<td><strong>CometD / long-polling</strong></td>
+<td>A technique to push events over HTTP by holding the connection open.</td>
+<td>Salesforce <strong>Streaming API</strong>, PushTopics, generic events.</td>
+</tr>
+</tbody>
+</table>
+<h3>Format - how the data is structured</h3>
+<p>The shape of the payload once it arrives. (Deep dive in <a href="#f04">04-json-vs-xml.md</a>.)</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it is</th>
+<th>Where you see it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>JSON</strong></td>
+<td>Lightweight, human-readable key/value text. The modern default.</td>
+<td>REST API, Bulk API 2.0.</td>
+</tr>
+<tr>
+<td><strong>XML</strong></td>
+<td>Verbose, tag-based, strongly typed via schema.</td>
+<td>SOAP API.</td>
+</tr>
+<tr>
+<td><strong>Protobuf</strong></td>
+<td>Compact binary format defined by a schema. Small and fast.</td>
+<td>Pub/Sub API (paired with gRPC).</td>
+</tr>
+</tbody>
+</table>
+<h3>Auth - how identity is proven</h3>
+<p>The proof the caller is allowed in. (Whole of <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>.)</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it is</th>
+<th>Where you see it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OAuth 2.0</strong></td>
+<td>Token-based authorization. A short-lived <strong>Bearer</strong> token unlocks the API.</td>
+<td>The standard for Salesforce APIs.</td>
+</tr>
+<tr>
+<td><strong>API key</strong></td>
+<td>A single shared secret string passed on each call.</td>
+<td>Common on simple third-party APIs.</td>
+</tr>
+<tr>
+<td><strong>mTLS</strong></td>
+<td>Both client and server present certificates. Mutual proof.</td>
+<td>High-security B2B links, some Named Credential setups.</td>
+</tr>
+<tr>
+<td><strong>Basic auth</strong></td>
+<td>Username and password base64-encoded. Weakest. Avoid.</td>
+<td>Legacy systems only.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. A concrete example</h2>
+<p>A web form on your company site needs to create a Lead in Salesforce. Walk the three layers:</p>
+<ol>
+<li><strong>Transport</strong> - the form posts over <strong>HTTPS</strong> so the data is encrypted in transit.</li>
+<li><strong>Format</strong> - the body is <strong>JSON</strong>: <code>{ "LastName": "Khan", "Company": "Acme" }</code>.</li>
+<li><strong>Auth</strong> - the server attaches an <strong>OAuth 2.0 Bearer token</strong> in the <code>Authorization</code> header.</li>
+</ol>
+<p>Put together, the call is:</p>
+<pre><code>POST https://MyDomainName.my.salesforce.com/services/data/v66.0/sobjects/Lead
+Authorization: Bearer 00D...!AQ...
+Content-Type: application/json
+
+{ &quot;LastName&quot;: &quot;Khan&quot;, &quot;Company&quot;: &quot;Acme&quot; }
+</code></pre>
+<p><code>POST ... HTTPS</code> is the <strong>transport</strong>. <code>Content-Type: application/json</code> and the body are the <strong>format</strong>. <code>Authorization: Bearer ...</code> is the <strong>auth</strong>. Three layers, one request.</p>
+<hr />
+<h2>5. How it shows up in Salesforce (the mapping table)</h2>
+<p>This table is worth memorizing. Name any Salesforce API and you can recite its three layers.</p>
+<table>
+<thead>
+<tr>
+<th>Salesforce API</th>
+<th>Transport</th>
+<th>Format</th>
+<th>Typical Auth</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td>HTTPS</td>
+<td>JSON (XML optional)</td>
+<td>OAuth 2.0 Bearer</td>
+<td>Most modern integrations, single/small record ops</td>
+</tr>
+<tr>
+<td><strong>SOAP API</strong></td>
+<td>HTTPS</td>
+<td>XML</td>
+<td>OAuth 2.0 Bearer or Session ID</td>
+<td>Legacy clients, strongly typed contracts (WSDL)</td>
+</tr>
+<tr>
+<td><strong>Bulk API 2.0</strong></td>
+<td>HTTPS</td>
+<td>JSON / CSV</td>
+<td>OAuth 2.0 Bearer</td>
+<td>Large data loads, asynchronous batches</td>
+</tr>
+<tr>
+<td><strong>Pub/Sub API</strong></td>
+<td>gRPC over HTTP/2</td>
+<td>Protobuf</td>
+<td>OAuth 2.0 Bearer</td>
+<td>Event streaming, publish and subscribe</td>
+</tr>
+<tr>
+<td><strong>Streaming API</strong></td>
+<td>CometD / long-polling over HTTPS</td>
+<td>JSON</td>
+<td>OAuth 2.0 Bearer</td>
+<td>Pushing change/platform events to subscribers</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Pattern to notice</strong>: the <strong>auth layer is almost always OAuth 2.0</strong> across Salesforce. What really differs between APIs is the <strong>transport</strong> and <strong>format</strong>. That is why Module 03 (auth) is largely shared across every API, while transport and format are what you pick per use case.</p>
+</blockquote>
+<hr />
+<h2>6. Common confusions and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"REST vs SOAP is the whole choice."</td>
+<td>REST vs SOAP bundles a transport and format choice. The three-layer model breaks it into separate decisions, which is clearer. See <a href="#f03">03-rest-vs-soap.md</a>.</td>
+</tr>
+<tr>
+<td>"JSON is a protocol."</td>
+<td>JSON is a <strong>format</strong>, not a transport. It travels <em>over</em> HTTP. Mixing the layers is a classic slip.</td>
+</tr>
+<tr>
+<td>"HTTPS is the security, so I'm done."</td>
+<td>HTTPS secures the <strong>transport</strong> (encryption in transit). It does not prove <strong>who</strong> is calling. You still need an auth layer.</td>
+</tr>
+<tr>
+<td>"OAuth is encryption."</td>
+<td>OAuth is <strong>auth</strong> (proving identity and permission). Encryption is the transport's job (TLS). Different layers.</td>
+</tr>
+<tr>
+<td>"Pub/Sub API is just REST."</td>
+<td>No. It uses <strong>gRPC + Protobuf</strong>, a different transport and format from REST's HTTPS + JSON.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: Give me a single mental model for any integration.</strong>
+A: Three independent layers. Transport is how the bytes travel (HTTP/HTTPS, gRPC, CometD). Format is how the data is structured (JSON, XML, Protobuf). Auth is how identity is proven (OAuth 2.0, API key, mTLS, Basic). Every integration picks one from each.</p>
+<p><strong>Q: Break a Salesforce REST call into the three layers.</strong>
+A: Transport is HTTPS, format is JSON, auth is an OAuth 2.0 Bearer token in the Authorization header. Change the transport or format and you have a different API, but the auth layer stays OAuth in nearly all cases.</p>
+<p><strong>Q: How does Pub/Sub API differ from REST API in this model?</strong>
+A: Same auth layer (OAuth 2.0), but a different transport and format. Pub/Sub uses gRPC over HTTP/2 with Protobuf, which is binary and efficient for streaming, whereas REST uses HTTPS with JSON.</p>
+<p><strong>Q: HTTPS already encrypts the call. Why do I still need OAuth?</strong>
+A: Different layers solving different problems. HTTPS (transport) protects the data in transit so it cannot be read or tampered with. OAuth (auth) proves the caller is who they claim and is allowed to do this. Encryption is not identity.</p>
+<p><strong>Q: Where does this model send you next when designing an integration?</strong>
+A: Transport choice points you at which API to use, format is detailed in the data formats file, and auth is the whole of Module 03. The model turns one big decision into three smaller, well-scoped ones.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "It is like mailing a letter. You need a way to travel, a language inside, and proof of who sent it. Software picks one of each, and that combination is the integration."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Transport, format, auth, HTTP/HTTPS, gRPC, CometD, long-polling, JSON, XML, Protobuf, OAuth 2.0, Bearer token, API key, mTLS, Basic auth - defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>. Auth detail lives in <a href="../03-Authentication/01-authentication-fundamentals.md">Module 03</a>. Format detail lives in <a href="#f04">04-json-vs-xml.md</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://help.salesforce.com/s/articleView?id=sf.integrate_what_is_api.htm&amp;type=5">Which API Do I Use? - Salesforce Help</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm">REST API Developer Guide (v66.0, Spring '26) - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/pub-sub-api/overview">Pub/Sub API Documentation - Salesforce Developers</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_quickstart_intro.htm">SOAP API Developer Guide - Salesforce Developers</a></li>
+</ul>
+<hr />
+<p><em>Next: <a href="#f10">10-salesforce-as-a-platform.md</a> - why "platform" changes how you design every integration.</em></p>
+</section>
+<section id="f10" class="doc">
+<h1>10 - Salesforce as a Platform (why it changes integration)</h1>
+<blockquote>
+<p><strong>One-liner</strong>: Salesforce is not just an app you log into. It is a <strong>multitenant, metadata-driven platform</strong> with APIs on everything and strict limits, and those four traits shape how you must design every integration.
+<strong>Why it matters</strong>: If you design an integration as if Salesforce were a private server you own, you will hit runtime errors in production. Understanding the platform is what separates a junior from a senior integration engineer.</p>
+</blockquote>
+<p>This is the final file of Module 01. It ties the whole module together.</p>
+<hr />
+<h2>1. The idea in plain English</h2>
+<p>A regular app is like a <strong>single house</strong> you own. You control the wiring, you can run the dishwasher and the dryer at the same time, nobody else is affected.</p>
+<p>Salesforce is like an <strong>apartment building</strong>. Many tenants share the same plumbing, the same electrical supply, the same elevators. To keep it fair and safe, the building has <strong>rules</strong>: don't run every appliance at once, don't hog the elevator, quiet hours apply. The building manager (Salesforce) enforces those rules automatically, and if you break them, the power to your unit trips.</p>
+<p>That apartment building is <strong>multitenancy</strong>, and the rules are <strong>governor limits</strong>. Once you internalize that you are a tenant sharing infrastructure, every design decision in this module makes sense.</p>
+<hr />
+<h2>2. The four traits that matter</h2>
+<div class="mermaid">
+flowchart TD
+    P[Salesforce as a PLATFORM] --&gt; T1[1. Multitenant&lt;br/&gt;shared infrastructure]
+    P --&gt; T2[2. API-first&lt;br/&gt;everything is callable]
+    P --&gt; T3[3. Governor limits&lt;br/&gt;guardrails for fair use]
+    P --&gt; T4[4. Metadata-driven&lt;br/&gt;+ event-capable]
+    T1 --&gt; D[How you DESIGN integrations]
+    T2 --&gt; D
+    T3 --&gt; D
+    T4 --&gt; D
+    D --&gt; R[Bulkify, respect limits,&lt;br/&gt;go async for volume]
+    style P fill:#00A1E0,color:#fff
+    style T1 fill:#9C27B0,color:#fff
+    style T2 fill:#4CAF50,color:#fff
+    style T3 fill:#F44336,color:#fff
+    style T4 fill:#ff9900,color:#fff
+    style R fill:#607D8B,color:#fff
+
+</div>
+<h3>1. Multitenant</h3>
+<p>Many customers share the same infrastructure. A <strong>single instance</strong> of Salesforce runs a <strong>shared multitenant database</strong> and a <strong>multitenant kernel</strong> (the application runtime). The kernel reads each tenant's <strong>metadata</strong> and serves up an app that behaves like it is yours alone. This is why your org feels private even though you share servers with thousands of others.</p>
+<h3>2. API-first</h3>
+<p>Nearly everything you can do in the Salesforce UI is also available through an <strong>API</strong>. Creating records, running queries, deploying metadata, subscribing to events - all callable programmatically. This is <em>why</em> integration is a first-class skill on this platform and not an afterthought.</p>
+<h3>3. Governor limits</h3>
+<p>Because resources are shared, Salesforce <strong>strictly enforces limits</strong> so no single tenant can starve the others. Exceed a limit and you get a <strong>runtime error</strong>, not a slow response. Limits are the guardrails of multitenancy. (Detailed below.)</p>
+<h3>4. Metadata-driven and event-capable</h3>
+<p>Your objects, fields, validation rules, and logic are stored as <strong>metadata</strong> that the kernel materializes at runtime. The platform is also <strong>event-capable</strong>: it can publish and subscribe to events (Platform Events, Change Data Capture), enabling real-time, decoupled integration.</p>
+<hr />
+<h2>3. The metadata-driven kernel serving many orgs</h2>
+<div class="mermaid">
+flowchart TB
+    subgraph SF[One Salesforce instance]
+        K{{Multitenant kernel&lt;br/&gt;application runtime}}
+        DB[(Shared database&lt;br/&gt;single schema)]
+        K &lt;--&gt; DB
+    end
+    M1[Org A metadata] --&gt; K
+    M2[Org B metadata] --&gt; K
+    M3[Org C metadata] --&gt; K
+    K --&gt; O1[Org A app + APIs]
+    K --&gt; O2[Org B app + APIs]
+    K --&gt; O3[Org C app + APIs]
+    G[Governor limits&lt;br/&gt;guardrails on every org] -.-&gt; O1
+    G -.-&gt; O2
+    G -.-&gt; O3
+    style K fill:#00A1E0,color:#fff
+    style DB fill:#607D8B,color:#fff
+    style M1 fill:#ff9900,color:#fff
+    style M2 fill:#ff9900,color:#fff
+    style M3 fill:#ff9900,color:#fff
+    style G fill:#F44336,color:#fff
+
+</div>
+<p>One kernel, one shared database, but each org's <strong>metadata</strong> makes it behave like its own application. The <strong>governor limits</strong> wrap every org as guardrails, keeping one tenant from hurting the rest.</p>
+<hr />
+<h2>4. Governor limits (the ones that bite integrations)</h2>
+<p>These exist purely because the platform is shared. Know that they exist and roughly what they cap. Exact numbers vary by edition and change across releases, so describe them rather than memorizing figures unless you have checked the current docs.</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>What it caps</th>
+<th>Why it matters for integration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total API requests per 24 hours</strong></td>
+<td>A daily <strong>allocation</strong> of API calls for the whole org. For paid editions it starts in the low hundreds of thousands and scales with the licenses you own. It is a soft limit meant for bursts, not for planning normal volume on.</td>
+<td>A chatty integration that makes a call per record can blow the daily allocation. Batch your calls.</td>
+</tr>
+<tr>
+<td><strong>Concurrent long-running requests</strong></td>
+<td>The number of synchronous API/Apex requests that can run at once <strong>once a request exceeds about 5 seconds</strong>. The org-wide cap is small (single digits to low tens).</td>
+<td>Several slow synchronous callouts at once can lock out other traffic. Keep calls fast or go async.</td>
+</tr>
+<tr>
+<td><strong>Callouts per transaction</strong></td>
+<td>The number of HTTP callouts a single Apex transaction may make, plus a cap on total callout time per transaction.</td>
+<td>You cannot loop over thousands of records firing one callout each. Aggregate or move to async/batch.</td>
+</tr>
+<tr>
+<td><strong>Callout timeout</strong></td>
+<td>How long a single callout may wait, with a configurable default and a hard maximum.</td>
+<td>A hung external service will not hang forever. Set sensible timeouts and handle failures.</td>
+</tr>
+<tr>
+<td><strong>Per-transaction Apex limits</strong></td>
+<td>SOQL queries, DML statements, CPU time, and heap per transaction.</td>
+<td>Inbound integrations that trigger Apex must be <strong>bulkified</strong> to survive a 200-record batch.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Important</strong>: treat the precise allocation numbers as "look it up for the current release and edition." The interview-safe move is to <strong>describe</strong> the limit and the design response, not to quote a figure you might get wrong. (Verified ranges are in Sources below.)</p>
+</blockquote>
+<hr />
+<h2>5. Why this changes how you design integrations</h2>
+<p>This is the payoff of the whole module. Because Salesforce is a shared platform with limits, three habits are mandatory:</p>
+<table>
+<thead>
+<tr>
+<th>Habit</th>
+<th>What it means</th>
+<th>Driven by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bulkify</strong></td>
+<td>Process records in <strong>sets</strong>, not one at a time. One query and one DML for 200 records, never 200 of each.</td>
+<td>Per-transaction SOQL/DML limits</td>
+</tr>
+<tr>
+<td><strong>Respect API allocations</strong></td>
+<td>Count your calls. Use composite or batch endpoints to do more per request. Monitor daily usage.</td>
+<td>Daily API request allocation</td>
+</tr>
+<tr>
+<td><strong>Go async for volume</strong></td>
+<td>For large data, use <strong>Bulk API 2.0</strong>, Platform Events, future/queueable Apex, or batch jobs instead of synchronous calls.</td>
+<td>Concurrent + callout + timeout limits</td>
+</tr>
+</tbody>
+</table>
+<div class="mermaid">
+flowchart LR
+    V[Large volume&lt;br/&gt;or many records?] --&gt;|Yes| ASYNC[Async path&lt;br/&gt;Bulk API 2.0, events,&lt;br/&gt;queueable, batch]
+    V --&gt;|No, small + real-time| SYNC[Synchronous path&lt;br/&gt;REST callout]
+    ASYNC --&gt; OK[Stays within limits]
+    SYNC --&gt; OK
+    style V fill:#ff9900,color:#fff
+    style ASYNC fill:#4CAF50,color:#fff
+    style SYNC fill:#00A1E0,color:#fff
+    style OK fill:#607D8B,color:#fff
+
+</div>
+<p><strong>One sentence to carry forward</strong>: on a shared platform you design for <em>fairness and scale</em>, which in practice means bulkify, count your API calls, and prefer async for anything large.</p>
+<hr />
+<h2>6. Common confusions and interview traps</h2>
+<table>
+<thead>
+<tr>
+<th>Confusion</th>
+<th>The clarification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Limits are bugs / Salesforce being stingy."</td>
+<td>Limits are the <strong>price of multitenancy</strong>. They guarantee one tenant cannot degrade everyone else. Design within them, do not fight them.</td>
+</tr>
+<tr>
+<td>"I'll just retry until it works."</td>
+<td>Hitting a limit throws a <strong>runtime error</strong>. Blind retries make it worse. Fix the design (bulkify, async) instead.</td>
+</tr>
+<tr>
+<td>"Metadata-driven just means customizable."</td>
+<td>It is deeper: the <strong>kernel materializes your app from metadata at runtime</strong>, which is what lets one instance serve many distinct orgs.</td>
+</tr>
+<tr>
+<td>"API-first is marketing."</td>
+<td>It is literal. Almost every UI action has an API equivalent, which is exactly why integration is so central to the platform.</td>
+</tr>
+<tr>
+<td>"Governor limits only matter for Apex."</td>
+<td>They also cap <strong>API usage</strong> (daily allocation, concurrency, callouts). Inbound and outbound integrations both feel them.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Interview Q&amp;A</h2>
+<p><strong>Q: What does it mean that Salesforce is a platform, not just an app?</strong>
+A: It is multitenant (many customers share one infrastructure), metadata-driven (a kernel builds each org's app from metadata at runtime), API-first (nearly everything in the UI is also callable through an API), and event-capable. Those traits, plus enforced limits, shape every integration you build on it.</p>
+<p><strong>Q: What is multitenancy and why should an integration engineer care?</strong>
+A: Many customers share the same database and application kernel, isolated by metadata. You care because shared resources mean enforced governor limits. You must bulkify, watch your API allocation, and design for fairness, since you are not the only tenant.</p>
+<p><strong>Q: What are governor limits and why do they exist?</strong>
+A: Runtime caps on resources like API calls per day, concurrent long-running requests, callouts per transaction, and per-transaction SOQL/DML/CPU. They exist because the platform is shared, so no single tenant can monopolize resources. Exceeding one throws a runtime error.</p>
+<p><strong>Q: How do platform limits change your integration design?</strong>
+A: Three ways. Bulkify so logic handles record sets, not singletons. Respect the daily API allocation by batching calls and using composite endpoints. Go asynchronous for large volume using Bulk API 2.0, Platform Events, or async Apex, rather than many synchronous calls.</p>
+<p><strong>Q: A nightly job needs to load two million records. How do you approach it given the platform?</strong>
+A: Not record-by-record through the REST API, which would burn the daily allocation and hit concurrency limits. Use Bulk API 2.0, which is asynchronous and built for large volumes, processing data in server-side batches that respect the shared-platform constraints.</p>
+<p><strong>Talking point to explain it to anyone</strong>: "Salesforce is an apartment building, not a private house. Everyone shares the plumbing, so there are house rules. Design your integration like a good neighbor: don't run every appliance at once, and do the big laundry loads off-peak."</p>
+<hr />
+<h2>8. Key terms</h2>
+<p>Platform, multitenant, metadata-driven, kernel, API-first, governor limits, API request allocation, concurrent requests, bulkify, asynchronous, Platform Events, Bulk API 2.0 - defined in <a href="#f02">02-core-vocabulary.md</a> and the <a href="#overview">README glossary</a>.</p>
+<hr />
+<h2>Sources (Verified June 2026)</h2>
+<ul>
+<li><a href="https://architect.salesforce.com/docs/architect/fundamentals/guide/platform-multitenant-architecture.html">Platform Multitenant Architecture - Salesforce Architect</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm">API Request Limits and Allocations - Salesforce Developer Limits Quick Reference</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm">Execution Governors and Limits - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_timeouts.htm">Callout Limits and Limitations - Apex Developer Guide</a></li>
+<li><a href="https://developer.salesforce.com/blogs/2024/11/api-limits-and-monitoring-your-api-usage">API Limits and Monitoring Your API Usage - Salesforce Developers Blog</a></li>
+</ul>
+<hr />
+<p><em>Next: back to the <a href="#overview">README.md</a> module index. From here, the natural continuation is </em><em>Module 02 - Integration Patterns</em><em>, where these fundamentals turn into concrete design choices (request/reply, fire-and-forget, batch, data virtualization, and more).</em></p>
+</section>
+</main>
+<div class="foot">Salesforce Integration · Module 01 Fundamentals · Built from official Salesforce documentation · June 18, 2026</div>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose', flowchart:{useMaxWidth:true}, sequence:{useMaxWidth:true}});
+</script>
+</body></html>
