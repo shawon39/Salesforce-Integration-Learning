@@ -1,6 +1,8 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Salesforce Integration — Complete Vault Handbook</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMDMyRDYwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDBBMUUwIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0idXJsKCNnKSIvPjxwYXRoIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQgNCkiIGZpbGw9IiNmZmYiIGQ9Ik0xOS4zNSAxMC4wNEMxOC42NyA2LjU5IDE1LjY0IDQgMTIgNCA5LjExIDQgNi42IDUuNjQgNS4zNSA4LjA0IDIuMzQgOC4zNiAwIDEwLjkxIDAgMTRjMCAzLjMxIDIuNjkgNiA2IDZoMTNjMi43NiAwIDUtMi4yNCA1LTUgMC0yLjY0LTIuMDUtNC43OC00LjY1LTQuOTZ6Ii8+PC9zdmc+Cg==">
+<meta name="theme-color" content="#032D60">
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
 :root{--blue:#00A1E0;--navy:#032D60;--orange:#ff9900;--ink:#16191c;--muted:#5a6770;--line:#e3e8ee;--bg:#ffffff;--code:#f5f7fa;}
@@ -135,6 +137,11 @@ details.mod li a.active{background:#e4f3fd;color:#032D60;border-left-color:#00A1
  .card-grid{grid-template-columns:repeat(2,1fr);}
  .mod-card{break-inside:avoid;box-shadow:none;transform:none;}
 }
+
+/* ---- current-topic title cue: makes the section you land on stand out ---- */
+section.doc.current>h1{color:#0a6ebd;border-radius:6px;animation:topicArrive 1.15s ease-out;}
+@keyframes topicArrive{0%,12%{background-color:rgba(0,161,224,.18);}100%{background-color:transparent;}}
+@media (prefers-reduced-motion:reduce){section.doc.current>h1{animation:none;}}
 </style></head>
 <body>
 <div class="app" id="app">
@@ -23128,9 +23135,10 @@ A: <strong>Ingestion</strong> (data in), <strong>Query</strong> (Data 360 SQL ou
   links.forEach(function(a){a.addEventListener('click',function(){ if(isMobile())app.classList.remove('open'); });});
   window.addEventListener('scroll',function(){ if(window.scrollY>600)topBtn.classList.add('show'); else topBtn.classList.remove('show'); });
   topBtn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
-  var cur=null;
+  var cur=null,curSec=null;
   var obs=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var a=idToLink[e.target.id];
     if(a&&a!==cur){ if(cur)cur.classList.remove('active'); a.classList.add('active'); cur=a;
+      if(curSec)curSec.classList.remove('current'); e.target.classList.add('current'); curSec=e.target;
       var det=a.closest('details'); if(det&&!det.open)det.open=true; a.scrollIntoView({block:'nearest'}); } } }); },
     {rootMargin:'-12% 0px -78% 0px',threshold:0});
   [].slice.call(document.querySelectorAll('section.doc')).forEach(function(s){obs.observe(s);});
