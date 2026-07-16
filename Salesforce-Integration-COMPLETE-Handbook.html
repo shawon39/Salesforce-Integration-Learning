@@ -7,11 +7,6 @@
 *{box-sizing:border-box;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.62;margin:0;background:#eef2f6;}
 .wrap{max-width:920px;margin:0 auto;background:var(--bg);}
-.cover{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:90px 60px;}
-.cover h1{font-size:42px;line-height:1.12;margin:0 0 14px;font-weight:800;letter-spacing:-.5px;}
-.cover .sub{font-size:19px;opacity:.95;margin:0 0 28px;font-weight:400;}
-.cover .meta{font-size:14px;opacity:.85;border-top:1px solid rgba(255,255,255,.3);padding-top:18px;}
-.cover .pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 13px;font-size:13px;margin:3px 6px 3px 0;}
 nav.toc{padding:34px 60px;border-bottom:1px solid var(--line);background:#fafcfe;}
 nav.toc h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
 nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:42px;}
@@ -41,7 +36,6 @@ hr{border:none;border-top:1px solid var(--line);margin:1.6em 0;}
 .foot{text-align:center;color:var(--muted);font-size:12.5px;padding:26px;border-top:1px solid var(--line);}
 @media print{
   body{background:#fff;} .wrap{max-width:none;}
-  .cover{padding:70px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   nav.toc{page-break-after:always;}
   section.doc{page-break-before:always;border-top:none;}
   th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -74,7 +68,6 @@ details.mod li a:hover{background:#e6edf6;color:#032D60;}
 details.mod li a.active{background:#e4f3fd;color:#032D60;border-left-color:#00A1E0;font-weight:600;}
 .main{flex:1;min-width:0;background:#fff;}
 .main .content{max-width:900px;margin:0 auto;padding:14px 56px 90px;}
-.cover{border-radius:0;}
 .app.nav-hidden .sidebar{flex-basis:0;width:0;transform:translateX(-100%);overflow:hidden;border:none;}
 .show-btn,.top-btn{position:fixed;z-index:60;border:none;cursor:pointer;font-weight:700;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);}
 .show-btn{display:none;top:12px;left:12px;background:#00A1E0;color:#fff;padding:9px 14px;font-size:13.5px;align-items:center;gap:6px;}
@@ -93,6 +86,55 @@ details.mod li a.active{background:#e4f3fd;color:#032D60;border-left-color:#00A1
  .main .content{max-width:none;padding:0;}
  section.doc{page-break-before:always;}
 }
+
+/* ---- sidebar Home link ---- */
+.home-link{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;font-weight:700;font-size:13px;color:#143a5e;text-decoration:none;margin-bottom:4px;border-left:2px solid transparent;}
+.home-link:hover{background:#e6edf6;color:#032D60;}
+.home-link.active{background:#e4f3fd;color:#032D60;border-left-color:#00A1E0;}
+.home-link .ico{width:15px;height:15px;flex:0 0 auto;color:#5a7290;}
+.home-link:hover .ico,.home-link.active .ico{color:#00A1E0;}
+
+/* ---- home / landing page ---- */
+.home{padding-top:12px;}
+.home-hero{padding:22px 0 28px;border-bottom:1px solid var(--line);margin-bottom:30px;}
+.home-hero .kicker{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--blue);margin-bottom:16px;}
+.home-hero .kicker::before{content:"";width:30px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--navy),var(--blue));}
+.home-hero h1{font-size:40px;line-height:1.1;margin:0 0 16px;color:var(--navy);font-weight:800;letter-spacing:-.7px;border:none;padding:0;}
+.home-sub{font-size:18px;line-height:1.55;color:var(--muted);margin:0 0 22px;max-width:730px;}
+.quick{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px;}
+.quick a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:13.5px;font-weight:600;padding:10px 17px;border-radius:9px;transition:background .15s ease,border-color .15s ease,transform .15s ease;}
+.quick a:hover{transform:translateY(-1px);}
+.quick a.primary{background:var(--navy);color:#fff;}
+.quick a.primary:hover{background:#064a92;}
+.quick a.ghost{background:#fff;color:var(--navy);border:1px solid #cfe0ee;}
+.quick a.ghost:hover{background:#eef5fb;border-color:#a9cde9;}
+.quick a .go{opacity:.7;font-weight:700;}
+.home-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.home-badges .pill{display:inline-block;background:#eef5fb;border:1px solid #d6e6f4;color:#0b4c7a;border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:600;}
+.home-meta{font-size:13.5px;color:var(--muted);line-height:1.65;}
+.home-meta strong{color:#3a4754;font-weight:600;}
+.home-h2{display:flex;align-items:baseline;gap:10px;font-size:13px;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);border:none;padding:0;margin:0 0 18px;font-weight:700;}
+.home-h2 span{font-size:12px;letter-spacing:.4px;color:#9aa7b5;text-transform:none;font-weight:600;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:16px;}
+.mod-card{display:flex;flex-direction:column;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 18px 15px;position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;}
+.mod-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--blue),var(--navy));opacity:.9;}
+.mod-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(3,45,96,.14);border-color:#bcd8ee;}
+.mod-card .num{font-size:11.5px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:7px;}
+.mod-card .title{font-size:16px;font-weight:700;color:var(--navy);line-height:1.3;margin-bottom:8px;}
+.mod-card .desc{font-size:13px;color:var(--muted);line-height:1.5;flex:1;margin-bottom:14px;}
+.mod-card .foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:#6b7885;border-top:1px solid #eef2f6;padding-top:11px;}
+.mod-card .foot .go{color:var(--blue);font-size:15px;line-height:1;transition:transform .15s ease;}
+.mod-card:hover .foot .go{transform:translateX(4px);}
+@media (max-width:900px){
+ .home-hero h1{font-size:32px;}
+ .home-sub{font-size:16px;}
+}
+@media print{
+ .home-hero{border-bottom:1px solid var(--line);}
+ .quick{display:none;}
+ .card-grid{grid-template-columns:repeat(2,1fr);}
+ .mod-card{break-inside:avoid;box-shadow:none;transform:none;}
+}
 </style></head>
 <body>
 <div class="app" id="app">
@@ -106,6 +148,7 @@ details.mod li a.active{background:#e4f3fd;color:#032D60;border-left-color:#00A1
       <input id="tocSearch" class="tocsearch" type="search" placeholder="Filter topics...">
     </div>
     <nav class="toc-side">
+<a class="home-link" href="#home"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</a>
 <details class="mod" open><summary>01 · Fundamentals</summary><ul><li><a href="#01-fundamentals-readme">Overview</a></li><li><a href="#01-fundamentals-01-what-and-why-of-integration">01 - What Integration Is (and Why Salesforce Needs It)</a></li><li><a href="#01-fundamentals-02-core-vocabulary">02 - Core Vocabulary (The Words You Must Know)</a></li><li><a href="#01-fundamentals-03-rest-vs-soap">03 - REST vs SOAP (The Two API Styles)</a></li><li><a href="#01-fundamentals-04-json-vs-xml">04 - JSON vs XML (The Two Data Formats)</a></li><li><a href="#01-fundamentals-05-synchronous-vs-asynchronous">05 - Synchronous vs Asynchronous</a></li><li><a href="#01-fundamentals-06-inbound-vs-outbound">06 - Inbound vs Outbound</a></li><li><a href="#01-fundamentals-07-push-pull-and-webhooks">07 - Push, Pull, and Webhooks</a></li><li><a href="#01-fundamentals-08-middleware-and-esb">08 - Middleware and the ESB (the glue layer)</a></li><li><a href="#01-fundamentals-09-three-layers-transport-format-auth">09 - The Three Layers: Transport, Format, Auth</a></li><li><a href="#01-fundamentals-10-salesforce-as-a-platform">10 - Salesforce as a Platform (why it changes integration)</a></li></ul></details>
 <details class="mod"><summary>02 · Integration Patterns</summary><ul><li><a href="#02-integration-patterns-readme">Overview</a></li><li><a href="#02-integration-patterns-01-request-and-reply">01 - Request and Reply</a></li><li><a href="#02-integration-patterns-02-fire-and-forget">02 - Fire and Forget</a></li><li><a href="#02-integration-patterns-03-batch-data-synchronization">03 - Batch Data Synchronization</a></li><li><a href="#02-integration-patterns-04-remote-call-in">04 - Remote Call-In</a></li><li><a href="#02-integration-patterns-05-data-virtualization">05 - Data Virtualization</a></li><li><a href="#02-integration-patterns-06-ui-update-based-on-data-changes">06 - UI Update Based on Data Changes</a></li></ul></details>
 <details class="mod"><summary>03 · Authentication</summary><ul><li><a href="#03-authentication-readme">Overview</a></li><li><a href="#03-authentication-01-authentication-fundamentals">01 - Authentication Fundamentals (Read This First)</a></li><li><a href="#03-authentication-02-web-server-flow">02 - Web Server Flow (Authorization Code) + PKCE</a></li><li><a href="#03-authentication-03-user-agent-flow">03 - User-Agent Flow (Browser Implicit-Style)</a></li><li><a href="#03-authentication-04-jwt-bearer-flow">04 - JWT Bearer Token Flow</a></li><li><a href="#03-authentication-05-client-credentials-flow">05 - Client Credentials Flow</a></li><li><a href="#03-authentication-06-device-flow">06 - OAuth 2.0 Device Flow</a></li><li><a href="#03-authentication-07-username-password-flow">07 - Username-Password Flow</a></li><li><a href="#03-authentication-08-refresh-token-flow">08 - Refresh Token Flow</a></li><li><a href="#03-authentication-09-saml-bearer-assertion-flow">09 - SAML Bearer Assertion Flow</a></li><li><a href="#03-authentication-10-saml-assertion-flow">10 - SAML Assertion Flow (Access the API After Web SSO)</a></li><li><a href="#03-authentication-11-asset-token-flow">11 - Asset Token Flow</a></li><li><a href="#03-authentication-12-authorization-code-and-credentials-flow">12 - Authorization Code and Credentials Flow (Headless Identity)</a></li><li><a href="#03-authentication-13-connected-apps-vs-external-client-apps">13 - Connected Apps vs External Client Apps (ECA)</a></li><li><a href="#03-authentication-14-named-credentials-and-external-credentials">14 - Named Credentials + External Credentials (Outbound)</a></li><li><a href="#03-authentication-15-auth-providers">15 - Auth Providers</a></li><li><a href="#03-authentication-16-sso-saml-and-openid-connect">16 - Single Sign-On: SAML 2.0 and OpenID Connect</a></li><li><a href="#03-authentication-17-session-security-and-token-management">17 - Session Security &amp; Token Management</a></li></ul></details>
@@ -122,17 +165,93 @@ details.mod li a.active{background:#e4f3fd;color:#032D60;border-left-color:#00A1
     </nav>
   </aside>
   <main class="main">
-    <header class="cover">
-      <h1>Salesforce Integration<br>Complete Vault Handbook</h1>
-      <div class="sub">All 13 modules in one file: fundamentals, patterns, authentication, inbound &amp; outbound, events, bulk, modern APIs, security, tools, 12 hands-on projects, cheat sheets, and what's new in 2026.</div>
-      <div>
-        <span class="pill">13 modules</span><span class="pill">114 topic files</span><span class="pill">every diagram rendered</span>
-        <span class="pill">v66.0 (Spring '26)</span><span class="pill">official sources</span>
-      </div>
-      <div class="meta">Prepared for Shakhawat · Sources verified June 18, 2026<br>
-      Use the sidebar to jump anywhere. Click &#171; for focus mode. To save as PDF: Print &#8594; Save as PDF.</div>
-    </header>
     <div class="content">
+<section id="home" class="doc home">
+  <div class="home-hero">
+    <div class="kicker">Complete Vault · v66.0 Spring '26</div>
+    <h1>Salesforce Integration Handbook</h1>
+    <p class="home-sub">Everything you need to master Salesforce integration in one place: fundamentals, patterns, authentication, inbound &amp; outbound APIs, events, bulk &amp; async, modern APIs, security, tooling, hands-on projects, and what's new in 2026.</p>
+    <div class="quick">
+      <a class="primary" href="#01-fundamentals-readme">Start with Fundamentals <span class="go">&#8594;</span></a>
+      <a class="ghost" href="#11-hands-on-projects-readme">Hands-On Projects</a>
+      <a class="ghost" href="#12-cheatsheets-readme">Cheatsheets</a>
+      <a class="ghost" href="#13-whats-new-2026-readme">What's New 2026</a>
+    </div>
+    <div class="home-badges">
+      <span class="pill">13 modules</span><span class="pill">114 topic files</span><span class="pill">12 hands-on projects</span><span class="pill">every diagram rendered</span><span class="pill">official sources</span>
+    </div>
+    <div class="home-meta">Prepared for Shakhawat · Sources verified June 18, 2026 · Use the sidebar or the cards below to jump anywhere. Click <strong>&#171;</strong> in the sidebar for focus mode. To save as PDF: <strong>Print &#8594; Save as PDF</strong>.</div>
+  </div>
+
+  <h2 class="home-h2">Explore the Vault <span>13 modules · read in order or jump to any topic</span></h2>
+  <div class="card-grid">
+    <a class="mod-card" href="#01-fundamentals-readme">
+      <div class="num">MODULE 01</div><div class="title">Fundamentals</div>
+      <div class="desc">The mental model: core vocabulary, REST vs SOAP, sync vs async, and the three layers every integration shares.</div>
+      <div class="foot"><span>10 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#02-integration-patterns-readme">
+      <div class="num">MODULE 02</div><div class="title">Integration Patterns</div>
+      <div class="desc">The six official patterns — request &amp; reply, fire &amp; forget, batch sync, remote call-in, data virtualization, and UI updates.</div>
+      <div class="foot"><span>6 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#03-authentication-readme">
+      <div class="num">MODULE 03</div><div class="title">Authentication</div>
+      <div class="desc">Every OAuth 2.0 flow, connected apps vs external client apps, named credentials, and SSO with SAML &amp; OpenID Connect.</div>
+      <div class="foot"><span>17 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#04-inbound-apis-readme">
+      <div class="num">MODULE 04</div><div class="title">Inbound APIs</div>
+      <div class="desc">Calling into Salesforce: standard REST &amp; SOAP, Apex REST/SOAP, Composite, Connect, and the User Interface API.</div>
+      <div class="foot"><span>7 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#05-outbound-callouts-readme">
+      <div class="num">MODULE 05</div><div class="title">Outbound Callouts</div>
+      <div class="desc">Calling out from Apex: HTTP callouts, named credentials, External Services, SOAP callouts, and the continuation pattern.</div>
+      <div class="foot"><span>7 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#06-event-driven-readme">
+      <div class="num">MODULE 06</div><div class="title">Event-Driven</div>
+      <div class="desc">Platform Events, Change Data Capture, and the modern Pub/Sub API for real-time, decoupled streaming integrations.</div>
+      <div class="foot"><span>6 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#07-bulk-async-readme">
+      <div class="num">MODULE 07</div><div class="title">Bulk &amp; Async</div>
+      <div class="desc">Move data at scale: Bulk API 2.0 and 1.0 plus Batch, Queueable, Future, and Scheduled Apex — with limits and monitoring.</div>
+      <div class="foot"><span>7 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#08-modern-apis-readme">
+      <div class="num">MODULE 08</div><div class="title">Modern APIs</div>
+      <div class="desc">GraphQL, sObject Collections, Data Cloud APIs, and a definitive map of the complete modern API landscape.</div>
+      <div class="foot"><span>4 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#09-security-limits-readme">
+      <div class="num">MODULE 09</div><div class="title">Security &amp; Limits</div>
+      <div class="desc">Connection security, authentication &amp; access controls, data-level security, mTLS &amp; Shield, and governor &amp; API limits.</div>
+      <div class="foot"><span>5 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#10-tools-middleware-readme">
+      <div class="num">MODULE 10</div><div class="title">Tools &amp; Middleware</div>
+      <div class="desc">The daily toolkit: Postman, Workbench, Salesforce CLI, Data Loader, testing helpers, and middleware / iPaaS.</div>
+      <div class="foot"><span>6 topics</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#11-hands-on-projects-readme">
+      <div class="num">MODULE 11</div><div class="title">Hands-On Projects</div>
+      <div class="desc">Twelve end-to-end builds, from a first REST callout to a live Platform Event LWC and a Pub/Sub CDC listener.</div>
+      <div class="foot"><span>12 projects</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#12-cheatsheets-readme">
+      <div class="num">MODULE 12</div><div class="title">Cheatsheets</div>
+      <div class="desc">Printable one-pagers: API picker, OAuth flows, callout &amp; async limits, error codes, and HTTP status codes.</div>
+      <div class="foot"><span>11 sheets</span><span class="go">&#8594;</span></div>
+    </a>
+    <a class="mod-card" href="#13-whats-new-2026-readme">
+      <div class="num">MODULE 13</div><div class="title">What's New 2026</div>
+      <div class="desc">Retirements &amp; deprecations, Agentforce &amp; MCP, MuleSoft in 2026, and new platform &amp; API capabilities.</div>
+      <div class="foot"><span>4 topics</span><span class="go">&#8594;</span></div>
+    </a>
+  </div>
+</section>
 <section id="01-fundamentals-readme" class="doc">
 <h1>Module 01 - Fundamentals</h1>
 <blockquote>
